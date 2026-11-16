@@ -1,6 +1,6 @@
 # zcode 研究交接：独立最小车控客户端
 
-更新：2026-11-16。工作目录：`/Users/lukesong/Work/Workspace/LukeSONG/fawvw`。本轮最后要求是整理研究方向交接给 zcode，已停止继续安装修改版。
+更新：2026-11-16（zcode 首轮进展见文末「zcode 进展日志」）。工作目录：`/Users/lukesong/Work/Workspace/LukeSONG/fawvw`。本轮最后要求是整理研究方向交接给 zcode，已停止继续安装修改版。
 
 ## 研究主线
 
@@ -174,3 +174,21 @@ SDK 的直接非系统动态依赖已见：AEXML、AnyDate、EVReflectionCore、
 ## 建议交给 zcode 的首条任务
 
 > 在本工作区用 REA 验证 CarNetLib 脱离 OneApp 的最小宿主。先恢复 SDK 初始化和一汽大众密码登录→身份令牌→MBB 账号→车辆列表→状态读取的真实链路，交付可构建 PoC、精确依赖白名单和证据记录。用户输入凭据，只进行只读验证。P0 成功后再做左上角按 VIN 单选的车型下拉菜单、最小车控 UI 和逐项控制能力。最终 IPA 不含原 OneApp 主程序和非车控业务模块；当前补丁版只作为过渡与证据，不能以隐藏入口冒充彻底移除。
+
+## zcode 进展日志（2026-11-16 首轮）
+
+成果与证据全文见 `docs/P0-EVIDENCE.md`（证据分级：EVIDENCE-STATIC / TODO-RUNTIME），此处只列结论：
+
+1. **宿主 SDK 适配层定位并反汇编**：`VWPCHybridMotion`（initializeCarNetLib / fetchMbbStage / loginMBBWithIdentityToken / fetchVehicleByVin 等 imp 已知）；Widget 侧 `MosiWidgetCarnetLibManager` 同构，官方 `OneAppWidgetExtension.appex`（22MB）即"最小宿主"实证。
+2. **登录链路定性（回答交接核心疑问）**：原宿主**不使用** SDK 的 FAWVW 身份提供器（selref 无任何引用）；密码登录走宿主网关 `oneapp-api.faw-vw.com/account/login/loginByPassword/v1` 拿身份令牌，再 `useMbbStage:` → `authenticateWithIdentityToken:accountFunction:` → `executeWithErrorFunction:` 换 MBB 令牌。
+3. **生产环境参数确认**：mbboauth-1d/fal-3a/mal-3a `.prd.cn…vwg-connect.cn`、scope `openid profile mbb`、ActionConfig(123.0, 2.0)。brand/country/AppInfo×5 等 9 个参数为逐串独立密钥的流密码密文（静态不可解），已列取证清单。
+4. **依赖白名单闭包（6 件）**：CarNetLib + AEXML + AnyDate + EVReflectionCore + **XMLDictionary**（EVReflectionCore 递归依赖，易漏）+ TrustKit。
+5. **MinimalClient PoC 已建并真机运行**：`implementation/MinimalClient/`（纯脚本构建，21MB，Bundle ID `com.lukev.minimalclient` 与现有安装并存）；iPhone Air 实测**进程存活、SDK 类探测「可用」**——CarNetLib 脱离 OneApp 独立加载成功。踩坑记录：iOS 13+ 须 UIScene 生命周期；主程序未链接 CarNetLib 时须 `dlopen(RTLD_NOW)`。
+6. **归档**：GitHub 私有仓库 `LukeSONG2000/fawvw`（main + Release `research-baseline`：原始 IPA / 补丁版 IPA / 133MB 元数据 gz）；敏感备份、偏好、运行日志未入库。
+
+### 下一步（按优先级）
+
+1. 运行时取证 9 个加密参数：设备上运行原 App 时 dump `MosiWidgetCarnetLibManager` 各 getter 返回值与 AppInfo 五参数（一次操作全部拿到），回填 `MCConfiguration`。
+2. 网关登录协议：一次抓包或 `probeLoginSchema` 确认 loginByPassword/v1 字段与 data 解密（响应样例显示 data 为 base64 密文，注意 GMObjC）。
+3. 用户输凭据全链路只读验证：登录 → MBB → 两车 VIN → 一车状态（P0 验收线）。
+4. P0 通过后：P1 左上角按 VIN 单选下拉（`UIButton.menu`/`UIMenu`），再 P2 能力化车控。

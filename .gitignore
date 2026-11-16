@@ -22,3 +22,4 @@ recovered/
 .venv-device/
 .DS_Store
 __pycache__/
+analysis/objc-runtime-metadata.txt.gz
