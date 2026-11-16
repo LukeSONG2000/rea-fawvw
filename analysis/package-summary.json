@@ -1,0 +1,328 @@
+{
+  "CFBundleDisplayName": "一汽大众",
+  "CFBundleIdentifier": "com.fawvw.aftermarket",
+  "CFBundleExecutable": "OneApp",
+  "CFBundleShortVersionString": "444.28.0",
+  "CFBundleVersion": "518",
+  "MinimumOSVersion": "15.0",
+  "CFBundleURLTypes": [
+    {
+      "CFBundleTypeRole": "Editor",
+      "CFBundleURLName": "",
+      "CFBundleURLSchemes": [
+        "fawvwaftermarketalipay"
+      ]
+    },
+    {
+      "CFBundleTypeRole": "Editor",
+      "CFBundleURLName": "",
+      "CFBundleURLSchemes": [
+        "fawvwapp"
+      ]
+    },
+    {
+      "CFBundleTypeRole": "Editor",
+      "CFBundleURLName": "alipay",
+      "CFBundleURLSchemes": [
+        "chargingpile"
+      ]
+    },
+    {
+      "CFBundleTypeRole": "Editor",
+      "CFBundleURLName": "weibo",
+      "CFBundleURLSchemes": [
+        "wb3172822147"
+      ]
+    },
+    {
+      "CFBundleTypeRole": "Editor",
+      "CFBundleURLName": "wx",
+      "CFBundleURLSchemes": [
+        "wx053d47fe8c543d8b"
+      ]
+    },
+    {
+      "CFBundleTypeRole": "Editor",
+      "CFBundleURLName": "qq",
+      "CFBundleURLSchemes": [
+        "tencent1109592587"
+      ]
+    },
+    {
+      "CFBundleTypeRole": "Editor",
+      "CFBundleURLSchemes": [
+        "wx1fc3ddf77a11f51e"
+      ]
+    },
+    {
+      "CFBundleTypeRole": "Editor",
+      "CFBundleURLSchemes": [
+        "wxe512036a14cae805"
+      ]
+    },
+    {
+      "CFBundleTypeRole": "Editor",
+      "CFBundleURLSchemes": [
+        "xmlydc7c484482082d1d35be3a39f7b808d8"
+      ]
+    },
+    {
+      "CFBundleTypeRole": "Editor",
+      "CFBundleURLSchemes": []
+    },
+    {
+      "CFBundleTypeRole": "Editor",
+      "CFBundleURLSchemes": [
+        "kwemffj8lg2ybr"
+      ]
+    },
+    {
+      "CFBundleTypeRole": "Editor",
+      "CFBundleURLName": "weChatH5",
+      "CFBundleURLSchemes": [
+        "mall.faw-vw.com"
+      ]
+    },
+    {
+      "CFBundleTypeRole": "Editor",
+      "CFBundleURLSchemes": [
+        "xmly0c91eff0ecbf78b32d98a28631e24f94"
+      ]
+    },
+    {
+      "CFBundleTypeRole": "Editor",
+      "CFBundleURLSchemes": [
+        "kwias541qe00jk"
+      ]
+    },
+    {
+      "CFBundleTypeRole": "Editor",
+      "CFBundleURLName": "SensorsData.production",
+      "CFBundleURLSchemes": [
+        "sa436ea84b"
+      ]
+    },
+    {
+      "CFBundleTypeRole": "Editor",
+      "CFBundleURLName": "juhezhifu",
+      "CFBundleURLSchemes": [
+        "com.tima.aftermarket"
+      ]
+    },
+    {
+      "CFBundleTypeRole": "Editor",
+      "CFBundleURLName": "juhezhifu1",
+      "CFBundleURLSchemes": [
+        "com.fawvw.aftermarket"
+      ]
+    },
+    {
+      "CFBundleTypeRole": "Editor",
+      "CFBundleURLSchemes": [
+        "wx1734848bd5125561"
+      ]
+    },
+    {
+      "CFBundleTypeRole": "Editor",
+      "CFBundleURLSchemes": [
+        "atm.92959292"
+      ]
+    },
+    {
+      "CFBundleTypeRole": "Editor",
+      "CFBundleURLSchemes": [
+        "um.61a833e5e0f9bb492b78963b"
+      ]
+    },
+    {
+      "CFBundleTypeRole": "Editor",
+      "CFBundleURLSchemes": [
+        "um.61a83414e0f9bb492b78967d"
+      ]
+    },
+    {
+      "CFBundleTypeRole": "Editor",
+      "CFBundleURLName": "vpaWechatH5Pay",
+      "CFBundleURLSchemes": [
+        "www.carbuyin.cn"
+      ]
+    },
+    {
+      "CFBundleTypeRole": "Editor",
+      "CFBundleURLName": "kwAppKey",
+      "CFBundleURLSchemes": [
+        "kw37jqxi8a17vt"
+      ]
+    },
+    {
+      "CFBundleTypeRole": "Editor",
+      "CFBundleURLName": "kwAppKey",
+      "CFBundleURLSchemes": [
+        "kw2gq7mevbrl67"
+      ]
+    },
+    {
+      "CFBundleTypeRole": "Editor",
+      "CFBundleURLName": "kwAppKey",
+      "CFBundleURLSchemes": [
+        "kwopzn3jjffbp0"
+      ]
+    },
+    {
+      "CFBundleTypeRole": "Editor",
+      "CFBundleURLName": "kwAppKey",
+      "CFBundleURLSchemes": [
+        "kwuv3w8akmtoca"
+      ]
+    },
+    {
+      "CFBundleTypeRole": "Editor",
+      "CFBundleURLSchemes": [
+        "atm.bo0n1nc8n4fkdlrrwzk02evv"
+      ]
+    },
+    {
+      "CFBundleTypeRole": "Editor",
+      "CFBundleURLSchemes": [
+        "atm.a1qarqgl14lcijzhskutwp5k"
+      ]
+    },
+    {
+      "CFBundleTypeRole": "Editor",
+      "CFBundleURLSchemes": [
+        "faw-vw"
+      ]
+    },
+    {
+      "CFBundleTypeRole": "Editor",
+      "CFBundleURLName": "kwAppKey",
+      "CFBundleURLSchemes": [
+        "kwdxtjxda6t4nb"
+      ]
+    },
+    {
+      "CFBundleTypeRole": "Editor",
+      "CFBundleURLName": "kwAppKey",
+      "CFBundleURLSchemes": [
+        "kwqvxts8eyfren"
+      ]
+    },
+    {
+      "CFBundleTypeRole": "Editor",
+      "CFBundleURLSchemes": [
+        "xmlyf7bde702f1603209ce423af78727a2b7"
+      ]
+    },
+    {
+      "CFBundleTypeRole": "Editor",
+      "CFBundleURLSchemes": [
+        "xmly4a250d7b3cbaf5ad467d670ede76cf1f"
+      ]
+    }
+  ],
+  "UIBackgroundModes": [
+    "fetch",
+    "location",
+    "remote-notification",
+    "bluetooth-central"
+  ],
+  "app": "/Users/lukesong/Work/Workspace/LukeSONG/fawvw/recovered/ios-444.28.0/Payload/OneApp.app",
+  "frameworks": [
+    "RHPCATUtility.framework",
+    "CATLogging.framework",
+    "RPAUtilitySDK.framework",
+    "EVReflectionCore.framework",
+    "RHPLCCFileLogger.framework",
+    "CarNetLib.framework",
+    "RtsSDK.framework",
+    "VWCeaVehicleDefinitions.framework",
+    "Car2PhonePairing.framework",
+    "AEXML.framework",
+    "LCCOSLogLogger.framework",
+    "TrustKit.framework",
+    "artcSource.framework",
+    "XMLDictionary.framework",
+    "RHPLCCUtility.framework",
+    "alivcffmpeg.framework",
+    "AliyunPlayer.framework",
+    "RemoteParkAssistPlugin.framework",
+    "RHPBeaconScanner.framework",
+    "LCCLog.framework",
+    "CATObserving.framework",
+    "AliyunMediaDownloader.framework",
+    "GMObjC.framework",
+    "SmartCloudMobileSDK.framework",
+    "RHPCATSecureStorage.framework",
+    "UnityFramework.framework",
+    "RHPLCCOSLogLogger.framework",
+    "LCCUtility.framework",
+    "RHPLCCCATKeychain.framework",
+    "shared_all.framework",
+    "CnpcSecuritySDK.framework",
+    "LCCFileLogger.framework",
+    "RHPCar2PhonePairing.framework",
+    "RHPGenX.framework",
+    "RHPCATLogger.framework",
+    "CATLogger.framework",
+    "RemoteParkAssistCoreMEB.framework",
+    "RHPRemoteParkAssistCoreMEB.framework",
+    "AnyDate.framework",
+    "KDVehicleButlerSDK.framework",
+    "VWRPAConnection.framework",
+    "RHPCATObserving.framework",
+    "CATUtility.framework",
+    "CATSecureStorage.framework",
+    "BeaconScanner.framework",
+    "GenX.framework",
+    "RHPCATLogging.framework",
+    "RHPLCCLog.framework",
+    "RHPRemoteParkAssistPlugin.framework"
+  ],
+  "web_assets": [
+    "AlipaySDK.bundle/bridge.js",
+    "NebulamPaaSBiz.bundle/error.html",
+    "NBInside.bundle/h5_pushStateChange.js",
+    "NBInside.bundle/nb_component.js",
+    "NBInside.bundle/H5JSCBridge.js",
+    "NBInside.bundle/H5Timer.js",
+    "NBInside.bundle/h5_bridge.js",
+    "NBInside.bundle/h5_performance.js",
+    "NBInside.bundle/h5_share.js",
+    "NBInside.bundle/h5_dynamicscript.js",
+    "NBInside.bundle/h5_delegateGeo.js",
+    "NBInside.bundle/h5_message_channel.js",
+    "NBInside.bundle/H5ES6Promise.js",
+    "AriverRuntime.bundle/H5JSCBridge.js",
+    "AriverRuntime.bundle/H5Timer.js",
+    "AriverRuntime.bundle/H5ES6Promise.js",
+    "MPNebulaAdapter.bundle/game_bridge.js",
+    "MPNebulaAdapter.bundle/error.html",
+    "NebulaTinyapp.bundle/H5JSCBridge.js",
+    "RangersAppLog.bundle/h5bridge-wkwebview.js",
+    "FAWGPIOS.bundle/形象克隆隐私政策_20240530.html",
+    "AriverComponent.bundle/nb_component.js",
+    "NebulaPoseidon.bundle/h5_bridge.js",
+    "NebulaPoseidon.bundle/h5_performance.js",
+    "NebulaPoseidon.bundle/h5_dynamicscript.js",
+    "NebulaPoseidon.bundle/h5_message_channel_new.js",
+    "NebulaPoseidon.bundle/h5_delegateGeo.js",
+    "NebulaPoseidon.bundle/h5_message_channel.js",
+    "NebulaLogging.bundle/h5_performance.js",
+    "NebulaLogging.bundle/h5_reportClick.js",
+    "NebulaBiz.bundle/h5_reporttime.js",
+    "NebulaBiz.bundle/error_new.html",
+    "NebulaBiz.bundle/errorTrans.html",
+    "NebulaBiz.bundle/h5_save_webImg.js",
+    "NebulaBiz.bundle/h5_bizlog_pre.js",
+    "NebulaBiz.bundle/h5_bridge_for_scanApp.js",
+    "NebulaBiz.bundle/h5_keyboard.js",
+    "NebulaBiz.bundle/error.html",
+    "OneApp-Agreement.bundle/VIPAgreement.html",
+    "OneApp-Agreement.bundle/ForegniAgreement.html",
+    "OneApp-Agreement.bundle/PublicChargingAgreement.html",
+    "OneApp-Agreement.bundle/GetSendVehicleAgreement.html",
+    "OneApp-Agreement.bundle/PublicChargingAgreement_En.html",
+    "OneApp-Agreement.bundle/PrivacyAgreement.html",
+    "OneApp-Agreement.bundle/ServiceAgreement.html"
+  ]
+}

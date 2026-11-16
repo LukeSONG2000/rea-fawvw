@@ -1,0 +1,46 @@
+[
+  {
+    "address": "0x10094d160",
+    "symbol": "_CFNetworkCopySystemProxySettings"
+  },
+  {
+    "address": "0x101007f74",
+    "symbol": "_CFNetworkCopySystemProxySettings"
+  },
+  {
+    "address": "0x1018af8cc",
+    "symbol": "_CFNetworkCopySystemProxySettings"
+  },
+  {
+    "address": "0x10542fc20",
+    "symbol": "_CFNetworkCopySystemProxySettings"
+  },
+  {
+    "address": "0x1055561fc",
+    "symbol": "_CFNetworkCopySystemProxySettings"
+  },
+  {
+    "address": "0x1055562d4",
+    "symbol": "_CFNetworkCopyProxiesForURL"
+  },
+  {
+    "address": "0x105556a9c",
+    "symbol": "_CFNetworkCopyProxiesForURL"
+  },
+  {
+    "address": "0x10592be20",
+    "symbol": "_CFNetworkCopySystemProxySettings"
+  },
+  {
+    "address": "0x10592d0e8",
+    "symbol": "_CFNetworkCopySystemProxySettings"
+  },
+  {
+    "address": "0x10592d110",
+    "symbol": "_CFNetworkCopyProxiesForURL"
+  },
+  {
+    "address": "0x10739db08",
+    "symbol": "_CFNetworkCopySystemProxySettings"
+  }
+]

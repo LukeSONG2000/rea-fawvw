@@ -1,0 +1,7 @@
+{
+  "file_offset": "0x18af8cc",
+  "original": "a7a4a995",
+  "replacement": "000080d2",
+  "scope": "FV_NetworkService proxy-inspection callback; CFNetwork proxy configuration remains supplied to the system network stack",
+  "validation": "2026-11-16: overlay installation and codesign passed; proxy-enabled runtime path observed; user confirmed usable"
+}

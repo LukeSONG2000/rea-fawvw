@@ -1,0 +1,12 @@
+{
+  "ipa": "FAWVW-444.28.0-CarControlOnly-dev-unsigned.ipa",
+  "sha256": "5d8ffdcb3f21753b0c6545ba6ad71feef80248c6393b053bbf656b5dd954f7c6",
+  "bytes": 440449174,
+  "status": "unsigned-development-build",
+  "verification": [
+    "dylib compilation",
+    "Mach-O header padding and LC_LOAD_DYLIB injection",
+    "ZIP CRC verification"
+  ],
+  "runtime_verified": false
+}

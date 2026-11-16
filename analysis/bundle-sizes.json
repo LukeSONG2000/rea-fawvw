@@ -1,0 +1,570 @@
+[
+  {
+    "name": "AMap.bundle",
+    "bytes": 4501608
+  },
+  {
+    "name": "APCommonUI.bundle",
+    "bytes": 263353
+  },
+  {
+    "name": "APLongLinkService.bundle",
+    "bytes": 224
+  },
+  {
+    "name": "APMAftsCommon.bundle",
+    "bytes": 0
+  },
+  {
+    "name": "APMCDNImage.bundle",
+    "bytes": 0
+  },
+  {
+    "name": "APMFileTransfer.bundle",
+    "bytes": 0
+  },
+  {
+    "name": "APMHevc.bundle",
+    "bytes": 0
+  },
+  {
+    "name": "APMImageProcessing.bundle",
+    "bytes": 14162
+  },
+  {
+    "name": "APMMediaCache.bundle",
+    "bytes": 0
+  },
+  {
+    "name": "APMUtils.bundle",
+    "bytes": 7298
+  },
+  {
+    "name": "APMVideo.bundle",
+    "bytes": 22901
+  },
+  {
+    "name": "APMVoiceManager.bundle",
+    "bytes": 0
+  },
+  {
+    "name": "APMediaBasic.bundle",
+    "bytes": 0
+  },
+  {
+    "name": "APMobileFramework.bundle",
+    "bytes": 6478
+  },
+  {
+    "name": "APMobileNetwork.bundle",
+    "bytes": 7653
+  },
+  {
+    "name": "APMultimedia.bundle",
+    "bytes": 8149
+  },
+  {
+    "name": "APRemoteLogging.bundle",
+    "bytes": 2360
+  },
+  {
+    "name": "AUBase.bundle",
+    "bytes": 0
+  },
+  {
+    "name": "AUKeyboard.bundle",
+    "bytes": 0
+  },
+  {
+    "name": "AUTheme.bundle",
+    "bytes": 0
+  },
+  {
+    "name": "Alamofire.bundle",
+    "bytes": 1362
+  },
+  {
+    "name": "AlipaySDK.bundle",
+    "bytes": 7834
+  },
+  {
+    "name": "AntUIToken.bundle",
+    "bytes": 0
+  },
+  {
+    "name": "AriverApp.bundle",
+    "bytes": 14694
+  },
+  {
+    "name": "AriverComponent.bundle",
+    "bytes": 26219
+  },
+  {
+    "name": "AriverFileManager.bundle",
+    "bytes": 0
+  },
+  {
+    "name": "AriverKernel.bundle",
+    "bytes": 14377
+  },
+  {
+    "name": "AriverResource.bundle",
+    "bytes": 0
+  },
+  {
+    "name": "AriverRuntime.bundle",
+    "bytes": 44290
+  },
+  {
+    "name": "BEEAudioUtil.bundle",
+    "bytes": 19429
+  },
+  {
+    "name": "BeeCapture.bundle",
+    "bytes": 78117
+  },
+  {
+    "name": "BeeMediaPlayer.bundle",
+    "bytes": 26097
+  },
+  {
+    "name": "BeePhoto.bundle",
+    "bytes": 2279
+  },
+  {
+    "name": "BeePhotoBrowser.bundle",
+    "bytes": 35111
+  },
+  {
+    "name": "BeePhotoPicker.bundle",
+    "bytes": 108632
+  },
+  {
+    "name": "BeeUtils.bundle",
+    "bytes": 9575
+  },
+  {
+    "name": "CocoaLumberjackPrivacy.bundle",
+    "bytes": 1582
+  },
+  {
+    "name": "CryptoSwift.bundle",
+    "bytes": 1138
+  },
+  {
+    "name": "DGCharts.bundle",
+    "bytes": 1132
+  },
+  {
+    "name": "DateTools.bundle",
+    "bytes": 89130
+  },
+  {
+    "name": "FAWGPIOS.bundle",
+    "bytes": 6220270
+  },
+  {
+    "name": "FAWVWIntegration.bundle",
+    "bytes": 19059
+  },
+  {
+    "name": "FMDB_Privacy.bundle",
+    "bytes": 1141
+  },
+  {
+    "name": "FSPopoverView.bundle",
+    "bytes": 950
+  },
+  {
+    "name": "FV-UIComponents-ComponentContainer.bundle",
+    "bytes": 7034
+  },
+  {
+    "name": "FV-UIComponents-Empty.bundle",
+    "bytes": 4093
+  },
+  {
+    "name": "FV-UIComponents-Loading.bundle",
+    "bytes": 179397
+  },
+  {
+    "name": "FV-UIComponents-NavigationController.bundle",
+    "bytes": 818
+  },
+  {
+    "name": "FV-UIComponents-View.bundle",
+    "bytes": 56232
+  },
+  {
+    "name": "Fonts.bundle",
+    "bytes": 465258
+  },
+  {
+    "name": "IQKeyboardManager.bundle",
+    "bytes": 1153
+  },
+  {
+    "name": "JXCategoryView.bundle",
+    "bytes": 1144
+  },
+  {
+    "name": "JXPagerView.bundle",
+    "bytes": 1138
+  },
+  {
+    "name": "JXPagingView.bundle",
+    "bytes": 1140
+  },
+  {
+    "name": "JXSegmentedView.bundle",
+    "bytes": 1148
+  },
+  {
+    "name": "KDSVWSDK.bundle",
+    "bytes": 3354
+  },
+  {
+    "name": "Kingfisher.bundle",
+    "bytes": 1471
+  },
+  {
+    "name": "LottiePrivacyInfo.bundle",
+    "bytes": 1378
+  },
+  {
+    "name": "MJRefresh.Privacy.bundle",
+    "bytes": 1377
+  },
+  {
+    "name": "MJRefresh.bundle",
+    "bytes": 10795
+  },
+  {
+    "name": "MPInternalPlugins.bundle",
+    "bytes": 1123
+  },
+  {
+    "name": "MPNebulaAdapter.bundle",
+    "bytes": 10476
+  },
+  {
+    "name": "MPScanSDK.bundle",
+    "bytes": 35153
+  },
+  {
+    "name": "MarqueeLabel.bundle",
+    "bytes": 1140
+  },
+  {
+    "name": "NBInside.bundle",
+    "bytes": 1664397
+  },
+  {
+    "name": "NebulaAppBiz.bundle",
+    "bytes": 908
+  },
+  {
+    "name": "NebulaAppManager.bundle",
+    "bytes": 1029
+  },
+  {
+    "name": "NebulaBiz.bundle",
+    "bytes": 219691
+  },
+  {
+    "name": "NebulaBundle.bundle",
+    "bytes": 114243
+  },
+  {
+    "name": "NebulaConfig.bundle",
+    "bytes": 123854
+  },
+  {
+    "name": "NebulaEngine.bundle",
+    "bytes": 2
+  },
+  {
+    "name": "NebulaLogging.bundle",
+    "bytes": 9811
+  },
+  {
+    "name": "NebulaPlugins.bundle",
+    "bytes": 2543
+  },
+  {
+    "name": "NebulaPoseidon.bundle",
+    "bytes": 198736
+  },
+  {
+    "name": "NebulaResource.bundle",
+    "bytes": 1029
+  },
+  {
+    "name": "NebulaSDK.bundle",
+    "bytes": 3363
+  },
+  {
+    "name": "NebulaSDKPlugins.bundle",
+    "bytes": 41379
+  },
+  {
+    "name": "NebulaTinyapp.bundle",
+    "bytes": 1
+  },
+  {
+    "name": "NebulamPaaSBiz.bundle",
+    "bytes": 9699
+  },
+  {
+    "name": "OneApp-Account.bundle",
+    "bytes": 1272736
+  },
+  {
+    "name": "OneApp-Agreement.bundle",
+    "bytes": 699368
+  },
+  {
+    "name": "OneApp-BusinessComponents.bundle",
+    "bytes": 1645300
+  },
+  {
+    "name": "OneApp-BuyCar.bundle",
+    "bytes": 1211576
+  },
+  {
+    "name": "OneApp-CarCamera.bundle",
+    "bytes": 363572
+  },
+  {
+    "name": "OneApp-CarClub.bundle",
+    "bytes": 1416872
+  },
+  {
+    "name": "OneApp-CarWidget.bundle",
+    "bytes": 1271435
+  },
+  {
+    "name": "OneApp-CreatorCenter.bundle",
+    "bytes": 2511545
+  },
+  {
+    "name": "OneApp-Delegates.bundle",
+    "bytes": 43330
+  },
+  {
+    "name": "OneApp-GeneralModules-Launch.bundle",
+    "bytes": 2271642
+  },
+  {
+    "name": "OneApp-GeneralModules-XScreen.bundle",
+    "bytes": 568054
+  },
+  {
+    "name": "OneApp-Me.bundle",
+    "bytes": 7830701
+  },
+  {
+    "name": "OneApp-MyService.bundle",
+    "bytes": 7961348
+  },
+  {
+    "name": "OneApp-NGX.bundle",
+    "bytes": 764
+  },
+  {
+    "name": "OneApp-PaymentService.bundle",
+    "bytes": 788
+  },
+  {
+    "name": "OneApp-RHP.bundle",
+    "bytes": 46790388
+  },
+  {
+    "name": "OneApp-RPA.bundle",
+    "bytes": 14382541
+  },
+  {
+    "name": "OneApp-ReferralPurchase.bundle",
+    "bytes": 1250238
+  },
+  {
+    "name": "OneApp-Refuel.bundle",
+    "bytes": 5886576
+  },
+  {
+    "name": "OneApp-ShareService.bundle",
+    "bytes": 79197
+  },
+  {
+    "name": "OneApp-SharedAssets.bundle",
+    "bytes": 778277
+  },
+  {
+    "name": "OneApp-Social.bundle",
+    "bytes": 5436748
+  },
+  {
+    "name": "OneApp-UIComponents-ComponentContainer.bundle",
+    "bytes": 822
+  },
+  {
+    "name": "OneApp-UIComponents-View.bundle",
+    "bytes": 97437
+  },
+  {
+    "name": "OneApp-VPA.bundle",
+    "bytes": 2353740
+  },
+  {
+    "name": "OneApp-VehicleManagement.bundle",
+    "bytes": 905161
+  },
+  {
+    "name": "ParkingMapSDK.bundle",
+    "bytes": 2592989
+  },
+  {
+    "name": "PhoneNumberKitPrivacy.bundle",
+    "bytes": 1160
+  },
+  {
+    "name": "Privacy.bundle",
+    "bytes": 1130
+  },
+  {
+    "name": "RPAUIPlugin.bundle",
+    "bytes": 2048789
+  },
+  {
+    "name": "RangersAppLog.bundle",
+    "bytes": 7162
+  },
+  {
+    "name": "ReachabilitySwift.bundle",
+    "bytes": 1007
+  },
+  {
+    "name": "RxCocoa_Privacy.bundle",
+    "bytes": 1147
+  },
+  {
+    "name": "RxRelay_Privacy.bundle",
+    "bytes": 1147
+  },
+  {
+    "name": "RxSwift_Privacy.bundle",
+    "bytes": 1147
+  },
+  {
+    "name": "SDWebImage.bundle",
+    "bytes": 1363
+  },
+  {
+    "name": "SDWebImageSwiftUI.bundle",
+    "bytes": 1151
+  },
+  {
+    "name": "SGQRCode.bundle",
+    "bytes": 331459
+  },
+  {
+    "name": "Selector.bundle",
+    "bytes": 157625
+  },
+  {
+    "name": "SnapKit_Privacy.bundle",
+    "bytes": 1148
+  },
+  {
+    "name": "SocketCraft.bundle",
+    "bytes": 212
+  },
+  {
+    "name": "SwiftProtobuf.bundle",
+    "bytes": 1143
+  },
+  {
+    "name": "SwiftyJSON.bundle",
+    "bytes": 1136
+  },
+  {
+    "name": "TBDecodeSDK.bundle",
+    "bytes": 400989
+  },
+  {
+    "name": "TTTAttributedLabel.bundle",
+    "bytes": 0
+  },
+  {
+    "name": "Tabbar.bundle",
+    "bytes": 832770
+  },
+  {
+    "name": "Texel.bundle",
+    "bytes": 16710
+  },
+  {
+    "name": "TinyAppCommon.bundle",
+    "bytes": 2984
+  },
+  {
+    "name": "TinyappService.bundle",
+    "bytes": 16137
+  },
+  {
+    "name": "Toast-Swift.bundle",
+    "bytes": 1137
+  },
+  {
+    "name": "UMCommonLog.bundle",
+    "bytes": 72811
+  },
+  {
+    "name": "VWCarnet-Core.bundle",
+    "bytes": 451616
+  },
+  {
+    "name": "VWCarnet.bundle",
+    "bytes": 91367736
+  },
+  {
+    "name": "VWPrivateCharge.bundle",
+    "bytes": 1876737
+  },
+  {
+    "name": "VWPublicCharge.bundle",
+    "bytes": 12348784
+  },
+  {
+    "name": "VWRPA.bundle",
+    "bytes": 754
+  },
+  {
+    "name": "VWXMLY.bundle",
+    "bytes": 756
+  },
+  {
+    "name": "ZLPhotoBrowser.bundle",
+    "bytes": 222601
+  },
+  {
+    "name": "ZLPhotoBrowser_Privacy.bundle",
+    "bytes": 1162
+  },
+  {
+    "name": "com.baidu.idl.face.faceSDK.bundle",
+    "bytes": 210943
+  },
+  {
+    "name": "com.baidu.idl.face.live.action.image.bundle",
+    "bytes": 69277
+  },
+  {
+    "name": "com.baidu.idl.face.model.faceSDK.bundle",
+    "bytes": 1104367
+  },
+  {
+    "name": "uep.bundle",
+    "bytes": 6648
+  }
+]

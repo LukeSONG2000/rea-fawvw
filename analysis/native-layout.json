@@ -1,0 +1,386 @@
+{
+  "encryption": [
+    {
+      "cryptoff": 32768,
+      "cryptsize": 161742848,
+      "cryptid": 0
+    }
+  ],
+  "sections": [
+    {
+      "name": "__text",
+      "size": 137397856,
+      "offset": 32768
+    },
+    {
+      "name": "__stubs",
+      "size": 57996,
+      "offset": 137430624
+    },
+    {
+      "name": "__stub_helper",
+      "size": 57384,
+      "offset": 137488620
+    },
+    {
+      "name": "__objc_stubs",
+      "size": 1459104,
+      "offset": 137546016
+    },
+    {
+      "name": "__objc_methlist",
+      "size": 2151804,
+      "offset": 139005120
+    },
+    {
+      "name": "__const",
+      "size": 4790284,
+      "offset": 141156928
+    },
+    {
+      "name": "__objc_classname",
+      "size": 173525,
+      "offset": 145947216
+    },
+    {
+      "name": "__objc_methtype",
+      "size": 244120,
+      "offset": 146120752
+    },
+    {
+      "name": "__cstring",
+      "size": 4603509,
+      "offset": 146364880
+    },
+    {
+      "name": "__constg_swiftt",
+      "size": 1575832,
+      "offset": 150968392
+    },
+    {
+      "name": "__swift5_typeref",
+      "size": 1140835,
+      "offset": 152544224
+    },
+    {
+      "name": "__swift5_fieldmd",
+      "size": 1025212,
+      "offset": 153685060
+    },
+    {
+      "name": "__swift5_builtin",
+      "size": 27300,
+      "offset": 154710272
+    },
+    {
+      "name": "__swift5_assocty",
+      "size": 99504,
+      "offset": 154737572
+    },
+    {
+      "name": "__swift5_proto",
+      "size": 71380,
+      "offset": 154837076
+    },
+    {
+      "name": "__swift5_types",
+      "size": 55472,
+      "offset": 154908456
+    },
+    {
+      "name": "__objc_methname",
+      "size": 2603533,
+      "offset": 154963936
+    },
+    {
+      "name": "__swift5_reflstr",
+      "size": 492593,
+      "offset": 157567472
+    },
+    {
+      "name": "__swift_as_entry",
+      "size": 1072,
+      "offset": 158060068
+    },
+    {
+      "name": "__swift_as_ret",
+      "size": 1100,
+      "offset": 158061140
+    },
+    {
+      "name": "__swift5_capture",
+      "size": 462820,
+      "offset": 158062240
+    },
+    {
+      "name": "__swift5_entry",
+      "size": 8,
+      "offset": 158525060
+    },
+    {
+      "name": "__gcc_except_tab",
+      "size": 581524,
+      "offset": 158525068
+    },
+    {
+      "name": "__ustring",
+      "size": 111906,
+      "offset": 159106592
+    },
+    {
+      "name": "__llvm",
+      "size": 153,
+      "offset": 159218504
+    },
+    {
+      "name": "__swift5_mpenum",
+      "size": 15968,
+      "offset": 159218660
+    },
+    {
+      "name": "__swift5_protos",
+      "size": 3036,
+      "offset": 159234628
+    },
+    {
+      "name": "__dof_RACCompou",
+      "size": 744,
+      "offset": 159237664
+    },
+    {
+      "name": "__dof_RACSignal",
+      "size": 891,
+      "offset": 159238408
+    },
+    {
+      "name": "__unwind_info",
+      "size": 1505264,
+      "offset": 159239300
+    },
+    {
+      "name": "__eh_frame",
+      "size": 1022712,
+      "offset": 160744568
+    },
+    {
+      "name": "__oslogstring",
+      "size": 470,
+      "offset": 161775616
+    },
+    {
+      "name": "__got",
+      "size": 68888,
+      "offset": 161792000
+    },
+    {
+      "name": "__mod_init_func",
+      "size": 42640,
+      "offset": 161860888
+    },
+    {
+      "name": "__const",
+      "size": 3506336,
+      "offset": 161903536
+    },
+    {
+      "name": "__cfstring",
+      "size": 1303424,
+      "offset": 165409872
+    },
+    {
+      "name": "__objc_classlist",
+      "size": 109408,
+      "offset": 166713296
+    },
+    {
+      "name": "__objc_nlclslist",
+      "size": 400,
+      "offset": 166822704
+    },
+    {
+      "name": "__objc_catlist",
+      "size": 2120,
+      "offset": 166823104
+    },
+    {
+      "name": "__objc_catlist2",
+      "size": 8,
+      "offset": 166825224
+    },
+    {
+      "name": "__objc_nlcatlist",
+      "size": 232,
+      "offset": 166825232
+    },
+    {
+      "name": "__objc_protolist",
+      "size": 9272,
+      "offset": 166825464
+    },
+    {
+      "name": "__objc_imageinfo",
+      "size": 8,
+      "offset": 166834736
+    },
+    {
+      "name": "__objc_arraydata",
+      "size": 7384,
+      "offset": 166834744
+    },
+    {
+      "name": "__objc_arrayobj",
+      "size": 2520,
+      "offset": 166842128
+    },
+    {
+      "name": "__objc_intobj",
+      "size": 3552,
+      "offset": 166844648
+    },
+    {
+      "name": "__objc_doubleobj",
+      "size": 112,
+      "offset": 166848200
+    },
+    {
+      "name": "__objc_dictobj",
+      "size": 1560,
+      "offset": 166848312
+    },
+    {
+      "name": "__objc_floatobj",
+      "size": 80,
+      "offset": 166849872
+    },
+    {
+      "name": "__la_symbol_ptr",
+      "size": 38240,
+      "offset": 166854656
+    },
+    {
+      "name": "__objc_const",
+      "size": 4880600,
+      "offset": 166892896
+    },
+    {
+      "name": "__objc_selrefs",
+      "size": 654208,
+      "offset": 171773496
+    },
+    {
+      "name": "__objc_protorefs",
+      "size": 3024,
+      "offset": 172427704
+    },
+    {
+      "name": "__objc_classrefs",
+      "size": 51032,
+      "offset": 172430728
+    },
+    {
+      "name": "__objc_superrefs",
+      "size": 31352,
+      "offset": 172481760
+    },
+    {
+      "name": "__objc_ivar",
+      "size": 124908,
+      "offset": 172513112
+    },
+    {
+      "name": "__objc_data",
+      "size": 2561168,
+      "offset": 172638024
+    },
+    {
+      "name": "__data",
+      "size": 7630192,
+      "offset": 175199200
+    },
+    {
+      "name": "__llvm_prf_cnts",
+      "size": 31016,
+      "offset": 182829392
+    },
+    {
+      "name": "__llvm_prf_data",
+      "size": 88960,
+      "offset": 182860408
+    },
+    {
+      "name": "__llvm_prf_names",
+      "size": 19378,
+      "offset": 182949368
+    },
+    {
+      "name": "__br_tb",
+      "size": 41816,
+      "offset": 182968752
+    },
+    {
+      "name": "__objc_stublist",
+      "size": 256,
+      "offset": 183010568
+    },
+    {
+      "name": "__swift_hooks",
+      "size": 184,
+      "offset": 183010824
+    },
+    {
+      "name": "__swift51_hooks",
+      "size": 184,
+      "offset": 183011008
+    },
+    {
+      "name": "__s_async_hook",
+      "size": 400,
+      "offset": 183011192
+    },
+    {
+      "name": "__swift56_hooks",
+      "size": 176,
+      "offset": 183011592
+    },
+    {
+      "name": "__thread_vars",
+      "size": 360,
+      "offset": 183011768
+    },
+    {
+      "name": "__thread_data",
+      "size": 32,
+      "offset": 183012128
+    },
+    {
+      "name": "__thread_bss",
+      "size": 240,
+      "offset": 0
+    },
+    {
+      "name": "__bss",
+      "size": 2536208,
+      "offset": 0
+    },
+    {
+      "name": "__common",
+      "size": 209040,
+      "offset": 0
+    },
+    {
+      "name": "__llvm_covfun",
+      "size": 253865,
+      "offset": 183025664
+    },
+    {
+      "name": "__llvm_covmap",
+      "size": 15576,
+      "offset": 183279536
+    },
+    {
+      "name": "_restrict",
+      "size": 0,
+      "offset": 183304192
+    }
+  ]
+}

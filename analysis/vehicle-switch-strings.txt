@@ -1,0 +1,4186 @@
++[JCOREBusinessStorage setDefaultConAddress:]
++[JCOREBusinessStorage setDefaultSRVRecord:]
++[JCOREBusinessStorage setDefaultConnHost:]
+(function() {
+    var isIOS = (/iphone|ipad|ipod/i).test(window.navigator.userAgent.toLowerCase());
+    try {
+        console.dclog = function(log) {
+            if (isIOS) {
+                var iframe = document.createElement('iframe');
+                iframe.setAttribute('src', 'ios-log: ' + log);
+                document.documentElement.appendChild(iframe);
+                iframe.parentNode.removeChild(iframe);
+                iframe = null
+            }
+            console.log(log)
+        }
+    } catch(e) {
+        console.log(e)
+    }
+} ());
+
+(function() {
+    var sigmob = window.sigmob = {};
+    var adRvSettring = {};
+    var materialMeta = {};
+    var ad = {};
+    var os = 1;
+    var sigmobHandlers = {
+        rvSetting: function(val) {
+            for (var key in val) {
+                if (val.hasOwnProperty(key)) adRvSettring[key] = val[key]
+            }
+        },
+        osType: function(val) {
+            os = val
+        },
+        video: function(val) {
+            var videoObj = JSON.parse(val);
+            materialMeta.video = videoObj
+        },
+        material: function(val) {
+            var materialObj = JSON.parse(val);
+            for (var key in materialObj) {
+                if (materialObj.hasOwnProperty(key)) {
+                    materialMeta[key] = materialObj[key]
+                }
+            }
+        },
+        ad: function(val) {
+            var adObj = JSON.parse(val);
+            for (var key in adObj) {
+                if (adObj.hasOwnProperty(key)) {
+                    ad[key] = adObj[key]
+                }
+            }
+        },
+    };
+    sigmob.getOs = function() {
+        return os
+    };
+    sigmob.getRvSetting = function() {
+        return adRvSettring
+    };
+    sigmob.getMaterialMeta = function() {
+        return materialMeta
+    };
+    sigmob.getAd = function() {
+        return ad
+    };
+    var sendCustomEvent = function() {
+        var args = new Array();
+        var l = arguments.length;
+        for (var i = 0; i < l; i++) {
+            var obj = arguments[i];
+            if (obj === null) continue;
+            if (Array.isArray(obj)) {
+                args = args.concat(obj)
+            } else {
+                args.push(obj)
+            }
+        }
+        args.unshift('event');
+        args.unshift('smextension');
+        executeNativeCall(args)
+    };
+    var executeNativeCall = function(args) {
+        var command = args.shift();
+        var call = 'sigmob://' + command;
+        var key, value;
+        var isFirstArgument = true;
+        for (var i = 0; i < args.length; i += 2) {
+            key = args[i];
+            value = args[i + 1];
+            if (value === null) continue;
+            if (isFirstArgument) {
+                call += '?';
+                isFirstArgument = false
+            } else {
+                call += '&'
+            }
+            call += encodeURIComponent(key) + '=' + encodeURIComponent(value)
+        }
+        iframeSendSrc(call)
+    };
+    var iframeSendSrc = function(src) {
+        var iframe = document.createElement('iframe');
+        iframe.setAttribute('src', src);
+        document.documentElement.appendChild(iframe);
+        iframe.parentNode.removeChild(iframe);
+        iframe = null
+    }
+    function callNativeFunc(kwargs, func) {
+        if (kwargs === undefined) return undefined;
+        if (func === undefined) return undefined;
+        if (os === 1) {
+            kwargs['func'] = func;
+            var returnStr = prompt(JSON.stringify(kwargs));
+            return JSON.parse(returnStr)
+        } else {
+            kwargs['func'] = func;
+            var returnStr = sigandroid.func(JSON.stringify(kwargs));
+            return JSON.parse(returnStr)
+        }
+    };
+    sigmob.getAppInfo = function(kwargs) {
+        return callNativeFunc(kwargs, 'getAppInfo:')
+    };
+    sigmob.addDcLog = function(kwargs) {
+        return callNativeFunc(kwargs, 'javascriptAddDcLog:')
+    };
+    sigmob.addMacro = function(key, value) {
+        var kwargs = {};
+        kwargs['key'] = key;
+        kwargs['value'] = value;
+        return callNativeFunc(kwargs, 'addMacro:')
+    };
+    sigmob.executeVideoAdTracking = function(event) {
+        var kwargs = {};
+        kwargs['event'] = event;
+        return callNativeFunc(kwargs, 'excuteRewardAdTrack:')
+    };
+    sigmob.tracking = function(event, urls) {
+        var kwargs = {};
+        kwargs.event = event;
+        kwargs.urls = urls;
+        return callNativeFunc(kwargs, 'tracking:')
+    };
+    sigmob.loadProduct = function(kwargs) {
+        if (!kwargs) {
+            broadcastEvent(EVENTS.ERROR, 'args are required.', 'loadProduct')
+        } else if (!kwargs.itunesId || !kwargs.mode) {
+            broadcastEvent(EVENTS.ERROR, 'itunesId and mode are required.', 'loadProduct')
+        } else {
+            var mode = kwargs.mode
+            if (mode === 'overlay') {
+                broadcastEvent(EVENTS.ERROR, 'overlay does not support preloading', 'loadProduct')
+            }
+            sendCustomEvent('LoadProduct', 'args', JSON.stringify(kwargs))
+        }
+    };
+    sigmob.dissStoreKit = function(mode) {
+        if (!mode) {
+            broadcastEvent(EVENTS.ERROR, 'mode are required.', 'dissStoreKit')
+        } else {
+            sendCustomEvent('DissStoreKit', 'mode', mode)
+        }
+    };
+    sigmob.fireChangeEvent = function(properties) {
+        for (var p in properties) {
+            if (properties.hasOwnProperty(p)) {
+                var handler = sigmobHandlers[p];
+                handler(properties[p])
+            }
+        }
+    };
+    var contains = function(value, array) {
+        for (var i in array) {
+            if (array[i] === value) return true
+        }
+        return false
+    };
+    var EVENTS = sigmob.EVENTS = {
+        ERROR: 'error',
+        STOREKIT_READY: 'storekit_ready',
+        STOREKIT_DIDFAILTOLOAD: 'storekit_didFailToLoad',
+        STOREKIT_PRESENT: 'storekit_present',
+        STOREKIT_CLICK: 'storekit_click',
+        STOREKIT_FINISH: 'storekit_finish',
+        OVERLAY_DIDFAILTOLOAD: 'overlay_didFailToLoad',
+        OVERLAY_DIDPRESENT: 'overlay_didPresent',
+        OVERLAY_CLICK: 'overlay_click',
+        OVERLAY_DIDFINISH: 'overlay_didFinish',
+    };
+    var listeners = {};
+    var EventListeners = function(event) {
+        this.event = event;
+        this.count = 0;
+        var listeners = {};
+        this.add = function(func) {
+            var id = String(func);
+            if (!listeners[id]) {
+                listeners[id] = func;
+                this.count++
+            }
+        };
+        this.remove = function(func) {
+            var id = String(func);
+            if (listeners[id]) {
+                listeners[id] = null;
+                delete listeners[id];
+                this.count--;
+                return true
+            } else {
+                return false
+            }
+        };
+        this.removeAll = function() {
+            for (var id in listeners) {
+                if (listeners.hasOwnProperty(id)) this.remove(listeners[id])
+            }
+        };
+        this.broadcast = function(args) {
+            for (var id in listeners) {
+                if (listeners.hasOwnProperty(id)) listeners[id].apply(mraid, args)
+            }
+        };
+        this.toString = function() {
+            var out = [event, ':'];
+            for (var id in listeners) {
+                if (listeners.hasOwnProperty(id)) out.push('|', id, '|')
+            }
+            return out.join('')
+        }
+    };
+    var broadcastEvent = function() {
+        var args = new Array(arguments.length);
+        var l = arguments.length;
+        for (var i = 0; i < l; i++) args[i] = arguments[i];
+        var event = args.shift();
+        if (listeners[event]) listeners[event].broadcast(args)
+    };
+    sigmob.addEventListener = function(event, listener) {
+        if (!event || !listener) {
+            broadcastEvent(EVENTS.ERROR, 'Both event and listener are required.', 'addEventListener')
+        } else if (!contains(event, EVENTS)) {
+            broadcastEvent(EVENTS.ERROR, 'Unknown SIGMOB event: ' + event, 'addEventListener')
+        } else {
+            if (!listeners[event]) {
+                listeners[event] = new EventListeners(event)
+            }
+            listeners[event].add(listener)
+        }
+    };
+    sigmob.removeEventListener = function(event, listener) {
+        if (!event) {
+            broadcastEvent(EVENTS.ERROR, 'Event is required.', 'removeEventListener');
+            return
+        }
+        if (listener) {
+            var success = false;
+            if (listeners[event]) {
+                success = listeners[event].remove(listener)
+            }
+            if (!success) {
+                broadcastEvent(EVENTS.ERROR, 'Listener not currently registered for event.', 'removeEventListener');
+                return
+            }
+        } else if (!listener && listeners[event]) {
+            listeners[event].removeAll()
+        }
+        if (listeners[event] && listeners[event].count === 0) {
+            listeners[event] = null;
+            delete listeners[event]
+        }
+    };
+    sigmob.notifyStorekitReadyEvent = function(itunesId) {
+        broadcastEvent(EVENTS.STOREKIT_READY, itunesId)
+    };
+    sigmob.notifyStorekitDidFailToLoadEvent = function(itunesId, error) {
+        broadcastEvent(EVENTS.STOREKIT_DIDFAILTOLOAD, itunesId, error)
+    };
+    sigmob.notifyStorekitClickEvent = function(itunesId) {
+        broadcastEvent(EVENTS.STOREKIT_CLICK, itunesId)
+    };
+    sigmob.notifyStorekitPresentEvent = function(itunesId) {
+        broadcastEvent(EVENTS.STOREKIT_PRESENT, itunesId)
+    };
+    sigmob.notifyStorekitFinishEvent = function(itunesId) {
+        broadcastEvent(EVENTS.STOREKIT_FINISH, itunesId)
+    };
+    sigmob.notifyOverlayDidFailToLoadEvent = function(itunesId, error) {
+        broadcastEvent(EVENTS.OVERLAY_DIDFAILTOLOAD, itunesId, error)
+    };
+    sigmob.notifyOverlayPresentEvent = function(itunesId) {
+        broadcastEvent(EVENTS.OVERLAY_DIDPRESENT, itunesId)
+    };
+    sigmob.notifyOverlayClickEvent = function(itunesId) {
+        broadcastEvent(EVENTS.OVERLAY_CLICK, itunesId)
+    };
+    sigmob.notifyOverlayFinishEvent = function(itunesId) {
+        broadcastEvent(EVENTS.OVERLAY_DIDFINISH, itunesId)
+    }
+} ());
+
+(function() {
+    var mraid = window.mraid = {};
+    window.MRAID_ENV = {
+        version: '',
+        sdk: '',
+        sdkVersion: '',
+        appId: '',
+        ifa: '',
+        limitAdTracking: '',
+        coppa: ''
+    };
+    var bridge = window.mraidbridge = {
+        nativeSDKFiredReady: false,
+        nativeCallQueue: [],
+        nativeCallInFlight: false,
+        lastSizeChangeProperties: null
+    };
+    bridge.fireChangeEvent = function(properties) {
+        for (var p in properties) {
+            if (properties.hasOwnProperty(p)) {
+                var handler = changeHandlers[p];
+                handler(properties[p])
+            }
+        }
+    };
+    bridge.nativeCallComplete = function(command) {
+        if (this.nativeCallQueue.length === 0) {
+            this.nativeCallInFlight = false;
+            return
+        }
+        var nextCall = this.nativeCallQueue.pop();
+        window.location.href = nextCall
+    };
+    bridge.executeNativeCall = function(args) {
+        var command = args.shift();
+        if (!this.nativeSDKFiredReady) {
+            console.dclog('rejecting ' + command + ' because mraid is not ready');
+            bridge.notifyErrorEvent('mraid is not ready', command);
+            return
+        }
+        var call = 'mraid://' + command;
+        var key, value;
+        var isFirstArgument = true;
+        for (var i = 0; i < args.length; i += 2) {
+            key = args[i];
+            value = args[i + 1];
+            if (value === null) continue;
+            if (isFirstArgument) {
+                call += '?';
+                isFirstArgument = false
+            } else {
+                call += '&'
+            }
+            call += encodeURIComponent(key) + '=' + encodeURIComponent(value)
+        }
+        if (this.nativeCallInFlight) {
+            this.nativeCallQueue.push(call)
+        } else {
+            this.nativeCallInFlight = true;
+            window.location = call
+        }
+    };
+    bridge.setCurrentPosition = function(x, y, width, height) {
+        currentPosition = {
+            x: x,
+            y: y,
+            width: width,
+            height: height
+        };
+        broadcastEvent(EVENTS.INFO, 'Set current position to ' + stringify(currentPosition))
+    };
+    bridge.setDefaultPosition = function(x, y, width, height) {
+        defaultPosition = {
+            x: x,
+            y: y,
+            width: width,
+            height: height
+        };
+        broadcastEvent(EVENTS.INFO, 'Set default position to ' + stringify(defaultPosition))
+    };
+    bridge.setLocation = function(lat, lon, type) {
+        location = {
+            lat: lat,
+            lon: lon,
+            type: type
+        };
+        broadcastEvent(EVENTS.INFO, 'Set location to ' + stringify(location))
+    };
+    bridge.setMaxSize = function(width, height) {
+        maxSize = {
+            width: width,
+            height: height
+        };
+        expandProperties.width = width;
+        expandProperties.height = height;
+        broadcastEvent(EVENTS.INFO, 'Set max size to ' + stringify(maxSize))
+    };
+    bridge.setPlacementType = function(_placementType) {
+        placementType = _placementType;
+        broadcastEvent(EVENTS.INFO, 'Set placement type to ' + stringify(placementType))
+    };
+    bridge.setScreenSize = function(width, height) {
+        screenSize = {
+            width: width,
+            height: height
+        };
+        broadcastEvent(EVENTS.INFO, 'Set screen size to ' + stringify(screenSize))
+    };
+    bridge.setState = function(_state) {
+        state = _state;
+        broadcastEvent(EVENTS.INFO, 'Set state to ' + stringify(state));
+        broadcastEvent(EVENTS.STATECHANGE, state)
+    };
+    bridge.setIsViewable = function(_isViewable) {
+        isViewable = _isViewable;
+        broadcastEvent(EVENTS.INFO, 'Set isViewable to ' + stringify(isViewable));
+        broadcastEvent(EVENTS.VIEWABLECHANGE, isViewable)
+    };
+    bridge.setSupports = function(sms, tel, calendar, storePicture, inlineVideo, vpaid, location) {
+        supportProperties = {
+            sms: sms,
+            tel: tel,
+            calendar: calendar,
+            storePicture: storePicture,
+            inlineVideo: inlineVideo,
+            vpaid: vpaid,
+            location: location
+        }
+    };
+    bridge.notifyReadyEvent = function() {
+        this.nativeSDKFiredReady = true;
+        broadcastEvent(EVENTS.READY)
+    };
+    bridge.notifyErrorEvent = function(message, action) {
+        broadcastEvent(EVENTS.ERROR, message, action)
+    };
+    bridge.fireReadyEvent = bridge.notifyReadyEvent;
+    bridge.fireErrorEvent = bridge.notifyErrorEvent;
+    bridge.notifySizeChangeEvent = function(width, height) {
+        if (this.lastSizeChangeProperties && width == this.lastSizeChangeProperties.width && height == this.lastSizeChangeProperties.height) {
+            return
+        }
+        this.lastSizeChangeProperties = {
+            width: width,
+            height: height
+        };
+        broadcastEvent(EVENTS.SIZECHANGE, width, height)
+    };
+    bridge.notifyStateChangeEvent = function() {
+        if (state === STATES.LOADING) {
+            broadcastEvent(EVENTS.INFO, 'Native SDK initialized.')
+        }
+        broadcastEvent(EVENTS.INFO, 'Set state to ' + stringify(state));
+        broadcastEvent(EVENTS.STATECHANGE, state)
+    };
+    bridge.notifyViewableChangeEvent = function() {
+        broadcastEvent(EVENTS.INFO, 'Set isViewable to ' + stringify(isViewable));
+        broadcastEvent(EVENTS.VIEWABLECHANGE, isViewable)
+    };
+    var VERSION = mraid.VERSION = '3.0';
+    var isIOS = (/iphone|ipad|ipod/i).test(window.navigator.userAgent.toLowerCase());
+    var STATES = mraid.STATES = {
+        LOADING: 'loading',
+        DEFAULT: 'default',
+        EXPANDED: 'expanded',
+        HIDDEN: 'hidden',
+        RESIZED: 'resized'
+    };
+    var EVENTS = mraid.EVENTS = {
+        ERROR: 'error',
+        INFO: 'info',
+        READY: 'ready',
+        STATECHANGE: 'stateChange',
+        VIEWABLECHANGE: 'viewableChange',
+        SIZECHANGE: 'sizeChange',
+        VOLUMECHANGE: 'audioVolumeChange',
+        EXPOSURECHANGE: 'exposureChange'
+    };
+    var PLACEMENT_TYPES = mraid.PLACEMENT_TYPES = {
+        UNKNOWN: 'unknown',
+        INLINE: 'inline',
+        INTERSTITIAL: 'interstitial'
+    };
+    var VPAID_EVENTS = mraid.VPAID_EVENTS = {
+        AD_CLICKED: 'AdClickThru',
+        AD_ERROR: 'AdError',
+        AD_IMPRESSION: 'AdImpression',
+        AD_PAUSED: 'AdPaused',
+        AD_PLAYING: 'AdPlaying',
+        AD_VIDEO_COMPLETE: 'AdVideoComplete',
+        AD_VIDEO_FIRST_QUARTILE: 'AdVideoFirstQuartile',
+        AD_VIDEO_MIDPOINT: 'AdVideoMidpoint',
+        AD_VIDEO_THIRD_QUARTILE: 'AdVideoThirdQuartile',
+        AD_VIDEO_START: 'AdVideoStart'
+    };
+    var MRAID_CUSTOM_EVENTS = mraid.MRAID_CUSTOM_EVENTS = {
+        AD_VIDEO_DOM_RECT: 'AdVideoDomRect',
+        AD_SKIP_AD: 'skipAd',
+        AD_REWARD_AD: 'reward',
+        AD_VIDEO_VOICE: 'voice',
+        AD_SKIP_SHOW_TIME: 'showSkipTime',
+        AD_COMPANION_CLICK: 'companionClick',
+        AD_ENDCARD_SHOW: 'endcardShow',
+    };
+    var vpaid_handlers = {
+        AdClickThru: function(url, id, playerHandles) {
+            var args = ['url', url, 'id', id, 'playerHandles', playerHandles];
+            sendVpaidEvent(VPAID_EVENTS.AD_CLICKED, args)
+        },
+        AdError: function() {
+            sendVpaidEvent(VPAID_EVENTS.AD_ERROR)
+        },
+        AdImpression: function() {
+            sendVpaidEvent(VPAID_EVENTS.AD_IMPRESSION)
+        },
+        AdPaused: function() {
+            sendVpaidEvent(VPAID_EVENTS.AD_PAUSED)
+        },
+        AdPlaying: function() {
+            sendVpaidEvent(VPAID_EVENTS.AD_PLAYING)
+        },
+        AdVideoComplete: function() {
+            sendVpaidEvent(VPAID_EVENTS.AD_VIDEO_COMPLETE)
+        },
+        AdVideoFirstQuartile: function() {
+            sendVpaidEvent(VPAID_EVENTS.AD_VIDEO_FIRST_QUARTILE)
+        },
+        AdVideoMidpoint: function() {
+            sendVpaidEvent(VPAID_EVENTS.AD_VIDEO_MIDPOINT)
+        },
+        AdVideoThirdQuartile: function() {
+            sendVpaidEvent(VPAID_EVENTS.AD_VIDEO_THIRD_QUARTILE)
+        },
+        AdVideoStart: function() {
+            sendVpaidEvent(VPAID_EVENTS.AD_VIDEO_START)
+        }
+    }
+    var expandProperties = {
+        width: false,
+        height: false,
+        useCustomClose: false,
+        isModal: true
+    };
+    var resizeProperties = {
+        width: 0,
+        height: 0,
+        offsetX: 0,
+        offsetY: 0,
+        customClosePosition: 'top-right',
+        allowOffscreen: true
+    };
+    var orientationProperties = {
+        allowOrientationChange: true,
+        forceOrientation: "none"
+    };
+    var currentAppOrientation = {
+        orientation: 'none',
+        locked: true
+    };
+    if (isIOS) {
+        orientationProperties.allowOrientationChange = false
+    }
+    var supportProperties = {
+        sms: false,
+        tel: false,
+        calendar: false,
+        storePicture: false,
+        inlineVideo: false,
+        vpaid: true,
+        location: false
+    };
+    var lastSizeChangeProperties;
+    var maxSize = {};
+    var currentPosition = {};
+    var defaultPosition = {};
+    var location = {};
+    var screenSize = {};
+    var hasSetCustomClose = false;
+    var listeners = {};
+    var state = STATES.LOADING;
+    var isViewable = false;
+    var placementType = PLACEMENT_TYPES.UNKNOWN;
+    var hostSDKVersion = {
+        'major': 0,
+        'minor': 0,
+        'patch': 0
+    };
+    var EventListeners = function(event) {
+        this.event = event;
+        this.count = 0;
+        var listeners = {};
+        this.add = function(func) {
+            var id = String(func);
+            if (!listeners[id]) {
+                listeners[id] = func;
+                this.count++
+            }
+        };
+        this.remove = function(func) {
+            var id = String(func);
+            if (listeners[id]) {
+                listeners[id] = null;
+                delete listeners[id];
+                this.count--;
+                return true
+            } else {
+                return false
+            }
+        };
+        this.removeAll = function() {
+            for (var id in listeners) {
+                if (listeners.hasOwnProperty(id)) this.remove(listeners[id])
+            }
+        };
+        this.broadcast = function(args) {
+            for (var id in listeners) {
+                if (listeners.hasOwnProperty(id)) listeners[id].apply(mraid, args)
+            }
+        };
+        this.toString = function() {
+            var out = [event, ':'];
+            for (var id in listeners) {
+                if (listeners.hasOwnProperty(id)) out.push('|', id, '|')
+            }
+            return out.join('')
+        }
+    };
+    var broadcastEvent = function() {
+        var args = new Array(arguments.length);
+        var l = arguments.length;
+        for (var i = 0; i < l; i++) args[i] = arguments[i];
+        var event = args.shift();
+        if (listeners[event]) listeners[event].broadcast(args)
+    };
+    var sendVpaidEvent = function() {
+        var args = new Array();
+        var l = arguments.length;
+        for (var i = 0; i < l; i++) {
+            var obj = arguments[i];
+            if (obj === null) continue;
+            if (Array.isArray(obj)) {
+                args = args.concat(obj)
+            } else {
+                args.push(obj)
+            }
+        }
+        args.unshift('event');
+        args.unshift('vpaid');
+        bridge.executeNativeCall(args)
+    };
+    var sendCustomEvent = function() {
+        var args = new Array();
+        var l = arguments.length;
+        for (var i = 0; i < l; i++) {
+            var obj = arguments[i];
+            if (obj === null) continue;
+            if (Array.isArray(obj)) {
+                args = args.concat(obj)
+            } else {
+                args.push(obj)
+            }
+        }
+        args.unshift('event');
+        args.unshift('extension');
+        bridge.executeNativeCall(args)
+    };
+    var contains = function(value, array) {
+        for (var i in array) {
+            if (array[i] === value) return true
+        }
+        return false
+    };
+    var clone = function(obj) {
+        if (obj === null) return null;
+        var f = function() {};
+        f.prototype = obj;
+        return new f()
+    };
+    var stringify = function(obj) {
+        if (typeof obj === 'object') {
+            var out = [];
+            if (obj.push) {
+                for (var p in obj) out.push(obj[p]);
+                return '[' + out.join(',') + ']'
+            } else {
+                for (var p in obj) out.push("'" + p + "': " + obj[p]);
+                return '{' + out.join(',') + '}'
+            }
+        } else return String(obj)
+    };
+    var trim = function(str) {
+        return str.replace(/^\s+|\s+$/g, '')
+    };
+    var changeHandlers = {
+        state: function(val) {
+            if (state === STATES.LOADING) {
+                broadcastEvent(EVENTS.INFO, 'Native SDK initialized.')
+            }
+            state = val;
+            broadcastEvent(EVENTS.INFO, 'Set state to ' + stringify(val));
+            broadcastEvent(EVENTS.STATECHANGE, state)
+        },
+        exposureChange: function(val) {
+            if (val.hasOwnProperty('exposedPercentage')) {
+                var exposedPercentage = val['exposedPercentage']
+            }
+            if (val.hasOwnProperty('visibleRectangle')) {
+                var visibleRectangle = val['visibleRectangle']
+            }
+            if (val.hasOwnProperty('occlusionRectangles')) {
+                var occlusionRectangles = val['occlusionRectangles']
+            }
+            broadcastEvent(EVENTS.EXPOSURECHANGE, exposedPercentage, visibleRectangle, occlusionRectangles)
+        },
+        viewable: function(val) {
+            isViewable = val;
+            broadcastEvent(EVENTS.INFO, 'Set isViewable to ' + stringify(val));
+            broadcastEvent(EVENTS.VIEWABLECHANGE, isViewable)
+        },
+        placementType: function(val) {
+            broadcastEvent(EVENTS.INFO, 'Set placementType to ' + stringify(val));
+            placementType = val
+        },
+        sizeChange: function(val) {
+            broadcastEvent(EVENTS.INFO, 'Set screenSize to ' + stringify(val));
+            for (var key in val) {
+                if (val.hasOwnProperty(key)) screenSize[key] = val[key]
+            }
+        },
+        supports: function(val) {
+            broadcastEvent(EVENTS.INFO, 'Set supports to ' + stringify(val));
+            supportProperties = val
+        },
+        env: function(val) {
+            broadcastEvent(EVENTS.INFO, 'Set MRAID_ENV to ' + stringify(val));
+            MRAID_ENV = val
+        },
+        location: function(val) {
+            broadcastEvent(EVENTS.INFO, 'Set location to ' + stringify(val));
+            location = val
+        },
+        appOrientation: function(val) {
+            broadcastEvent(EVENTS.INFO, 'Set appOrientation to ' + stringify(val));
+            currentAppOrientation = val
+        },
+        hostSDKVersion: function(val) {
+            var versions = val.split('.').map(function(version) {
+                return parseInt(version, 10)
+            }).filter(function(version) {
+                return version >= 0
+            });
+            if (versions.length >= 3) {
+                hostSDKVersion['major'] = parseInt(versions[0], 10);
+                hostSDKVersion['minor'] = parseInt(versions[1], 10);
+                hostSDKVersion['patch'] = parseInt(versions[2], 10);
+                broadcastEvent(EVENTS.INFO, 'Set hostSDKVersion to ' + stringify(hostSDKVersion))
+            }
+        }
+    };
+    var validate = function(obj, validators, action, merge) {
+        if (!merge) {
+            if (obj === null) {
+                broadcastEvent(EVENTS.ERROR, 'Required object not provided.', action);
+                return false
+            } else {
+                for (var i in validators) {
+                    if (validators.hasOwnProperty(i) && obj[i] === undefined) {
+                        broadcastEvent(EVENTS.ERROR, 'Object is missing required property: ' + i, action);
+                        return false
+                    }
+                }
+            }
+        }
+        for (var prop in obj) {
+            var validator = validators[prop];
+            var value = obj[prop];
+            if (validator && !validator(value)) {
+                broadcastEvent(EVENTS.ERROR, 'Value of property ' + prop + ' is invalid: ' + value, action);
+                return false
+            }
+        }
+        return true
+    };
+    var expandPropertyValidators = {
+        useCustomClose: function(v) {
+            return (typeof v === 'boolean')
+        },
+    };
+    mraid.skipAd = function(ctime) {
+        sendCustomEvent(MRAID_CUSTOM_EVENTS.AD_SKIP_AD, 'ctime', ctime)
+    };
+    mraid.reward = function(ctime) {
+        sendCustomEvent(MRAID_CUSTOM_EVENTS.AD_REWARD_AD, 'ctime', ctime)
+    };
+    mraid.volumChange = function(mute) {
+        sendCustomEvent(MRAID_CUSTOM_EVENTS.AD_VIDEO_VOICE, 'state', mute)
+    };
+    mraid.showSkip = function(ctime) {
+        sendCustomEvent(MRAID_CUSTOM_EVENTS.AD_SKIP_SHOW_TIME, 'ctime', ctime)
+    };
+    mraid.endcardShow = function() {
+        sendCustomEvent(MRAID_CUSTOM_EVENTS.AD_ENDCARD_SHOW)
+    };
+    mraid.companionClick = function(ctime) {
+        var args = new Array();
+        var l = arguments.length;
+        for (var i = 0; i < l; i++) {
+            var obj = arguments[i];
+            args.push(obj)
+        }
+        args.shift();
+        var ln = args.length;
+        if (ln == 0) sendCustomEvent(MRAID_CUSTOM_EVENTS.AD_COMPANION_CLICK, 'ctime', ctime);
+        else {
+            var ext = args[ln - 1];
+            sendCustomEvent(MRAID_CUSTOM_EVENTS.AD_COMPANION_CLICK, 'ctime', ctime, 'ext', JSON.stringify(ext))
+        }
+    };
+    mraid.addEventListener = function(event, listener) {
+        if (!event || !listener) {
+            broadcastEvent(EVENTS.ERROR, 'Both event and listener are required.', 'addEventListener')
+        } else if (!contains(event, EVENTS)) {
+            broadcastEvent(EVENTS.ERROR, 'Unknown MRAID event: ' + event, 'addEventListener')
+        } else {
+            if (!listeners[event]) {
+                listeners[event] = new EventListeners(event)
+            }
+            listeners[event].add(listener)
+        }
+    };
+    mraid.close = function() {
+        if (state === STATES.HIDDEN) {
+            broadcastEvent(EVENTS.ERROR, 'Ad cannot be closed when it is already hidden.', 'close')
+        } else bridge.executeNativeCall(['close'])
+    };
+    mraid.unload = function() {
+        if (state === STATES.HIDDEN) {
+            broadcastEvent(EVENTS.ERROR, 'Ad cannot be closed when it is already hidden.', 'close')
+        } else bridge.executeNativeCall(['unload'])
+    };
+    mraid.expand = function(URL) {
+        if (! (this.getState() === STATES.DEFAULT || this.getState() === STATES.RESIZED)) {
+            broadcastEvent(EVENTS.ERROR, 'Ad can only be expanded from the default or resized state.', 'expand')
+        } else {
+            var args = ['expand', 'shouldUseCustomClose', expandProperties.useCustomClose];
+            if (URL) {
+                args = args.concat(['url', URL])
+            }
+            bridge.executeNativeCall(args)
+        }
+    };
+    mraid.getExpandProperties = function() {
+        var properties = {
+            width: expandProperties.width,
+            height: expandProperties.height,
+            useCustomClose: expandProperties.useCustomClose,
+            isModal: expandProperties.isModal
+        };
+        return properties
+    };
+    mraid.getCurrentPosition = function() {
+        return {
+            x: currentPosition.x,
+            y: currentPosition.y,
+            width: currentPosition.width,
+            height: currentPosition.height
+        }
+    };
+    mraid.getDefaultPosition = function() {
+        return {
+            x: defaultPosition.x,
+            y: defaultPosition.y,
+            width: defaultPosition.width,
+            height: defaultPosition.height
+        }
+    };
+    mraid.getlocation = function() {
+        return location
+    };
+    mraid.getMaxSize = function() {
+        return {
+            width: maxSize.width,
+            height: maxSize.height
+        }
+    };
+    mraid.getPlacementType = function() {
+        return placementType
+    };
+    mraid.getScreenSize = function() {
+        return {
+            width: screenSize.width,
+            height: screenSize.height
+        }
+    };
+    mraid.getState = function() {
+        return state
+    };
+    mraid.isViewable = function() {
+        return isViewable
+    };
+    mraid.getVersion = function() {
+        return mraid.VERSION
+    };
+    mraid.open = function(URL) {
+        var args = new Array();
+        var l = arguments.length;
+        for (var i = 0; i < l; i++) {
+            var obj = arguments[i];
+            args.push(obj)
+        }
+        args.shift();
+        if (!URL) broadcastEvent(EVENTS.ERROR, 'URL is required.', 'open');
+        else {
+            var ln = args.length;
+            if (ln == 0) bridge.executeNativeCall(['open', 'url', URL]);
+            var ext = args[ln - 1];
+            bridge.executeNativeCall(['open', 'url', URL, 'ext', JSON.stringify(ext)])
+        }
+    };
+    mraid.removeEventListener = function(event, listener) {
+        if (!event) {
+            broadcastEvent(EVENTS.ERROR, 'Event is required.', 'removeEventListener');
+            return
+        }
+        if (listener) {
+            var success = false;
+            if (listeners[event]) {
+                success = listeners[event].remove(listener)
+            }
+            if (!success) {
+                broadcastEvent(EVENTS.ERROR, 'Listener not currently registered for event.', 'removeEventListener');
+                return
+            }
+        } else if (!listener && listeners[event]) {
+            listeners[event].removeAll()
+        }
+        if (listeners[event] && listeners[event].count === 0) {
+            listeners[event] = null;
+            delete listeners[event]
+        }
+    };
+    mraid.setExpandProperties = function(properties) {
+        if (validate(properties, expandPropertyValidators, 'setExpandProperties', true)) {
+            if (properties.hasOwnProperty('useCustomClose')) {
+                expandProperties.useCustomClose = properties.useCustomClose
+            }
+        }
+    };
+    mraid.useCustomClose = function(shouldUseCustomClose) {
+        expandProperties.useCustomClose = shouldUseCustomClose;
+        hasSetCustomClose = true;
+        bridge.executeNativeCall(['usecustomclose', 'shouldUseCustomClose', shouldUseCustomClose])
+    };
+    mraid.createCalendarEvent = function(parameters) {
+        CalendarEventParser.initialize(parameters);
+        if (CalendarEventParser.parse()) {
+            bridge.executeNativeCall(CalendarEventParser.arguments)
+        } else {
+            broadcastEvent(EVENTS.ERROR, CalendarEventParser.errors[0], 'createCalendarEvent')
+        }
+    };
+    mraid.getSupports = function() {
+        return supportProperties
+    };
+    mraid.supports = function(feature) {
+        return supportProperties[feature]
+    };
+    mraid.playVideo = function(uri) {
+        if (!mraid.isViewable()) {
+            broadcastEvent(EVENTS.ERROR, 'playVideo cannot be called until the ad is viewable', 'playVideo');
+            return
+        }
+        if (!uri) {
+            broadcastEvent(EVENTS.ERROR, 'playVideo must be called with a valid URI', 'playVideo')
+        } else {
+            bridge.executeNativeCall(['playVideo', 'uri', uri])
+        }
+    };
+    mraid.storePicture = function(uri) {
+        if (!mraid.isViewable()) {
+            broadcastEvent(EVENTS.ERROR, 'storePicture cannot be called until the ad is viewable', 'storePicture');
+            return
+        }
+        if (!uri) {
+            broadcastEvent(EVENTS.ERROR, 'storePicture must be called with a valid URI', 'storePicture')
+        } else {
+            bridge.executeNativeCall(['storePicture', 'uri', uri])
+        }
+    };
+    var resizePropertyValidators = {
+        width: function(v) {
+            return ! isNaN(v) && v > 0
+        },
+        height: function(v) {
+            return ! isNaN(v) && v > 0
+        },
+        offsetX: function(v) {
+            return ! isNaN(v)
+        },
+        offsetY: function(v) {
+            return ! isNaN(v)
+        },
+        customClosePosition: function(v) {
+            return (typeof v === 'string' && ['top-right', 'bottom-right', 'top-left', 'bottom-left', 'center', 'top-center', 'bottom-center'].indexOf(v) > -1)
+        },
+        allowOffscreen: function(v) {
+            return (typeof v === 'boolean')
+        }
+    };
+    mraid.setOrientationProperties = function(properties) {
+        if (properties.hasOwnProperty('allowOrientationChange')) {
+            orientationProperties.allowOrientationChange = properties.allowOrientationChange
+        }
+        if (properties.hasOwnProperty('forceOrientation')) {
+            orientationProperties.forceOrientation = properties.forceOrientation
+        }
+        var args = ['setOrientationProperties', 'allowOrientationChange', orientationProperties.allowOrientationChange, 'forceOrientation', orientationProperties.forceOrientation];
+        bridge.executeNativeCall(args)
+    };
+    mraid.getOrientationProperties = function() {
+        return {
+            allowOrientationChange: orientationProperties.allowOrientationChange,
+            forceOrientation: orientationProperties.forceOrientation
+        }
+    };
+    mraid.getCurrentAppOrientation = function() {
+        return {
+            orientation: currentAppOrientation.orientation,
+            locked: currentAppOrientation.locked
+        }
+    };
+    mraid.resize = function() {
+        if (! (this.getState() === STATES.DEFAULT || this.getState() === STATES.RESIZED)) {
+            broadcastEvent(EVENTS.ERROR, 'Ad can only be resized from the default or resized state.', 'resize')
+        } else if (!resizeProperties.width || !resizeProperties.height) {
+            broadcastEvent(EVENTS.ERROR, 'Must set resize properties before calling resize()', 'resize')
+        } else {
+            var args = ['resize', 'width', resizeProperties.width, 'height', resizeProperties.height, 'offsetX', resizeProperties.offsetX || 0, 'offsetY', resizeProperties.offsetY || 0, 'customClosePosition', resizeProperties.customClosePosition, 'allowOffscreen', !!resizeProperties.allowOffscreen];
+            bridge.executeNativeCall(args)
+        }
+    };
+    mraid.getResizeProperties = function() {
+        var properties = {
+            width: resizeProperties.width,
+            height: resizeProperties.height,
+            offsetX: resizeProperties.offsetX,
+            offsetY: resizeProperties.offsetY,
+            customClosePosition: resizeProperties.customClosePosition,
+            allowOffscreen: resizeProperties.allowOffscreen
+        };
+        return properties
+    };
+    mraid.setResizeProperties = function(properties) {
+        if (validate(properties, resizePropertyValidators, 'setResizeProperties', true)) {
+            var desiredProperties = ['width', 'height', 'offsetX', 'offsetY', 'customClosePosition', 'allowOffscreen'];
+            var length = desiredProperties.length;
+            for (var i = 0; i < length; i++) {
+                var propname = desiredProperties[i];
+                if (properties.hasOwnProperty(propname)) {
+                    resizeProperties[propname] = properties[propname]
+                }
+            }
+        }
+    };
+    mraid.setVideoObject = function(videoObject) {
+        this._videoObject = videoObject
+    };
+    mraid.initVpaid = function(vpaidObject) {
+        for (var event in VPAID_EVENTS) {
+            var handle = vpaid_handlers[VPAID_EVENTS[event]];
+            vpaidObject.subscribe(handle, VPAID_EVENTS[event])
+        }
+        this._vpaid = vpaidObject
+    };
+    bridge.startAd = function() {
+        if (typeof(mraid._vpaid) === 'undefined') {
+            vpaid_handlers[VPAID_EVENTS.AD_ERROR].call();
+            return
+        }
+        if (mraid._vpaid.startAd) {
+            mraid._vpaid.startAd()
+        } else vpaid_handlers[VPAID_EVENTS.AD_ERROR].call()
+    };
+    bridge.getAdDuration = function() {
+        if (typeof(mraid._vpaid) == "undefined") {
+            return undefined
+        }
+        if (mraid._vpaid.getAdDuration) {
+            return mraid._vpaid.getAdDuration()
+        } else return undefined
+    };
+    bridge.getPlayProgress = function() {
+        if (typeof(mraid._vpaid) == "undefined") {
+            return undefined
+        }
+        if (mraid._vpaid.getAdDuration && mraid._vpaid.getAdRemainingTime) {
+            return (1 - mraid._vpaid.getAdRemainingTime() / mraid._vpaid.getAdDuration())
+        } else return undefined
+    };
+    bridge.getVideoCurrentTime = function() {
+        if (typeof(mraid._vpaid) == "undefined") {
+            return undefined
+        }
+        if (mraid._vpaid.getAdDuration && mraid._vpaid.getAdRemainingTime) {
+            return mraid._vpaid.getAdDuration() - mraid._vpaid.getAdRemainingTime()
+        } else return undefined
+    };
+    mraid.getHostSDKVersion = function() {
+        return hostSDKVersion
+    };
+    var CalendarEventParser = {
+        initialize: function(parameters) {
+            this.parameters = parameters;
+            this.errors = [];
+            this.arguments = ['createCalendarEvent']
+        },
+        parse: function() {
+            if (!this.parameters) {
+                this.errors.push('The object passed to createCalendarEvent cannot be null.')
+            } else {
+                this.parseDescription();
+                this.parseLocation();
+                this.parseSummary();
+                this.parseStartAndEndDates();
+                this.parseReminder();
+                this.parseRecurrence();
+                this.parseTransparency()
+            }
+            var errorCount = this.errors.length;
+            if (errorCount) {
+                this.arguments.length = 0
+            }
+            return (errorCount === 0)
+        },
+        parseDescription: function() {
+            this._processStringValue('description')
+        },
+        parseLocation: function() {
+            this._processStringValue('location')
+        },
+        parseSummary: function() {
+            this._processStringValue('summary')
+        },
+        parseStartAndEndDates: function() {
+            this._processDateValue('start');
+            this._processDateValue('end')
+        },
+        parseReminder: function() {
+            var reminder = this._getParameter('reminder');
+            if (!reminder) {
+                return
+            }
+            if (reminder < 0) {
+                this.arguments.push('relativeReminder');
+                this.arguments.push(parseInt(reminder) / 1000)
+            } else {
+                this.arguments.push('absoluteReminder');
+                this.arguments.push(reminder)
+            }
+        },
+        parseRecurrence: function() {
+            var recurrenceDict = this._getParameter('recurrence');
+            if (!recurrenceDict) {
+                return
+            }
+            this.parseRecurrenceInterval(recurrenceDict);
+            this.parseRecurrenceFrequency(recurrenceDict);
+            this.parseRecurrenceEndDate(recurrenceDict);
+            this.parseRecurrenceArrayValue(recurrenceDict, 'daysInWeek');
+            this.parseRecurrenceArrayValue(recurrenceDict, 'daysInMonth');
+            this.parseRecurrenceArrayValue(recurrenceDict, 'daysInYear');
+            this.parseRecurrenceArrayValue(recurrenceDict, 'monthsInYear')
+        },
+        parseTransparency: function() {
+            var validValues = ['opaque', 'transparent'];
+            if (this.parameters.hasOwnProperty('transparency')) {
+                var transparency = this.parameters.transparency;
+                if (contains(transparency, validValues)) {
+                    this.arguments.push('transparency');
+                    this.arguments.push(transparency)
+                } else {
+                    this.errors.push('transparency must be opaque or transparent')
+                }
+            }
+        },
+        parseRecurrenceArrayValue: function(recurrenceDict, kind) {
+            if (recurrenceDict.hasOwnProperty(kind)) {
+                var array = recurrenceDict[kind];
+                if (!array || !(array instanceof Array)) {
+                    this.errors.push(kind + ' must be an array.')
+                } else {
+                    var arrayStr = array.join(',');
+                    this.arguments.push(kind);
+                    this.arguments.push(arrayStr)
+                }
+            }
+        },
+        parseRecurrenceInterval: function(recurrenceDict) {
+            if (recurrenceDict.hasOwnProperty('interval')) {
+                var interval = recurrenceDict.interval;
+                if (!interval) {
+                    this.errors.push('Recurrence interval cannot be null.')
+                } else {
+                    this.arguments.push('interval');
+                    this.arguments.push(interval)
+                }
+            } else {
+                this.arguments.push('interval');
+                this.arguments.push(1)
+            }
+        },
+        parseRecurrenceFrequency: function(recurrenceDict) {
+            if (recurrenceDict.hasOwnProperty('frequency')) {
+                var frequency = recurrenceDict.frequency;
+                var validFrequencies = ['daily', 'weekly', 'monthly', 'yearly'];
+                if (contains(frequency, validFrequencies)) {
+                    this.arguments.push('frequency');
+                    this.arguments.push(frequency)
+                } else {
+                    this.errors.push('Recurrence frequency must be one of: "daily", "weekly", "monthly", "yearly".')
+                }
+            }
+        },
+        parseRecurrenceEndDate: function(recurrenceDict) {
+            var expires = recurrenceDict.expires;
+            if (!expires) {
+                return
+            }
+            this.arguments.push('expires');
+            this.arguments.push(expires)
+        },
+        _getParameter: function(key) {
+            if (this.parameters.hasOwnProperty(key)) {
+                return this.parameters[key]
+            }
+            return null
+        },
+        _processStringValue: function(kind) {
+            if (this.parameters.hasOwnProperty(kind)) {
+                var value = this.parameters[kind];
+                this.arguments.push(kind);
+                this.arguments.push(value)
+            }
+        },
+        _processDateValue: function(kind) {
+            if (this.parameters.hasOwnProperty(kind)) {
+                var dateString = this._getParameter(kind);
+                this.arguments.push(kind);
+                this.arguments.push(dateString)
+            }
+        }
+    }
+} ());
+-[XMLYInteriorMRAIDBridge fireSetDefaultPositionWithPositionRect:]
+mraidbridge.setDefaultPosition(%.1f, %.1f, %.1f, %.1f)
+window.mraidbridge.setDefaultPosition(%.1f, %.1f, %.1f, %.1f);
+isTreeStore:%d,isQosLevel:%d,isBackFetch:%d,isReport:%d,isUseEV:%d,forgCompensate:%d,notAvailbleDuration:%ld,notAvailbleCount:%ld,freshNetInterface:%d,notAvailbleLogic:%d,proxyTimerInMain:%d,ignoreNetStatus:%d,massNotAvailbleDuration:%ld,massNotAvailbleCount:%ld,crashOpen:%d,hpackErrSize:%ld,hpackSwitch:%d,accountchange:%d,usettd:%d,relogin:%d,defaultCardSwitch:%d,loginFuse:%d,bDownPeriod:%ld,bFailedRPCNum:%ld,bIgnoreFailedRPCTime:%ld,bActivateNum:%ld,bActivateTime:%ld,bifrostdownNow:%d,bifrostMtlsSwitch:%d,bifrostNetChangeSwitch:%d,checkinWiteList:%d,atexitSwitch:%d,delayRegisterAtexitTimeSec:%ld,bifrostNoDowngradleSwitch:%d,cntSwitch:%d,gmSwitch:%d,tsErrorInter:%d,bind_cellular:%d,cell_toast:%d,
+amnet---local addresses:%@, v6Only:%@,defaultcard:%@
+local address defaultcard:
+shouldSetDefaultColor
+com.oneapp.coreentity.vehicles
+_defaultVehicle
+_vehicles
+defaultVehicle
+ceaVehicleStatus
+FV_CoreEntity.MosiWidgetCarnetCeaVehicleStatus
+_TtC13FV_CoreEntity32MosiWidgetCarnetCeaVehicleStatus
+_defaultCarModel
+_vehicleStatus
+isDefaultVehicle
+operateVehicleSeriesName
+vehicleSystemType
+vehicleStatusException
+vehicleStatus
+v24@?0@"NSString"8@"_TtC18KDVehicleButlerSDK17KDVBVehicleStatus"16
+v16@?0@"_TtC18KDVehicleButlerSDK17KDVBVehicleStatus"8
+support/dealer/setDefaultDealer/v1
+vehicleSeriesMatrixRelationId
+vehicleSeriesName
+vehicleSeriesList
+vehicleSeriesListByMatrixOrderByBusinessType
+vehicleSeriesInfo
+clubVehicleSeries
+clubVehicleSeriesName
+vehicleSeriesCode
+vehicleSeries
+OneApp_CarClub.SocialVehicleSeries
+_TtC14OneApp_CarClub19SocialVehicleSeries
+_TtC14OneApp_CarClub27SocialVehicleSeriesItemCell
+OneApp_CarClub/SocialVehicleSeriesItemCell.swift
+_TtC14OneApp_CarClub35SocialVehicleSeriesSelectController
+OneApp_CarClub/SocialVehicleSeriesSelectController.swift
+_TtC14OneApp_CarClub32SocialVehicleSeriesSelectReactor
+VWCarnet.MoscCarnetVehicleStatusViewController
+_TtC16OneApp_CarWidget28MoscCarnetVehicleStatusModel
+vehicleStatusFeatureServiceEnabled
+T@"NSNumber",N,&,VvehicleStatusFeatureServiceEnabled
+{
+  "hasMore" : false,
+  "data" : [
+    {
+      "status" : 0,
+      "title" : "啦咯啦咯啦咯就来咯哦哦哦哦哦哦哦农民名模一样的吧啦吧啦，你",
+      "skuId" : "",
+      "imageCount" : 2,
+      "shareCount" : 0,
+      "isAuthor" : true,
+      "highQuality" : 0,
+      "isCollect" : false,
+      "publishChannel" : "5",
+      "userInfo" : {
+        "defaultCarModelEn" : null,
+        "verifiedState" : 1,
+        "userType" : 0,
+        "backgroundUrl" : null,
+        "certificationIconUrl" : null,
+        "avatarUrl" : "https://auditmuat.ftb.faw-vw.com/resource/uat/7881482020/fawvw/headPics/05f9426ef7a741608d988ca38e64b9c3.jpg",
+        "signature" : null,
+        "technicianType" : null,
+        "nickName" : "用户11112",
+        "userTitleList" : [
+
+        ],
+        "verifiedName" : null,
+        "defaultCarModel" : "全新速腾",
+        "refId" : "9351269"
+      },
+      "contentList" : [
+        {
+          "content" : "啦咯啦咯啦咯啦咯啦咯考虑图记了",
+          "order" : 1,
+          "type" : 2,
+          "width" : null,
+          "height" : null
+        },
+        {
+          "content" : "https://oap4-test-cos-client-1256532032.cos.ap-beijing.myqcloud.com/user/img/191ff262803646cc8c7df08aae3a5264.jpg",
+          "order" : 2,
+          "type" : 1,
+          "width" : 834,
+          "height" : 626
+        },
+        {
+          "content" : "https://oap4-test-cos-client-1256532032.cos.ap-beijing.myqcloud.com/user/img/28505f01c1d2477baeae42a17518a7e4.jpg",
+          "order" : 3,
+          "type" : 1,
+          "width" : 828,
+          "height" : 1104
+        }
+      ],
+      "activityId" : null,
+      "ipProvince" : "四川",
+      "refId" : "9351269",
+      "deleted" : 0,
+      "id" : 26062868,
+      "readCount" : 0,
+      "themeNameList" : [
+        "话题无规则时什么状",
+        "话题走查第二轮"
+      ],
+      "themeList" : [
+        {
+          "themeChannel" : null,
+          "id" : 200111,
+          "readCount" : null,
+          "name" : "话题无规则时什么状",
+          "publishTime" : null,
+          "coverPicUrl" : null
+        },
+        {
+          "themeChannel" : null,
+          "id" : 200109,
+          "readCount" : null,
+          "name" : "话题走查第二轮",
+          "publishTime" : null,
+          "coverPicUrl" : null
+        }
+      ],
+      "publishTime" : 1712817043000,
+      "commentCount" : 0,
+      "createTime" : 1712817043000,
+      "likeCount" : 0,
+      "isFollow" : false,
+      "collectCount" : 0,
+      "isLike" : false
+    },
+    {
+      "status" : 1,
+      "title" : "啦咯啦咯啦咯就来咯哦哦哦哦哦哦哦农民名模一样的吧啦吧啦，你",
+      "skuId" : "",
+      "imageCount" : 2,
+      "shareCount" : 0,
+      "isAuthor" : true,
+      "highQuality" : 0,
+      "isCollect" : false,
+      "publishChannel" : "5",
+      "userInfo" : {
+        "defaultCarModelEn" : null,
+        "verifiedState" : 1,
+        "userType" : 0,
+        "backgroundUrl" : null,
+        "certificationIconUrl" : null,
+        "avatarUrl" : "https://auditmuat.ftb.faw-vw.com/resource/uat/7881482020/fawvw/headPics/05f9426ef7a741608d988ca38e64b9c3.jpg",
+        "signature" : null,
+        "technicianType" : null,
+        "nickName" : "用户11112",
+        "userTitleList" : [
+
+        ],
+        "verifiedName" : null,
+        "defaultCarModel" : "全新速腾",
+        "refId" : "9351269"
+      },
+      "contentList" : [
+        {
+          "content" : "啦咯啦咯啦咯啦咯啦咯考虑图记了",
+          "order" : 1,
+          "type" : 2,
+          "width" : null,
+          "height" : null
+        },
+        {
+          "content" : "https://oap4-test-cos-client-1256532032.cos.ap-beijing.myqcloud.com/user/img/84be8e48a1ef4351aa2c4d085459a4c4.jpg",
+          "order" : 2,
+          "type" : 1,
+          "width" : 834,
+          "height" : 626
+        },
+        {
+          "content" : "https://oap4-test-cos-client-1256532032.cos.ap-beijing.myqcloud.com/user/img/efa0b8f4df3c469abcc7b96cbecee442.jpg",
+          "order" : 3,
+          "type" : 1,
+          "width" : 828,
+          "height" : 1104
+        }
+      ],
+      "activityId" : null,
+      "ipProvince" : "四川",
+      "refId" : "9351269",
+      "deleted" : 0,
+      "id" : 26062867,
+      "readCount" : 0,
+      "themeNameList" : [
+        "话题无规则时什么状",
+        "话题走查第二轮"
+      ],
+      "themeList" : [
+        {
+          "themeChannel" : null,
+          "id" : 200111,
+          "readCount" : null,
+          "name" : "话题无规则时什么状",
+          "publishTime" : null,
+          "coverPicUrl" : null
+        },
+        {
+          "themeChannel" : null,
+          "id" : 200109,
+          "readCount" : null,
+          "name" : "话题走查第二轮",
+          "publishTime" : null,
+          "coverPicUrl" : null
+        }
+      ],
+      "publishTime" : 1712816824000,
+      "commentCount" : 0,
+      "createTime" : 1712816824000,
+      "likeCount" : 0,
+      "isFollow" : false,
+      "collectCount" : 0,
+      "isLike" : false
+    },
+    {
+      "status" : 2,
+      "title" : "啦咯啦咯啦咯就来咯哦哦哦哦哦哦哦农民名模一样的吧啦吧啦，你",
+      "skuId" : "",
+      "imageCount" : 2,
+      "shareCount" : 0,
+      "isAuthor" : true,
+      "highQuality" : 0,
+      "isCollect" : false,
+      "publishChannel" : "5",
+      "userInfo" : {
+        "defaultCarModelEn" : null,
+        "verifiedState" : 1,
+        "userType" : 0,
+        "backgroundUrl" : null,
+        "certificationIconUrl" : null,
+        "avatarUrl" : "https://auditmuat.ftb.faw-vw.com/resource/uat/7881482020/fawvw/headPics/05f9426ef7a741608d988ca38e64b9c3.jpg",
+        "signature" : null,
+        "technicianType" : null,
+        "nickName" : "用户11112",
+        "userTitleList" : [
+
+        ],
+        "verifiedName" : null,
+        "defaultCarModel" : "全新速腾",
+        "refId" : "9351269"
+      },
+      "contentList" : [
+        {
+          "content" : "啦咯啦咯啦咯啦咯啦咯考虑图记了",
+          "order" : 1,
+          "type" : 2,
+          "width" : null,
+          "height" : null
+        },
+        {
+          "content" : "https://oap4-test-cos-client-1256532032.cos.ap-beijing.myqcloud.com/user/img/89fc74abda5642ed81399a895d37c8aa.jpg",
+          "order" : 2,
+          "type" : 1,
+          "width" : 834,
+          "height" : 626
+        },
+        {
+          "content" : "https://oap4-test-cos-client-1256532032.cos.ap-beijing.myqcloud.com/user/img/65dbe4afd3ab4995b070703e557df261.jpg",
+          "order" : 3,
+          "type" : 1,
+          "width" : 828,
+          "height" : 1104
+        }
+      ],
+      "activityId" : null,
+      "ipProvince" : "四川",
+      "refId" : "9351269",
+      "deleted" : 0,
+      "id" : 26062866,
+      "readCount" : 0,
+      "themeNameList" : [
+        "话题无规则时什么状",
+        "话题走查第二轮"
+      ],
+      "themeList" : [
+        {
+          "themeChannel" : null,
+          "id" : 200111,
+          "readCount" : null,
+          "name" : "话题无规则时什么状",
+          "publishTime" : null,
+          "coverPicUrl" : null
+        },
+        {
+          "themeChannel" : null,
+          "id" : 200109,
+          "readCount" : null,
+          "name" : "话题走查第二轮",
+          "publishTime" : null,
+          "coverPicUrl" : null
+        }
+      ],
+      "publishTime" : 1712816816000,
+      "commentCount" : 0,
+      "createTime" : 1712816816000,
+      "likeCount" : 0,
+      "isFollow" : false,
+      "collectCount" : 0,
+      "isLike" : false
+    },
+    {
+      "status" : 3,
+      "title" : "墨迹咯啦咯",
+      "skuId" : "",
+      "imageCount" : 1,
+      "shareCount" : 0,
+      "isAuthor" : true,
+      "highQuality" : 0,
+      "isCollect" : false,
+      "publishChannel" : "5",
+      "userInfo" : {
+        "defaultCarModelEn" : null,
+        "verifiedState" : 1,
+        "userType" : 0,
+        "backgroundUrl" : null,
+        "certificationIconUrl" : null,
+        "avatarUrl" : "https://auditmuat.ftb.faw-vw.com/resource/uat/7881482020/fawvw/headPics/05f9426ef7a741608d988ca38e64b9c3.jpg",
+        "signature" : null,
+        "technicianType" : null,
+        "nickName" : "用户11112",
+        "userTitleList" : [
+
+        ],
+        "verifiedName" : null,
+        "defaultCarModel" : "全新速腾",
+        "refId" : "9351269"
+      },
+      "contentList" : [
+        {
+          "content" : "时候有时间啊",
+          "order" : 1,
+          "type" : 2,
+          "width" : null,
+          "height" : null
+        },
+        {
+          "content" : "https://oap4-test-cos-client-1256532032.cos.ap-beijing.myqcloud.com/user/img/f0f6611e721c479ca2eb7ff4edf4cfdb.jpg",
+          "order" : 2,
+          "type" : 1,
+          "width" : 834,
+          "height" : 626
+        },
+        {
+          "content" : "公司来咯摸么得",
+          "order" : 3,
+          "type" : 2,
+          "width" : null,
+          "height" : null
+        }
+      ],
+      "activityId" : null,
+      "ipProvince" : "四川",
+      "refId" : "9351269",
+      "deleted" : 0,
+      "id" : 26062865,
+      "readCount" : 14,
+      "themeNameList" : [
+        "话题无规则时什么状",
+        "话题走查第二轮"
+      ],
+      "themeList" : [
+        {
+          "themeChannel" : null,
+          "id" : 200111,
+          "readCount" : null,
+          "name" : "话题无规则时什么状",
+          "publishTime" : null,
+          "coverPicUrl" : null
+        },
+        {
+          "themeChannel" : null,
+          "id" : 200109,
+          "readCount" : null,
+          "name" : "话题走查第二轮",
+          "publishTime" : null,
+          "coverPicUrl" : null
+        }
+      ],
+      "publishTime" : 1712813060000,
+      "commentCount" : 0,
+      "createTime" : 1712813059000,
+      "likeCount" : 0,
+      "isFollow" : false,
+      "collectCount" : 0,
+      "isLike" : false
+    },
+    {
+      "status" : 3,
+      "title" : "空军建军节",
+      "skuId" : "",
+      "imageCount" : 0,
+      "shareCount" : 0,
+      "isAuthor" : true,
+      "highQuality" : 0,
+      "isCollect" : false,
+      "publishChannel" : "5",
+      "userInfo" : {
+        "defaultCarModelEn" : null,
+        "verifiedState" : 1,
+        "userType" : 0,
+        "backgroundUrl" : null,
+        "certificationIconUrl" : null,
+        "avatarUrl" : "https://auditmuat.ftb.faw-vw.com/resource/uat/7881482020/fawvw/headPics/05f9426ef7a741608d988ca38e64b9c3.jpg",
+        "signature" : null,
+        "technicianType" : null,
+        "nickName" : "用户11112",
+        "userTitleList" : [
+
+        ],
+        "verifiedName" : null,
+        "defaultCarModel" : "全新速腾",
+        "refId" : "9351269"
+      },
+      "contentList" : [
+        {
+          "content" : "八九块就咯啦咯她咯啦咯啦咯啦咯",
+          "order" : 1,
+          "type" : 2,
+          "width" : null,
+          "height" : null
+        }
+      ],
+      "activityId" : null,
+      "ipProvince" : "四川",
+      "refId" : "9351269",
+      "deleted" : 0,
+      "id" : 26062859,
+      "readCount" : 2,
+      "themeNameList" : [
+        "话题无规则时什么状"
+      ],
+      "themeList" : [
+        {
+          "themeChannel" : null,
+          "id" : 200111,
+          "readCount" : null,
+          "name" : "话题无规则时什么状",
+          "publishTime" : null,
+          "coverPicUrl" : null
+        }
+      ],
+      "publishTime" : 1712802319000,
+      "commentCount" : 0,
+      "createTime" : 1712802319000,
+      "likeCount" : 0,
+      "isFollow" : false,
+      "collectCount" : 0,
+      "isLike" : false
+    }
+  ],
+  "returnStatus" : "SUCCEED",
+  "pageSize" : 10,
+  "total" : 5,
+  "pageNo" : 1
+}
+vehicleSeriesId
+iceDefaultVehicleSeries
+mebDefaultVehicleSeries
+vehicleSeriesRotation
+vehicleSeriesBasic
+OneApp_DataModels.RecommendPurchaseVehicleSeriesModel
+_TtC17OneApp_DataModels35RecommendPurchaseVehicleSeriesModel
+defaultCarModelEn
+OneApp_DataModels.VehicleServicesModel
+OneApp_DataModels.VehicleSaleServicesModel
+OneApp_DataModels.VehicleSaleDetailTypeModel
+_TtC17OneApp_DataModels24VehicleSelectOutputModel
+_TtC17OneApp_DataModels20VehicleServicesModel
+_TtC17OneApp_DataModels24VehicleSaleServicesModel
+_TtC17OneApp_DataModels26VehicleSaleDetailTypeModel
+_TtC17OneApp_DataModels18VehicleSeriesModel
+{
+  "returnStatus" : "SUCCEED",
+  "data" : {
+    "id" : 32000069,
+    "hasImage" : true,
+    "status" : "PROCESSED",
+    "result" : "我是icare侧结果回复我是icare侧结果回复我是icare侧结果回复我是icare侧结果回复我是icare侧结果回复我是icare侧结果回复我是icare侧结果回复我是icare侧结果回复",
+    "mobile" : "137****7992",
+    "resultDetail" : {
+      "id" : 8,
+      "content" : "我是icare侧结果回复我是icare侧结果回复我是icare侧结果回复我是icare侧结果回复我是icare侧结果回复我是icare侧结果回复我是icare侧结果回复我是icare侧结果回复",
+      "isRead" : true,
+      "handleTime" : 1727572792000,
+      "imageList" : [
+        "https://oap4-test-cos-client-1256532032.cos.ap-beijing.myqcloud.com/user/img/7b18b206cf8547148a1682ffab18227d.jpg",
+        "https://oap4-test-cos-client-1256532032.cos.ap-beijing.myqcloud.com/user/img/7b18b206cf8547148a1682ffab18227d.jpg",
+        "https://oap4-test-cos-client-1256532032.cos.ap-beijing.myqcloud.com/user/img/7b18b206cf8547148a1682ffab18227d.jpg",
+        "https://oap4-test-cos-client-1256532032.cos.ap-beijing.myqcloud.com/user/img/7b18b206cf8547148a1682ffab18227d.jpg",
+        "https://oap4-test-cos-client-1256532032.cos.ap-beijing.myqcloud.com/user/img/7b18b206cf8547148a1682ffab18227d.jpg",
+        "https://oap4-test-cos-client-1256532032.cos.ap-beijing.myqcloud.com/user/img/7b18b206cf8547148a1682ffab18227d.jpg",
+        "https://oap4-test-cos-client-1256532032.cos.ap-beijing.myqcloud.com/user/img/7b18b206cf8547148a1682ffab18227d.jpg",
+        "https://oap4-test-cos-client-1256532032.cos.ap-beijing.myqcloud.com/user/img/7b18b206cf8547148a1682ffab18227d.jpg",
+        "https://oap4-test-cos-client-1256532032.cos.ap-beijing.myqcloud.com/user/img/7b18b206cf8547148a1682ffab18227d.jpg",
+        "https://oap4-test-cos-client-1256532032.cos.ap-beijing.myqcloud.com/user/img/7b18b206cf8547148a1682ffab18227d.jpg"
+      ]
+    },
+    "scene" : "FUNCTION",
+    "imageList" : [
+      "https://oap4-test-cos-client-1256532032.cos.ap-beijing.myqcloud.com/user/img/9fd498c12350417eb8f0c7f201a7b035.jpg",
+      "https://oap4-test-cos-client-1256532032.cos.ap-beijing.myqcloud.com/user/img/520d2aea05c04d958abb8083ddd872d4.jpg",
+      "https://oap4-test-cos-client-1256532032.cos.ap-beijing.myqcloud.com/user/img/2c743b4d4caf458ea9ba28ecc81f21f4.jpg",
+      "https://oap4-test-cos-client-1256532032.cos.ap-beijing.myqcloud.com/user/img/6ddab57021bf486c9ec9b3dd88a2b200.jpg"
+    ],
+    "type" : "COMPLAINT",
+    "defaultCarVin" : "BVWTDM10*********",
+    "source" : "APP",
+    "handleTime" : 1727572792000,
+    "unreadFeedbackResult" : false,
+    "defaultCarSeries" : "VW B MAIN SUV",
+    "defaultCarModel" : "精英巡行版",
+    "nickname" : "用**14649548",
+    "feedbackTime" : 1727572516000,
+    "content" : "可口可乐了可口可乐了看看可口可乐可口可乐"
+  }
+}
+{
+  "hasMore" : false,
+  "data" : [
+    {
+      "id" : 32000069,
+      "hasImage" : true,
+      "status" : "PROCESSED",
+      "result" : "我是icare侧结果回复我是icare侧结果回复我是icare侧结果回复我是icare侧结果回复我是icare侧结果回复我是icare侧结果回复我是icare侧结果回复我是icare侧结果回复",
+      "mobile" : "137****7992",
+      "resultDetail" : null,
+      "scene" : "FUNCTION",
+      "imageList" : [
+        "https://oap4-test-cos-client-1256532032.cos.ap-beijing.myqcloud.com/user/im/9fd498c12350417eb8f0c7f201a7b035.jpg",
+        "https://oap4-test-cos-client-1256532032.cos.ap-beijing.myqcloud.com/user/img/520d2aea05c04d958abb8083ddd872d4.jpg",
+        "https://oap4-test-cos-client-1256532032.cos.ap-beijing.myqcloud.com/user/img/2c743b4d4caf458ea9ba28ecc81f21f4.jpg",
+        "https://oap4-test-cos-client-1256532032.cos.ap-beijing.myqcloud.com/use/img/6ddab57021bf486c9ec9b3dd88a2b200.jpg"
+      ],
+      "type" : "COMPLAINT",
+      "defaultCarVin" : "BVWTDM10*********",
+      "source" : "APP",
+      "handleTime" : 1727572792000,
+      "unreadFeedbackResult" : true,
+      "defaultCarSeries" : "VW B MAIN SUV",
+      "defaultCarModel" : "精英巡行版",
+      "nickname" : "用**14649548",
+      "feedbackTime" : 1727572516000,
+      "content" : "可口可乐了可口可乐了看看可口可乐可口可乐"
+    }
+  ],
+  "returnStatus" : "SUCCEED",
+  "pageSize" : 10,
+  "total" : 1,
+  "pageNo" : 1
+}
+defaultVehicleVIN
+defaultVehicleModel
+defaultVehicleSeries
+defaultCarSeries
+_TtC9OneApp_Me21GetMyVehiclesResponse
+_TtC9OneApp_Me29MeMainMyVehiclesContainerCell
+OneApp_Me/MeMainMyVehiclesContainerCell.swift
+faw-vw://vehicle/list
+defaultCarModel
+_TtC9OneApp_Me24MyVehiclesViewController
+_TtC9OneApp_Me21MyVehiclesViewReactor
+defaultVehicleTagContainer
+setDefaultVehicleBtn
+T@"UIView",N,W,VdefaultVehicleTagContainer
+T@"UIButton",N,W,VsetDefaultVehicleBtn
+{
+  "returnStatus" : "SUCCEED",
+  "data" : {
+    "saveMoney" : null,
+    "theme" : 3,
+    "cardStatus" : 2,
+    "vehicleSeriesName" : "捷达-运营",
+    "serviceList" : [
+      {
+        "nextAddAmount" : null,
+        "maxLimit" : null,
+        "amount" : null,
+        "count" : null,
+        "inflatedDays" : null,
+        "rightsId" : "QY17410762511",
+        "useIntroduce" : "膨胀金",
+        "rightsUseMethod" : "膨胀至上限后停止，核销时只能抵扣1次，不找零，使用后即作废。",
+        "rightsName" : "膨胀金",
+        "rightsIntroduce" : "购买后，当天金额为0，每过1天增加3.0元，100天后达到金额上限300元。",
+        "buttonName" : "去使用",
+        "buttonUrl" : "faw-vw://myService/upkeep?serviceDealerCode=7585129H1&type=2",
+        "styleType" : 4,
+        "couponDoor" : null,
+        "rightsStatus" : 2
+      },
+      {
+        "nextAddAmount" : null,
+        "maxLimit" : null,
+        "amount" : null,
+        "count" : null,
+        "inflatedDays" : null,
+        "rightsId" : "QY17411451630",
+        "useIntroduce" : "出险结算返回保养基金",
+        "rightsUseMethod" : "保养基金使用方法",
+        "rightsName" : "保养基金",
+        "rightsIntroduce" : "会员期内，根据客户单次进店保险事故A-工单结算单的“合计金额”，按阶梯发放保养基金代金券。“合计金额”在大于0元，小于等于1K元的发50元代金券，在大于1k元，小于等于2k元的发放100元代金券，在大于2k元，小于等于5k元的发放200元代金券，在大于5k元，小于等于10k的发放300元代金券，在大于10K元的发放400元代金券",
+        "buttonName" : "去预约",
+        "buttonUrl" : "faw-vw://myService/upkeep?serviceDealerCode=7585129H1&type=2",
+        "styleType" : 3,
+        "couponDoor" : null,
+        "rightsStatus" : 0
+      },
+      {
+        "nextAddAmount" : null,
+        "maxLimit" : null,
+        "amount" : null,
+        "count" : 4,
+        "inflatedDays" : null,
+        "rightsId" : "QY17411455037",
+        "useIntroduce" : "车辆清洗和舱内消毒",
+        "rightsUseMethod" : "洗车前，请及时预约您的众惠卡购买经销商。",
+        "rightsName" : "洗车消毒",
+        "rightsIntroduce" : "享受4次车辆普通外观清洗（不含内饰），以及车内消毒杀菌服务。",
+        "buttonName" : "去查看",
+        "buttonUrl" : "faw-vw://myService/dealerDetail?serviceCode=7585129H1",
+        "styleType" : 1,
+        "couponDoor" : null,
+        "rightsStatus" : 2
+      },
+      {
+        "nextAddAmount" : null,
+        "maxLimit" : null,
+        "amount" : null,
+        "count" : 2,
+        "inflatedDays" : null,
+        "rightsId" : "QY17411454562",
+        "useIntroduce" : "享受28项车辆检查",
+        "rightsUseMethod" : "按照权益核销经销商的实际情况，开展具体检查项目。",
+        "rightsName" : "车辆健康检查",
+        "rightsIntroduce" : "进店2次免费车辆健康检查，并生成健康检查报告。",
+        "buttonName" : "去预约",
+        "buttonUrl" : "faw-vw://myService/upkeep?serviceDealerCode=7585129H1&type=2",
+        "styleType" : 1,
+        "couponDoor" : null,
+        "rightsStatus" : 2
+      },
+      {
+        "nextAddAmount" : null,
+        "maxLimit" : null,
+        "amount" : null,
+        "count" : 2,
+        "inflatedDays" : null,
+        "rightsId" : "QY17411452529",
+        "useIntroduce" : "进店钣喷享受立减权益",
+        "rightsUseMethod" : "每次只能核销1张，不找零，使用后即作废。",
+        "rightsName" : "喷漆代金券",
+        "rightsIntroduce" : "2张100元自费喷漆抵扣券。",
+        "buttonName" : "去预约",
+        "buttonUrl" : "faw-vw://myService/upkeep?serviceDealerCode=7585129H1&type=1",
+        "styleType" : 1,
+        "couponDoor" : null,
+        "rightsStatus" : 2
+      },
+      {
+        "nextAddAmount" : null,
+        "maxLimit" : null,
+        "amount" : null,
+        "count" : 1,
+        "inflatedDays" : null,
+        "rightsId" : "QY17411453927",
+        "useIntroduce" : "普通胶片式补胎",
+        "rightsUseMethod" : "补胎前，请及时预约您的众惠卡购买经销商。",
+        "rightsName" : "补胎",
+        "rightsIntroduce" : "享受1次免费提供胶片补胎方式且仅针对普通胎，不包含防爆胎/AT胎/静音棉胎等特殊类型轮胎。",
+        "buttonName" : "去预约",
+        "buttonUrl" : "faw-vw://myService/upkeep?serviceDealerCode=7585129H1&type=1",
+        "styleType" : 1,
+        "couponDoor" : null,
+        "rightsStatus" : 2
+      },
+      {
+        "nextAddAmount" : null,
+        "maxLimit" : null,
+        "amount" : null,
+        "count" : 2,
+        "inflatedDays" : null,
+        "rightsId" : "QY17411453345",
+        "useIntroduce" : "30KM内搭电换胎",
+        "rightsUseMethod" : "发生道路救援申请时，请联系购买众惠卡权益经销商。",
+        "rightsName" : "道路救援权益",
+        "rightsIntroduce" : "购买权益经销商30km以内2次免费道路救援，仅限搭电，换备胎现场检查，不含拖车服务等其他服务。",
+        "buttonName" : "去查看",
+        "buttonUrl" : "faw-vw://myService/roadRescue?serviceDealerCode=7585129H1",
+        "styleType" : 1,
+        "couponDoor" : null,
+        "rightsStatus" : 2
+      }
+    ],
+    "liveList" : [
+      {
+        "nextAddAmount" : null,
+        "maxLimit" : null,
+        "amount" : 1,
+        "count" : 0,
+        "inflatedDays" : null,
+        "rightsId" : "QY17411645405",
+        "useIntroduce" : "购买流量加油商品享折",
+        "rightsUseMethod" : "流量加油商品券权益使用方法",
+        "rightsName" : "流量加油折扣权益",
+        "rightsIntroduce" : "流量加油商品券权益介绍",
+        "buttonName" : "去使用",
+        "buttonUrl" : "https://h5-uat.mosi-tech.com/stvub/v1/combinationProducts/list?fs=coupon&hasAppTopBar=0",
+        "styleType" : 2,
+        "couponDoor" : 1,
+        "rightsStatus" : 4
+      },
+      {
+        "nextAddAmount" : null,
+        "maxLimit" : null,
+        "amount" : null,
+        "count" : 1,
+        "inflatedDays" : null,
+        "rightsId" : "QY17411455735",
+        "useIntroduce" : "享受商城热门商品折扣",
+        "rightsUseMethod" : "热门商品折扣权益权益使用方法",
+        "rightsName" : "热门商品折扣权益",
+        "rightsIntroduce" : "热门商品折扣权益权益介绍",
+        "buttonName" : "去领取",
+        "buttonUrl" : "https://uat-shop.faw-vw.com/mobile/pages/package-B/x-site/page-link/index?pageType=poster&pageCode=174105#######&hasAppTopBar=0",
+        "styleType" : 1,
+        "couponDoor" : null,
+        "rightsStatus" : 2
+      }
+    ],
+    "useCount" : 9,
+    "expiration" : 1770397919,
+    "avatarUrl" : "https://cdp-fileserver-uat-1256532032.cos.ap-beijing.myqcloud.com/vw/simple/bmp/user/headPics/225019########/887c9ae3403e4a60b8c9c832bb2b37e2.jpeg",
+    "vehicleImageUrl" : "https://cdp-fileserver-uat-1256532032.cos.ap-beijing.myqcloud.com/vw/simple/admin/vehicle/image/1G/1G26B4/1DP1/vehicleImage_1G_1G26B4_1DP1_07c7b4f72e5f4184b6f73a3a8b68a199.png",
+    "dealerName" : "成都汇和双流万达店",
+    "address" : "四川省成都市双流区东升街道星空路二段 399 号 1成都双流万达广场1层1031B",
+    "cardTemplateName" : "尊享金卡",
+    "nickName" : "用户_跌吧",
+    "cardId" : "289944############",
+    "dealerCode" : "7585129H1",
+    "driveList" : [
+      {
+        "nextAddAmount" : null,
+        "maxLimit" : null,
+        "amount" : 5,
+        "count" : 0,
+        "inflatedDays" : null,
+        "rightsId" : "QY17411646226",
+        "useIntroduce" : "立享多次加油优惠",
+        "rightsUseMethod" : " 智慧加油权益使用方法",
+        "rightsName" : " 智慧加油",
+        "rightsIntroduce" : " 智慧加油权益介绍",
+        "buttonName" : "去查看",
+        "buttonUrl" : "faw-vw://oil/main?fromPage=卡券详情",
+        "styleType" : 1,
+        "couponDoor" : 100,
+        "rightsStatus" : 4
+      },
+      {
+        "nextAddAmount" : null,
+        "maxLimit" : null,
+        "amount" : null,
+        "count" : 0,
+        "inflatedDays" : null,
+        "rightsId" : "QY17410752663",
+        "useIntroduce" : "6G流量",
+        "rightsUseMethod" : "6G流量6G流量6G流量6G流量6G流量6G流量6G流量6G流量6G流量6G流量6G流量6G流量6G流量6G流量6G流量6G流量6G流量6G流量6G流量6G流量6G流量6G流量6G流量6G流量",
+        "rightsName" : "6G流量",
+        "rightsIntroduce" : "车联网通用流量车联网通用流量车联网通用流量车联网通用流量车联网通用流量车联网通用流量车联网通用流量车联网通用流量车联网慧加油权益使用方法",
+        "rightsName" : " 智慧加油",
+        "rightsIntroduce" : " 智慧加油权益介绍",
+        "buttonName" : "去查看",
+        "buttonUrl" : "faw-vw://oil/main?fromPage=卡券详情",
+        "styleType" : 1,
+        "couponDoor" : 100,
+        "rightsStatus" : 4
+      },
+      {
+        "nextAddAmount" : null,
+        "maxLimit" : null,
+        "amount" : null,
+        "count" : 0,
+        "inflatedDays" : null,
+        "rightsId" : "QY17410752663",
+        "useIntroduce" : "6G流量",
+        "rightsUseMethod" : "6G流量6G流量6G流量6G流量6G流量6G流量6G流量6G流量6G流量6G流量6G流量6G流量6G流量6G流量6G流量6G流量6G流量6G流量6G流量6G流量6G流量6G流量6G流量6G流量",
+        "rightsName" : "6G流量",
+        "rightsIntroduce" : "车联网通用流量车联网通用流量车联网通用流量车联网通用流量车联网通用流量车联网通用流量车联网通用流量车联网通用流量车联网351200通用流量车联网通用流量车联网通用流量车联网通用流量车联网通用流量",
+        "buttonName" : "去兑换",
+        "buttonUrl" : "https://h5-uat.mosi-tech.com/mstpages/flowCoupon/?ticketId=FTBT42598420250311102503499&hasAppTopBar=0",
+        "styleType" : 1,
+        "couponDoor" : null,
+        "rightsStatus" : 4
+      }
+    ],
+    "cardTemplateId" : "ZHK17398674113",
+    "carNumber" : null
+  }
+}
+vehiclesVin
+didSelectVehicleSeries
+_TtC16OneApp_MyService24ServiceSwitchVehicleView
+switchVehicleView
+@"_TtC16OneApp_MyService24ServiceSwitchVehicleView"
+T@"_TtC16OneApp_MyService24ServiceSwitchVehicleView",N,&,VswitchVehicleView
+vehicleStatusError
+_TtC10OneApp_NGX21CoreVehicleStateModel
+vehicleState
+vehicleStateModel
+_vehicleStatusError
+_TtC10OneApp_NGX18SingleVehicleState
+_TtC10OneApp_NGX21ProSingleVehicleState
+RHPRPACMEBVehicleStatusErrorParkingFailed
+v24@0:8@"<RHPRPACMEBVehicleStatusErrorParkingFailed>"16
+RHPRPACMEBVehicleStatusError
+RHP-info:  VWRHPIndexView  startScanningForVehicles
+@"<RHPRPACMEBVehicleStatusErrorParkingFailed>"
+T@"<RHPRPACMEBVehicleStatusErrorParkingFailed>",N,&,VvehicleStatusError
+T@"<RHPRPACMEBVehicleStatusErrorParkingFailed>",N,R
+@"<RHPRPACMEBVehicleStatusErrorParkingFailed>"16@0:8
+该车辆VIN码与当前账号默认车辆不符，无法使用遥控泊车功能。
+RPACMEBVehicleStatusErrorParkingFailed
+v24@0:8@"<RPACMEBVehicleStatusErrorParkingFailed>"16
+RPACMEBVehicleStatusError
+@"<RPACMEBVehicleStatusErrorParkingFailed>"
+T@"<RPACMEBVehicleStatusErrorParkingFailed>",N,&,VvehicleStatusError
+T@"<RPACMEBVehicleStatusErrorParkingFailed>",N,R
+@"<RPACMEBVehicleStatusErrorParkingFailed>"16@0:8
+VehicleServicesModel
+VehicleSaleDetailTypeModel
+VehicleSaleServicesModel
+faw-vw://selector/vehicleSelectBrand
+faw-vw://selector/vehicleSelectServices
+faw-vw://selector/vehicleSelectType
+faw-vw://selector/vehicleSelectSalesServices
+faw-vw://selector/vehicleSelectSalesType
+_TtC15OneApp_Selector33SaleVehicleServicesListController
+_TtC15OneApp_Selector26SaleVehicleServicesReactor
+_TtC15OneApp_Selector19VehicleSelectCenter
+_TtC15OneApp_Selector27VehicleSeriesListController
+_TtC15OneApp_Selector24VehicleSeriesListReactor
+{
+  "returnStatus" : "SUCCEED",
+  "data" : [
+    {
+      "id" : 13000441,
+      "commentatorName" : null,
+      "contentType" : 3,
+      "likeCount" : 0,
+      "adoptedRead" : null,
+      "subCommentVOList" : [
+        {
+          "id" : 13000447,
+          "commentatorName" : "1163841674762256384",
+          "contentType" : 3,
+          "likeCount" : 0,
+          "adoptedRead" : null,
+          "subCommentVOList" : null,
+          "createTime" : 1701400926000,
+          "adopted" : null,
+          "images" : null,
+          "likeState" : 0,
+          "ipProvince" : "四川",
+          "user" : {
+            "defaultCarModelEn" : null,
+            "verifiedState" : 0,
+            "userType" : 0,
+            "backgroundUrl" : null,
+            "certificationIconUrl" : null,
+            "avatarUrl" : null,
+            "signature" : null,
+            "technicianType" : null,
+            "nickName" : "1163841674762256384",
+            "userTitleList" : [
+              {
+                "titleName" : "ID.明星车主",
+                "titleOrder" : 0,
+                "titleId" : 2,
+                "showExpired" : 0,
+                "titleIconUrl" : "https://one-app-dev-2-1256532032.piccd.myqcloud.com/a230756b415b42fcb68c637cab22f64c.png",
+                "expireTime" : "2024-10-18T03:27:42.000+0000"
+              }
+            ],
+            "verifiedName" : null,
+            "defaultCarModel" : null,
+            "refId" : "935904509"
+          },
+          "replyCount" : null,
+          "content" : "B"
+        }
+      ],
+      "createTime" : 1701400903000,
+      "adopted" : null,
+      "images" : null,
+      "likeState" : 0,
+      "ipProvince" : "四川",
+      "user" : {
+        "defaultCarModelEn" : null,
+        "verifiedState" : 0,
+        "userType" : 0,
+        "backgroundUrl" : null,
+        "certificationIconUrl" : null,
+        "avatarUrl" : null,
+        "signature" : null,
+        "technicianType" : null,
+        "nickName" : "1163841674762256384",
+        "userTitleList" : [
+          {
+            "titleName" : "ID.明星车主",
+            "titleOrder" : 0,
+            "titleId" : 2,
+            "showExpired" : 0,
+            "titleIconUrl" : "https://one-app-dev-2-1256532032.piccd.myqcloud.com/a230756b415b42fcb68c637cab22f64c.png",
+            "expireTime" : "2024-10-18T03:27:42.000+0000"
+          }
+        ],
+        "verifiedName" : null,
+        "defaultCarModel" : null,
+        "refId" : "935904509"
+      },
+      "replyCount" : 6,
+      "content" : "Q"
+    }
+  ]
+}
+ {
+   "hasMore" : true,
+   "data" : [
+     {
+       "id" : 13000214,
+       "commentatorName" : null,
+       "contentType" : null,
+       "likeCount" : 0,
+       "subCommentVOList" : [
+         {
+           "id" : 13000217,
+           "commentatorName" : "1163841674762256384",
+           "contentType" : null,
+           "likeCount" : 0,
+           "subCommentVOList" : null,
+           "createTime" : 1700461433000,
+           "images" : null,
+           "likeState" : 0,
+           "ipProvince" : "四川",
+           "user" : {
+             "userTitleList" : [
+
+             ],
+             "nickName" : "1163841674762256384",
+             "defaultCarModel" : null,
+             "refId" : "935904509",
+             "defaultCarModelEn" : null,
+             "avatarUrl" : null
+           },
+           "replyCount" : 0,
+           "content" : "Y"
+         }
+       ],
+       "createTime" : 1700461413000,
+       "images" : null,
+       "likeState" : 0,
+       "ipProvince" : "四川",
+       "user" : {
+         "userTitleList" : [
+
+         ],
+         "nickName" : "1163841674762256384",
+         "defaultCarModel" : null,
+         "refId" : "935904509",
+         "defaultCarModelEn" : null,
+         "avatarUrl" : null
+       },
+       "replyCount" : 2,
+       "content" : "Q"
+     },
+     {
+       "id" : 13000210,
+       "commentatorName" : null,
+       "contentType" : null,
+       "likeCount" : 2,
+       "subCommentVOList" : [
+         {
+           "id" : 13000211,
+           "commentatorName" : "Vue3成都扯把子124",
+           "contentType" : null,
+           "likeCount" : 0,
+           "subCommentVOList" : null,
+           "createTime" : 1700131372000,
+           "images" : null,
+           "likeState" : 0,
+           "ipProvince" : "四川",
+           "user" : {
+             "userTitleList" : null,
+             "nickName" : "Vue3成都扯把子124",
+             "defaultCarModel" : "ID.6 CROZZ",
+             "refId" : "9326335",
+             "defaultCarModelEn" : null,
+             "avatarUrl" : "https://one-app-dev-2-1256532032.piccd.myqcloud.com/07a513cad63140b9a8c4856a3d4d5e2e.png"
+           },
+           "replyCount" : 0,
+           "content" : "W"
+         }
+       ],
+       "createTime" : 1700131368000,
+       "images" : null,
+       "likeState" : 0,
+       "ipProvince" : "四川",
+       "user" : {
+         "userTitleList" : null,
+         "nickName" : "Vue3成都扯把子124",
+         "defaultCarModel" : "ID.6 CROZZ",
+         "refId" : "9326335",
+         "defaultCarModelEn" : null,
+         "avatarUrl" : "https://one-app-dev-2-1256532032.piccd.myqcloud.com/07a513cad63140b9a8c4856a3d4d5e2e.png"
+       },
+       "replyCount" : 0,
+       "content" : "Q"
+     },
+     {
+       "id" : 13000138,
+       "commentatorName" : null,
+       "contentType" : null,
+       "likeCount" : 0,
+       "subCommentVOList" : null,
+       "createTime" : 1699844735000,
+       "images" : null,
+       "likeState" : 0,
+       "ipProvince" : "四川",
+       "user" : {
+         "userTitleList" : null,
+         "nickName" : "Vue3成都扯把子124",
+         "defaultCarModel" : "ID.6 CROZZ",
+         "refId" : "9326335",
+         "defaultCarModelEn" : null,
+         "avatarUrl" : "https://one-app-dev-2-1256532032.piccd.myqcloud.com/07a513cad63140b9a8c4856a3d4d5e2e.png"
+       },
+       "replyCount" : 1,
+       "content" : "10 依照轻松雨刮器坏了怎么办依照轻松搞定,让您无惧风雨搞定.器坏了怎么办依照轻松无惧风雨搞定.器坏了怎么办依照轻松无惧风雨搞搞定.器坏了怎么办依照轻松无惧风雨搞搞定.器坏了"
+     },
+     {
+       "id" : 13000137,
+       "commentatorName" : null,
+       "contentType" : null,
+       "likeCount" : 1,
+       "subCommentVOList" : [
+         {
+           "id" : 13000209,
+           "commentatorName" : "Vue3成都扯把子124",
+           "contentType" : null,
+           "likeCount" : 0,
+           "subCommentVOList" : null,
+           "createTime" : 1700111693000,
+           "images" : null,
+           "likeState" : 0,
+           "ipProvince" : "四川",
+           "user" : {
+             "userTitleList" : null,
+             "nickName" : "Vue3成都扯把子124",
+             "defaultCarModel" : "ID.6 CROZZ",
+             "refId" : "9326335",
+             "defaultCarModelEn" : null,
+             "avatarUrl" : "https://one-app-dev-2-1256532032.piccd.myqcloud.com/07a513cad63140b9a8c4856a3d4d5e2e.png"
+           },
+           "replyCount" : 0,
+           "content" : "T"
+         }
+       ],
+       "createTime" : 1699844728000,
+       "images" : null,
+       "likeState" : 0,
+       "ipProvince" : "四川",
+       "user" : {
+         "userTitleList" : null,
+         "nickName" : "Vue3成都扯把子124",
+         "defaultCarModel" : "ID.6 CROZZ",
+         "refId" : "9326335",
+         "defaultCarModelEn" : null,
+         "avatarUrl" : "https://one-app-dev-2-1256532032.piccd.myqcloud.com/07a513cad63140b9a8c4856a3d4d5e2e.png"
+       },
+       "replyCount" : 2,
+       "content" : "9 依照轻松雨刮器坏了怎么办依照轻松搞定,让您无惧风雨搞定.器坏了怎么办依照轻松无惧风雨搞定.器坏了怎么办依照轻松无惧风雨搞搞定.器坏了怎么办依照轻松无惧风雨搞搞定.器坏了"
+     },
+     {
+       "id" : 13000136,
+       "commentatorName" : null,
+       "contentType" : null,
+       "likeCount" : 2,
+       "subCommentVOList" : null,
+       "createTime" : 1699844721000,
+       "images" : null,
+       "likeState" : 0,
+       "ipProvince" : "四川",
+       "user" : {
+         "userTitleList" : null,
+         "nickName" : "Vue3成都扯把子124",
+         "defaultCarModel" : "ID.6 CROZZ",
+         "refId" : "9326335",
+         "defaultCarModelEn" : null,
+         "avatarUrl" : "https://one-app-dev-2-1256532032.piccd.myqcloud.com/07a513cad63140b9a8c4856a3d4d5e2e.png"
+       },
+       "replyCount" : 0,
+       "content" : "8 依照轻松雨刮器坏了怎么办依照轻松搞定,让您无惧风雨搞定.器坏了怎么办依照轻松无惧风雨搞定.器坏了怎么办依照轻松无惧风雨搞搞定.器坏了怎么办依照轻松无惧风雨搞搞定.器坏了"
+     },
+     {
+       "id" : 13000135,
+       "commentatorName" : null,
+       "contentType" : null,
+       "likeCount" : 0,
+       "subCommentVOList" : null,
+       "createTime" : 1699844715000,
+       "images" : null,
+       "likeState" : 0,
+       "ipProvince" : "四川",
+       "user" : {
+         "userTitleList" : null,
+         "nickName" : "Vue3成都扯把子124",
+         "defaultCarModel" : "ID.6 CROZZ",
+         "refId" : "9326335",
+         "defaultCarModelEn" : null,
+         "avatarUrl" : "https://one-app-dev-2-1256532032.piccd.myqcloud.com/07a513cad63140b9a8c4856a3d4d5e2e.png"
+       },
+       "replyCount" : 0,
+       "content" : "7 依照轻松雨刮器坏了怎么办依照轻松搞定,让您无惧风雨搞定.器坏了怎么办依照轻松无惧风雨搞定.器坏了怎么办依照轻松无惧风雨搞搞定.器坏了怎么办依照轻松无惧风雨搞搞定.器坏了"
+     },
+     {
+       "id" : 13000134,
+       "commentatorName" : null,
+       "contentType" : null,
+       "likeCount" : 0,
+       "subCommentVOList" : null,
+       "createTime" : 1699844707000,
+       "images" : null,
+       "likeState" : 0,
+       "ipProvince" : "四川",
+       "user" : {
+         "userTitleList" : null,
+         "nickName" : "Vue3成都扯把子124",
+         "defaultCarModel" : "ID.6 CROZZ",
+         "refId" : "9326335",
+         "defaultCarModelEn" : null,
+         "avatarUrl" : "https://one-app-dev-2-1256532032.piccd.myqcloud.com/07a513cad63140b9a8c4856a3d4d5e2e.png"
+       },
+       "replyCount" : 1,
+       "content" : "6 依照轻松雨刮器坏了怎么办依照轻松搞定,让您无惧风雨搞定.器坏了怎么办依照轻松无惧风雨搞定.器坏了怎么办依照轻松无惧风雨搞搞定.器坏了怎么办依照轻松无惧风雨搞搞定.器坏了"
+     },
+     {
+       "id" : 13000133,
+       "commentatorName" : null,
+       "contentType" : null,
+       "likeCount" : 1,
+       "subCommentVOList" : null,
+       "createTime" : 1699844688000,
+       "images" : null,
+       "likeState" : 0,
+       "ipProvince" : "四川",
+       "user" : {
+         "userTitleList" : null,
+         "nickName" : "Vue3成都扯把子124",
+         "defaultCarModel" : "ID.6 CROZZ",
+         "refId" : "9326335",
+         "defaultCarModelEn" : null,
+         "avatarUrl" : "https://one-app-dev-2-1256532032.piccd.myqcloud.com/07a513cad63140b9a8c4856a3d4d5e2e.png"
+       },
+       "replyCount" : 1,
+       "content" : "5 依照轻松雨刮器坏了怎么办依照轻松搞定,让您无惧风雨搞定.器坏了怎么办依照轻松无惧风雨搞定.器坏了怎么办依照轻松无惧风雨搞搞定.器坏了怎么办依照轻松无惧风雨搞搞定.器坏了依照轻松雨刮器坏了怎么办依照轻松搞定,让您无惧风雨搞定.器坏了怎么办依照轻松无惧风雨搞定.器坏了怎么办依照轻松无惧风雨搞搞定.器坏了怎么办依照轻松无惧风雨搞搞定.器坏了"
+     },
+     {
+       "id" : 13000132,
+       "commentatorName" : null,
+       "contentType" : null,
+       "likeCount" : 1,
+       "subCommentVOList" : null,
+       "createTime" : 1699844672000,
+       "images" : null,
+       "likeState" : 0,
+       "ipProvince" : "四川",
+       "user" : {
+         "userTitleList" : null,
+         "nickName" : "Vue3成都扯把子124",
+         "defaultCarModel" : "ID.6 CROZZ",
+         "refId" : "9326335",
+         "defaultCarModelEn" : null,
+         "avatarUrl" : "https://one-app-dev-2-1256532032.piccd.myqcloud.com/07a513cad63140b9a8c4856a3d4d5e2e.png"
+       },
+       "replyCount" : 0,
+       "content" : "4 依照轻松雨刮器坏了怎么办依照轻松搞定,让您无惧风雨搞定.器坏了怎么办依照轻松无惧风雨搞定.器坏了怎么办依照轻松无惧风雨搞搞定.器坏了怎么办依照轻松无惧风雨搞搞定.器坏了"
+     },
+     {
+       "id" : 13000131,
+       "commentatorName" : null,
+       "contentType" : null,
+       "likeCount" : 0,
+       "subCommentVOList" : null,
+       "createTime" : 1699842097000,
+       "images" : null,
+       "likeState" : 0,
+       "ipProvince" : "四川",
+       "user" : {
+         "userTitleList" : null,
+         "nickName" : "Vue3成都扯把子124",
+         "defaultCarModel" : "ID.6 CROZZ",
+         "refId" : "9326335",
+         "defaultCarModelEn" : null,
+         "avatarUrl" : "https://one-app-dev-2-1256532032.piccd.myqcloud.com/07a513cad63140b9a8c4856a3d4d5e2e.png"
+       },
+       "replyCount" : 0,
+       "content" : "3 依照轻松雨刮器坏了怎么办依照轻松搞定,让您无惧风雨搞定.器坏了怎么办依照轻松"
+     }
+   ],
+   "returnStatus" : "SUCCEED",
+   "pageSize" : 10,
+   "total" : 15,
+   "pageNo" : 1
+ }
+{
+  "returnStatus" : "SUCCEED",
+  "data" : {
+    "images" : null,
+    "content" : "hello",
+    "replyCount" : 0,
+    "id" : 13000108,
+    "likeState" : 0,
+    "ipProvince" : "四川",
+    "user" : {
+      "userTitleList" : [
+        {
+          "titleName" : "称号1",
+          "titleOrder" : 1,
+          "titleId" : 1,
+          "showExpired" : 1,
+          "titleIconUrl" : null,
+          "expireTime" : null
+        }
+      ],
+      "nickName" : "Vue3成都扯把子124",
+      "defaultCarModel" : "高尔夫",
+      "refId" : "9326335",
+      "defaultCarModelEn" : "Golf",
+      "avatarUrl" : "https://img1.baidu.com/it/u=3273875893,670667803&fm=253&fmt=auto&app=120&f=PNG?w=200&h=200"
+    },
+    "subCommentVOList" : null,
+    "likeCount" : 0,
+    "createTime" : 1699681000708,
+    "commentatorName" : null
+  }
+}
+_TtC13OneApp_Social27CustomizeVehicleSeriesModel
+首页车型自定义页
+_TtC13OneApp_Social30CustomVehicleSegmentController
+isVehicleSelectorHidden
+$__lazy_storage_$_vehicleSelectorView
+_TtC13OneApp_Social27CustomVehicleSegmentReactor
+_TtC13OneApp_Social25CustomVehicleSelectorView
+onVehicleSelected
+vehicles
+OneApp_Social/CustomVehicleSelectorView.swift
+/Users/devops/Software/jenkinsAgentNew/workspace/OneApp4/TST/iOS-package/Pods/OneApp-Social/OneApp-Social/Classes/Bussiness/CustomVehicle/CustomVehicleSegment/PresentationLayer/CustomVehicleSelectorView.swift
+_TtC13OneApp_Social29CustomVehicleSingleBannerCell
+{
+  "returnStatus" : "SUCCEED",
+  "data" : {
+    "verifiedState" : null,
+    "userType" : 2,
+    "mobile" : null,
+    "certificationIconUrl" : null,
+    "avatarUrl" : "https://one-app-dev-2-1256532032.cos.ap-chengdu.myqcloud.com/ic_official_newLogo%402x.png",
+    "signature" : "一汽大众官方资讯发布平台，你值得关注。",
+    "technicianType" : null,
+    "nickName" : "一汽-大众",
+    "verifiedName" : null,
+    "certificationName" : null,
+    "userTitleList" : [
+      {
+        "titleName" : "摇篮之旅",
+        "titleOrder" : 0,
+        "titleId" : 1,
+        "showExpired" : 1,
+        "titleIconUrl" : "https://one-app-dev-2-1256532032.cos.ap-chengdu.myqcloud.com/images/056c6ed0f6b44b7ca0dcba2a34beab78.png",
+        "expireTime" : "2024-08-28T16:00:00.000+00:00"
+      }
+    ],
+    "defaultCarModel" : null,
+    "refId" : "-1000000004",
+    "email" : null,
+    "gender" : null
+  }
+}
+{
+    "returnStatus":"SUCCEED",
+    "total":7,
+    "pageNo":1,
+    "pageSize":10,
+    "hasMore":false,
+    "data":[
+        {
+            "type":2,
+            "collection":null,
+            "article":null,
+            "post":null,
+            "activity":{
+                "id":1101947,
+                "activityStatus":1,
+                "title":"1110活动日",
+                "content":"<p><img src="https://avris-uat-1256532032.cos.ap-beijing.myqcloud.com/cms-static/avris/20cb4bbea749429aa9476d70ddf0b2cc.jpg" width="100%"></p>",
+                "coverImgUrl":"https://avris-uat-1256532032.cos.ap-beijing.myqcloud.com/cms-static/avris/a75c36ab94ef42978a669301f8c20dcc.jpg",
+                "type":3,
+                "profile":"",
+                "userInfo":{
+                    "refId":"-1000000004",
+                    "avatarUrl":"https://one-app-dev-2-1256532032.piccd.myqcloud.com/07a513cad63140b9a8c4856a3d4d5e2e.png",
+                    "nickName":"官方账号2",
+                    "defaultCarModel":"ID.6 CROZZ",
+                    "defaultCarModelEn":null,
+                    "userTitleList":null
+                },
+                "publishTime":1699696704000,
+                "beginTime":1699574400000,
+                "endTime":1701388799000,
+                "config":{
+                    "customConfig":null,
+                    "signupConfig":null,
+                    "circleConfig":null,
+                    "outerChainConfig":{
+                        "coverLinkUrl":"https://h5-uat.mosi-tech.com/nuday",
+                        "linkUrl":""
+                    },
+                    "creatorConfig":null
+                },
+                "isLike":null,
+                "likeCount":null,
+                "commentCount":null,
+                "isAllowComment":1,
+                "userSignUpStatus":null,
+                "publishPathType":0
+            },
+            "theme":null
+        },
+        {
+            "type":2,
+            "collection":null,
+            "article":null,
+            "post":null,
+            "activity":{
+                "id":1101949,
+                "activityStatus":1,
+                "title":"1111话题活动",
+                "content":"",
+                "coverImgUrl":"https://avris-uat-1256532032.cos.ap-beijing.myqcloud.com/cms-static/avris/a303a4a20c6c46dfb979650593fda4ac.jpg",
+                "type":2,
+                "profile":"",
+                "userInfo":{
+                    "refId":"-1000000004",
+                    "avatarUrl":"https://one-app-dev-2-1256532032.piccd.myqcloud.com/07a513cad63140b9a8c4856a3d4d5e2e.png",
+                    "nickName":"官方账号2",
+                    "defaultCarModel":"ID.6 CROZZ",
+                    "defaultCarModelEn":null,
+                    "userTitleList":null
+                },
+                "publishTime":null,
+                "beginTime":1699660800000,
+                "endTime":1703894400000,
+                "config":{
+                    "customConfig":null,
+                    "signupConfig":null,
+                    "circleConfig":{
+                        "circleThemeId":200041,
+                        "themeCover":"",
+                        "circleThemeName":"1107新增测试1"
+                    },
+                    "outerChainConfig":null,
+                    "creatorConfig":null
+                },
+                "isLike":null,
+                "likeCount":null,
+                "commentCount":null,
+                "isAllowComment":1,
+                "userSignUpStatus":null,
+                "publishPathType":null
+            },
+            "theme":null
+        },
+        {
+            "type":7,
+            "collection":null,
+            "article":null,
+            "post":null,
+            "activity":null,
+            "theme":{
+                "id":200013,
+                "themeChannel":"1,2",
+                "status":2,
+                "coverPicUrl":"https://avris-uat-1256532032.cos.ap-beijing.myqcloud.com/cms-static/avris/1ef1b7d674ab49298c100cad79bec81f.jpg",
+                "name":"测试审核不通过ssv",
+                "shortDesc":"",
+                "detail":"<p>测试审核不通过</p>",
+                "publishTime":1698648215000,
+                "readCount":3,
+                "joinCount":56,
+                "userVOs":[
+                    {
+                        "refId":"9326335",
+                        "avatarUrl":"https://one-app-dev-2-1256532032.piccd.myqcloud.com/07a513cad63140b9a8c4856a3d4d5e2e.png",
+                        "nickName":"Vue3成都扯把子124",
+                        "defaultCarModel":"ID.6 CROZZ",
+                        "defaultCarModelEn":null,
+                        "userTitleList":null
+                    },
+                    {
+                        "refId":"9326335",
+                        "avatarUrl":"https://one-app-dev-2-1256532032.piccd.myqcloud.com/07a513cad63140b9a8c4856a3d4d5e2e.png",
+                        "nickName":"Vue3成都扯把子124",
+                        "defaultCarModel":"ID.6 CROZZ",
+                        "defaultCarModelEn":null,
+                        "userTitleList":null
+                    },
+                    {
+                        "refId":"9326335",
+                        "avatarUrl":"https://one-app-dev-2-1256532032.piccd.myqcloud.com/07a513cad63140b9a8c4856a3d4d5e2e.png",
+                        "nickName":"Vue3成都扯把子124",
+                        "defaultCarModel":"ID.6 CROZZ",
+                        "defaultCarModelEn":null,
+                        "userTitleList":null
+                    },
+                    {
+                        "refId":"9326335",
+                        "avatarUrl":"https://one-app-dev-2-1256532032.piccd.myqcloud.com/07a513cad63140b9a8c4856a3d4d5e2e.png",
+                        "nickName":"Vue3成都扯把子124",
+                        "defaultCarModel":"ID.6 CROZZ",
+                        "defaultCarModelEn":null,
+                        "userTitleList":null
+                    },
+                    {
+                        "refId":"9326335",
+                        "avatarUrl":"https://one-app-dev-2-1256532032.piccd.myqcloud.com/07a513cad63140b9a8c4856a3d4d5e2e.png",
+                        "nickName":"Vue3成都扯把子124",
+                        "defaultCarModel":"ID.6 CROZZ",
+                        "defaultCarModelEn":null,
+                        "userTitleList":null
+                    },
+                    {
+                        "refId":"9326335",
+                        "avatarUrl":"https://one-app-dev-2-1256532032.piccd.myqcloud.com/07a513cad63140b9a8c4856a3d4d5e2e.png",
+                        "nickName":"Vue3成都扯把子124",
+                        "defaultCarModel":"ID.6 CROZZ",
+                        "defaultCarModelEn":null,
+                        "userTitleList":null
+                    },
+                    {
+                        "refId":"9326335",
+                        "avatarUrl":"https://one-app-dev-2-1256532032.piccd.myqcloud.com/07a513cad63140b9a8c4856a3d4d5e2e.png",
+                        "nickName":"Vue3成都扯把子124",
+                        "defaultCarModel":"ID.6 CROZZ",
+                        "defaultCarModelEn":null,
+                        "userTitleList":null
+                    },
+                    {
+                        "refId":"9326335",
+                        "avatarUrl":"https://one-app-dev-2-1256532032.piccd.myqcloud.com/07a513cad63140b9a8c4856a3d4d5e2e.png",
+                        "nickName":"Vue3成都扯把子124",
+                        "defaultCarModel":"ID.6 CROZZ",
+                        "defaultCarModelEn":null,
+                        "userTitleList":null
+                    },
+                    {
+                        "refId":"935903762",
+                        "avatarUrl":"https://one-app-dev-2-1256532032.piccd.myqcloud.com/07a513cad63140b9a8c4856a3d4d5e2e.png",
+                        "nickName":"梅超风",
+                        "defaultCarModel":"ID.6 CROZZ",
+                        "defaultCarModelEn":null,
+                        "userTitleList":null
+                    },
+                    {
+                        "refId":"935903762",
+                        "avatarUrl":"https://one-app-dev-2-1256532032.piccd.myqcloud.com/07a513cad63140b9a8c4856a3d4d5e2e.png",
+                        "nickName":"梅超风",
+                        "defaultCarModel":"ID.6 CROZZ",
+                        "defaultCarModelEn":null,
+                        "userTitleList":null
+                    }
+                ],
+                "posts":[
+                    {
+                        "id":44,
+                        "title":"发帖1",
+                        "userInfo":{
+                            "refId":"9326335",
+                            "avatarUrl":"https://one-app-dev-2-1256532032.piccd.myqcloud.com/07a513cad63140b9a8c4856a3d4d5e2e.png",
+                            "nickName":"Vue3成都扯把子124",
+                            "defaultCarModel":"ID.6 CROZZ",
+                            "defaultCarModelEn":null,
+                            "userTitleList":null
+                        },
+                        "isAuthor":null,
+                        "isFollow":null,
+                        "contentList":[
+                            {
+                                "content":"这些问题就是不喜欢别人就行你还记得我们第一句就可以理解吗……在线的一年级新生",
+                                "type":2,
+                                "width":null,
+                                "height":null
+                            },
+                            {
+                                "content":"https://one-app-dev-2-1256532032.cos.ap-chengdu.myqcloud.com/images/36260a9a355347749641fd29f9ccb865.jpg",
+                                "type":1,
+                                "width":null,
+                                "height":null
+                            }
+                        ],
+                        "imageCount":1,
+                        "publishTime":"2023-10-23T12:08:30.000+0000",
+                        "activityId":1,
+                        "skuId":"1244646575758",
+                        "themeNameList":null,
+                        "readCount":null,
+                        "likeCount":null,
+                        "shareCount":null,
+                        "collectCount":null,
+                        "commentCount":null,
+                        "isLike":null,
+                        "isCollect":null,
+                        "ipProvince":"未知",
+                        "publishChannel":"1",
+                        "hotCommentList":null
+                    },
+                    {
+                        "id":43,
+                        "title":"发帖1",
+                        "userInfo":{
+                            "refId":"9326335",
+                            "avatarUrl":"https://one-app-dev-2-1256532032.piccd.myqcloud.com/07a513cad63140b9a8c4856a3d4d5e2e.png",
+                            "nickName":"Vue3成都扯把子124",
+                            "defaultCarModel":"ID.6 CROZZ",
+                            "defaultCarModelEn":null,
+                            "userTitleList":null
+                        },
+                        "isAuthor":null,
+                        "isFollow":null,
+                        "contentList":[
+                            {
+                                "content":"这些问题就是不喜欢别人就行你还记得我们第一句就可以理解吗……在线的一年级新生",
+                                "type":2,
+                                "width":null,
+                                "height":null
+                            },
+                            {
+                                "content":"https://one-app-dev-2-1256532032.cos.ap-chengdu.myqcloud.com/images/36260a9a355347749641fd29f9ccb865.jpg",
+                                "type":1,
+                                "width":null,
+                                "height":null
+                            }
+                        ],
+                        "imageCount":1,
+                        "publishTime":"2023-10-23T11:59:50.000+0000",
+                        "activityId":1,
+                        "skuId":"1244646575758",
+                        "themeNameList":null,
+                        "readCount":null,
+                        "likeCount":null,
+                        "shareCount":null,
+                        "collectCount":null,
+                        "commentCount":null,
+                        "isLike":null,
+                        "isCollect":null,
+                        "ipProvince":"未知",
+                        "publishChannel":"1",
+                        "hotCommentList":null
+                    },
+                    {
+                        "id":42,
+                        "title":"发帖1",
+                        "userInfo":{
+                            "refId":"9326335",
+                            "avatarUrl":"https://one-app-dev-2-1256532032.piccd.myqcloud.com/07a513cad63140b9a8c4856a3d4d5e2e.png",
+                            "nickName":"Vue3成都扯把子124",
+                            "defaultCarModel":"ID.6 CROZZ",
+                            "defaultCarModelEn":null,
+                            "userTitleList":null
+                        },
+                        "isAuthor":null,
+                        "isFollow":null,
+                        "contentList":[
+                            {
+                                "content":"这些问题就是不喜欢别人就行你还记得我们第一句就可以理解吗……在线的一年级新生",
+                                "type":2,
+                                "width":null,
+                                "height":null
+                            },
+                            {
+                                "content":"https://one-app-dev-2-1256532032.cos.ap-chengdu.myqcloud.com/images/36260a9a355347749641fd29f9ccb865.jpg",
+                                "type":1,
+                                "width":null,
+                                "height":null
+                            }
+                        ],
+                        "imageCount":1,
+                        "publishTime":"2023-10-23T11:48:47.000+0000",
+                        "activityId":1,
+                        "skuId":"1244646575758",
+                        "themeNameList":null,
+                        "readCount":null,
+                        "likeCount":null,
+                        "shareCount":null,
+                        "collectCount":null,
+                        "commentCount":null,
+                        "isLike":null,
+                        "isCollect":null,
+                        "ipProvince":"未知",
+                        "publishChannel":"1",
+                        "hotCommentList":null
+                    },
+                    {
+                        "id":41,
+                        "title":"发帖1",
+                        "userInfo":{
+                            "refId":"9326335",
+                            "avatarUrl":"https://one-app-dev-2-1256532032.piccd.myqcloud.com/07a513cad63140b9a8c4856a3d4d5e2e.png",
+                            "nickName":"Vue3成都扯把子124",
+                            "defaultCarModel":"ID.6 CROZZ",
+                            "defaultCarModelEn":null,
+                            "userTitleList":null
+                        },
+                        "isAuthor":null,
+                        "isFollow":null,
+                        "contentList":[
+                            {
+                                "content":"这些问题就是不喜欢别人就行你还记得我们第一句就可以理解吗……在线的一年级新生",
+                                "type":2,
+                                "width":null,
+                                "height":null
+                            },
+                            {
+                                "content":"https://one-app-dev-2-1256532032.cos.ap-chengdu.myqcloud.com/images/36260a9a355347749641fd29f9ccb865.jpg",
+                                "type":1,
+                                "width":null,
+                                "height":null
+                            }
+                        ],
+                        "imageCount":1,
+                        "publishTime":"2023-10-23T11:39:56.000+0000",
+                        "activityId":1,
+                        "skuId":"1244646575758",
+                        "themeNameList":null,
+                        "readCount":null,
+                        "likeCount":null,
+                        "shareCount":null,
+                        "collectCount":null,
+                        "commentCount":null,
+                        "isLike":null,
+                        "isCollect":null,
+                        "ipProvince":"未知",
+                        "publishChannel":"1",
+                        "hotCommentList":null
+                    },
+                    {
+                        "id":40,
+                        "title":"发帖1",
+                        "userInfo":{
+                            "refId":"9326335",
+                            "avatarUrl":"https://one-app-dev-2-1256532032.piccd.myqcloud.com/07a513cad63140b9a8c4856a3d4d5e2e.png",
+                            "nickName":"Vue3成都扯把子124",
+                            "defaultCarModel":"ID.6 CROZZ",
+                            "defaultCarModelEn":null,
+                            "userTitleList":null
+                        },
+                        "isAuthor":null,
+                        "isFollow":null,
+                        "contentList":[
+                            {
+                                "content":"这些问题就是不喜欢别人就行你还记得我们第一句就可以理解吗……在线的一年级新生",
+                                "type":2,
+                                "width":null,
+                                "height":null
+                            },
+                            {
+                                "content":"https://one-app-dev-2-1256532032.cos.ap-chengdu.myqcloud.com/images/36260a9a355347749641fd29f9ccb865.jpg",
+                                "type":1,
+                                "width":null,
+                                "height":null
+                            }
+                        ],
+                        "imageCount":1,
+                        "publishTime":"2023-10-21T08:51:07.000+0000",
+                        "activityId":1,
+                        "skuId":"1244646575758",
+                        "themeNameList":null,
+                        "readCount":null,
+                        "likeCount":null,
+                        "shareCount":null,
+                        "collectCount":null,
+                        "commentCount":null,
+                        "isLike":null,
+                        "isCollect":null,
+                        "ipProvince":"未知",
+                        "publishChannel":"1",
+                        "hotCommentList":null
+                    },
+                    {
+                        "id":39,
+                        "title":"发帖1",
+                        "userInfo":{
+                            "refId":"9326335",
+                            "avatarUrl":"https://one-app-dev-2-1256532032.piccd.myqcloud.com/07a513cad63140b9a8c4856a3d4d5e2e.png",
+                            "nickName":"Vue3成都扯把子124",
+                            "defaultCarModel":"ID.6 CROZZ",
+                            "defaultCarModelEn":null,
+                            "userTitleList":null
+                        },
+                        "isAuthor":null,
+                        "isFollow":null,
+                        "contentList":[
+                            {
+                                "content":"这些问题就是不喜欢别人就行你还记得我们第一句就可以理解吗……在线的一年级新生",
+                                "type":2,
+                                "width":null,
+                                "height":null
+                            },
+                            {
+                                "content":"https://one-app-dev-2-1256532032.cos.ap-chengdu.myqcloud.com/images/36260a9a355347749641fd29f9ccb865.jpg",
+                                "type":1,
+                                "width":null,
+                                "height":null
+                            }
+                        ],
+                        "imageCount":1,
+                        "publishTime":"2023-10-21T08:46:33.000+0000",
+                        "activityId":1,
+                        "skuId":"1244646575758",
+                        "themeNameList":null,
+                        "readCount":null,
+                        "likeCount":null,
+                        "shareCount":null,
+                        "collectCount":null,
+                        "commentCount":null,
+                        "isLike":null,
+                        "isCollect":null,
+                        "ipProvince":"未知",
+                        "publishChannel":"1",
+                        "hotCommentList":null
+                    },
+                    {
+                        "id":27,
+                        "title":"傻逼发帖1",
+                        "userInfo":{
+                            "refId":"9326335",
+                            "avatarUrl":"https://one-app-dev-2-1256532032.piccd.myqcloud.com/07a513cad63140b9a8c4856a3d4d5e2e.png",
+                            "nickName":"Vue3成都扯把子124",
+                            "defaultCarModel":"ID.6 CROZZ",
+                            "defaultCarModelEn":null,
+                            "userTitleList":null
+                        },
+                        "isAuthor":null,
+                        "isFollow":null,
+                        "contentList":[
+                            {
+                                "content":"这些问题就是不喜欢别人就行你还记得我们第一句就可以理解吗……在线的一年级新生",
+                                "type":2,
+                                "width":null,
+                                "height":null
+                            },
+                            {
+                                "content":"https://one-app-dev-2-1256532032.cos.ap-chengdu.myqcloud.com/images/f680dbc166ec4c70af9e938c46eb76d3.jpg",
+                                "type":1,
+                                "width":960,
+                                "height":1280
+                            }
+                        ],
+                        "imageCount":1,
+                        "publishTime":"2023-10-19T08:17:49.000+0000",
+                        "activityId":1,
+                        "skuId":"1243546575",
+                        "themeNameList":null,
+                        "readCount":null,
+                        "likeCount":null,
+                        "shareCount":null,
+                        "collectCount":null,
+                        "commentCount":null,
+                        "isLike":null,
+                        "isCollect":null,
+                        "ipProvince":"吉林",
+                        "publishChannel":"1",
+                        "hotCommentList":null
+                    },
+                    {
+                        "id":26,
+                        "title":"傻逼发帖1",
+                        "userInfo":{
+                            "refId":"9326335",
+                            "avatarUrl":"https://one-app-dev-2-1256532032.piccd.myqcloud.com/07a513cad63140b9a8c4856a3d4d5e2e.png",
+                            "nickName":"Vue3成都扯把子124",
+                            "defaultCarModel":"ID.6 CROZZ",
+                            "defaultCarModelEn":null,
+                            "userTitleList":null
+                        },
+                        "isAuthor":null,
+                        "isFollow":null,
+                        "contentList":[
+                            {
+                                "content":"这些问题就是不喜欢别人就行你还记得我们第一句就可以理解吗……在线的一年级新生",
+                                "type":2,
+                                "width":null,
+                                "height":null
+                            },
+                            {
+                                "content":"https://one-app-dev-2-1256532032.cos.ap-chengdu.myqcloud.com/images/f680dbc166ec4c70af9e938c46eb76d3.jpg",
+                                "type":1,
+                                "width":960,
+                                "height":1280
+                            }
+                        ],
+                        "imageCount":1,
+                        "publishTime":"2023-10-19T07:23:16.000+0000",
+                        "activityId":1,
+                        "skuId":"1243546575",
+                        "themeNameList":null,
+                        "readCount":null,
+                        "likeCount":null,
+                        "shareCount":null,
+                        "collectCount":null,
+                        "commentCount":null,
+                        "isLike":null,
+                        "isCollect":null,
+                        "ipProvince":"吉林",
+                        "publishChannel":"1",
+                        "hotCommentList":null
+                    },
+                    {
+                        "id":24,
+                        "title":"发帖1",
+                        "userInfo":{
+                            "refId":"935903762",
+                            "avatarUrl":"https://one-app-dev-2-1256532032.piccd.myqcloud.com/07a513cad63140b9a8c4856a3d4d5e2e.png",
+                            "nickName":"梅超风",
+                            "defaultCarModel":"ID.6 CROZZ",
+                            "defaultCarModelEn":null,
+                            "userTitleList":null
+                        },
+                        "isAuthor":null,
+                        "isFollow":null,
+                        "contentList":[
+                            {
+                                "content":"这些问题就是不喜欢别人就行你还记得我们第一句就可以理解吗……在线的一年级新生",
+                                "type":2,
+                                "width":null,
+                                "height":null
+                            },
+                            {
+                                "content":"https://one-app-dev-2-1256532032.cos.ap-chengdu.myqcloud.com/images/f680dbc166ec4c70af9e938c46eb76d3.jpg",
+                                "type":1,
+                                "width":960,
+                                "height":1280
+                            }
+                        ],
+                        "imageCount":1,
+                        "publishTime":"2023-10-19T06:42:47.000+0000",
+                        "activityId":1,
+                        "skuId":"1243546575",
+                        "themeNameList":null,
+                        "readCount":null,
+                        "likeCount":null,
+                        "shareCount":null,
+                        "collectCount":null,
+                        "commentCount":null,
+                        "isLike":null,
+                        "isCollect":null,
+                        "ipProvince":"吉林",
+                        "publishChannel":"1",
+                        "hotCommentList":null
+                    },
+                    {
+                        "id":23,
+                        "title":"发帖1",
+                        "userInfo":{
+                            "refId":"935903762",
+                            "avatarUrl":"https://one-app-dev-2-1256532032.piccd.myqcloud.com/07a513cad63140b9a8c4856a3d4d5e2e.png",
+                            "nickName":"梅超风",
+                            "defaultCarModel":"ID.6 CROZZ",
+                            "defaultCarModelEn":null,
+                            "userTitleList":null
+                        },
+                        "isAuthor":null,
+                        "isFollow":null,
+                        "contentList":[
+                            {
+                                "content":"这些问题就是不喜欢别人就行你还记得我们第一句就可以理解吗……在线的一年级新生",
+                                "type":2,
+                                "width":null,
+                                "height":null
+                            },
+                            {
+                                "content":"https://one-app-dev-2-1256532032.cos.ap-chengdu.myqcloud.com/images/36260a9a355347749641fd29f9ccb865.jpg",
+                                "type":1,
+                                "width":null,
+                                "height":null
+                            }
+                        ],
+                        "imageCount":1,
+                        "publishTime":"2023-10-19T04:59:49.000+0000",
+                        "activityId":1,
+                        "skuId":"1244646575758",
+                        "themeNameList":null,
+                        "readCount":null,
+                        "likeCount":null,
+                        "shareCount":null,
+                        "collectCount":null,
+                        "commentCount":null,
+                        "isLike":null,
+                        "isCollect":null,
+                        "ipProvince":"未知",
+                        "publishChannel":"1",
+                        "hotCommentList":null
+                    }
+                ]
+            }
+        },
+        {
+            "type":3,
+            "collection":null,
+            "article":null,
+            "post":{
+                "id":44,
+                "title":"发帖1",
+                "userInfo":{
+                    "refId":"9326335",
+                    "avatarUrl":"https://one-app-dev-2-1256532032.piccd.myqcloud.com/07a513cad63140b9a8c4856a3d4d5e2e.png",
+                    "nickName":"Vue3成都扯把子124",
+                    "defaultCarModel":"ID.6 CROZZ",
+                    "defaultCarModelEn":null,
+                    "userTitleList":null
+                },
+                "isAuthor":true,
+                "isFollow":false,
+                "contentList":[
+                    {
+                        "content":"这些问题就是不喜欢别人就行你还记得我们第一句就可以理解吗……在线的一年级新生",
+                        "type":2,
+                        "width":null,
+                        "height":null
+                    },
+                    {
+                        "content":"https://one-app-dev-2-1256532032.cos.ap-chengdu.myqcloud.com/images/36260a9a355347749641fd29f9ccb865.jpg",
+                        "type":1,
+                        "width":null,
+                        "height":null
+                    }
+                ],
+                "imageCount":1,
+                "publishTime":"2023-10-23T12:08:30.000+0000",
+                "activityId":1,
+                "skuId":"1244646575758",
+                "themeNameList":[
+                    "<p>测试审核不通过</p>",
+                    "<p>测试审核不通过</p>"
+                ],
+                "readCount":0,
+                "likeCount":0,
+                "shareCount":0,
+                "collectCount":0,
+                "commentCount":0,
+                "isLike":false,
+                "isCollect":false,
+                "ipProvince":"未知",
+                "publishChannel":"1",
+                "hotCommentList":null
+            },
+            "activity":null,
+            "theme":null
+        },
+        {
+            "type":1,
+            "collection":null,
+            "article":{
+                "id":2000836,
+                "title":"新官方账号",
+                "content":"<p>正文啊啊啊啊啊啊啊啊啊<img src="https://avris-uat-1256532032.cos.ap-beijing.myqcloud.com/cms-static/avris/a8a0182cf6b24597bb9d7b0a4cf72a69.jpg" width="100%" /></p>",
+                "userInfo":{
+                    "refId":"-1000000004",
+                    "avatarUrl":"https://one-app-dev-2-1256532032.piccd.myqcloud.com/07a513cad63140b9a8c4856a3d4d5e2e.png",
+                    "nickName":"官方账号2",
+                    "defaultCarModel":"ID.6 CROZZ",
+                    "defaultCarModelEn":null,
+                    "userTitleList":null
+                },
+                "publishDate":1700025115000,
+                "coverImageUrl":"https://avris-uat-1256532032.cos.ap-beijing.myqcloud.com/cms-static/avris/bad5c50bd7d8460893e60e49f25c7160.jpg",
+                "isLike":false,
+                "likeCount":0,
+                "commentCount":0,
+                "readCount":0,
+                "shareCount":0
+            },
+            "post":null,
+            "activity":null,
+            "theme":null
+        },
+        {
+            "type":2,
+            "collection":null,
+            "article":null,
+            "post":null,
+            "activity":{
+                "id":1101931,
+                "activityStatus":1,
+                "title":"app4.0报名活动1",
+                "content":"<p>app4.0报名活动1</p>",
+                "coverImgUrl":"https://avris-uat-1256532032.cos.ap-beijing.myqcloud.com/cms-static/avris/bad5c50bd7d8460893e60e49f25c7160.jpg",
+                "type":1,
+                "profile":"app4.0报名活动1",
+                "userInfo":{
+                    "refId":"-1000000004",
+                    "avatarUrl":"https://one-app-dev-2-1256532032.piccd.myqcloud.com/07a513cad63140b9a8c4856a3d4d5e2e.png",
+                    "nickName":"官方账号2",
+                    "defaultCarModel":"ID.6 CROZZ",
+                    "defaultCarModelEn":null,
+                    "userTitleList":null
+                },
+                "publishTime":1699366044000,
+                "beginTime":1698796800000,
+                "endTime":1703894400000,
+                "config":{
+                    "customConfig":null,
+                    "signupConfig":{
+                        "limitNum":50,
+                        "isOwnerVip":0,
+                        "signupBeginTime":1699315200000,
+                        "signupEndTime":1700870400000,
+                        "activityAddress":{
+                            "countyCode":"110101",
+                            "cityName":"市辖区",
+                            "cityCode":"110100",
+                            "provinceCode":"110000",
+                            "provinceName":"北京市",
+                            "countyName":"东城区"
+                        },
+                        "detailsAddress":{
+                            "latitude":39.865246,
+                            "longitude":116.378517,
+                            "mapAddress":"北京南站"
+                        },
+                        "formInfo":{
+                            "key1":{
+                                "name":"姓名",
+                                "required":true
+                            },
+                            "key2":{
+                                "name":"电话",
+                                "required":true
+                            },
+                            "key5":{
+                                "name":"",
+                                "required":true
+                            },
+                            "key6":{
+                                "name":"",
+                                "required":true
+                            },
+                            "key3":{
+                                "name":"",
+                                "required":true
+                            },
+                            "key4":{
+                                "name":"",
+                                "required":true
+                            },
+                            "key7":{
+                                "name":"",
+                                "required":true
+                            }
+                        }
+                    },
+                    "circleConfig":null,
+                    "outerChainConfig":null,
+                    "creatorConfig":null
+                },
+                "isLike":null,
+                "likeCount":null,
+                "commentCount":null,
+                "isAllowComment":1,
+                "userSignUpStatus":null,
+                "publishPathType":null
+            },
+            "theme":null
+        },
+        {
+            "type":6,
+            "collection":{
+                "id":9,
+                "name":"新增内容合集2-内容（帖子+文章+活动）",
+                "renderType":0,
+                "collectionContentVOS":[
+                    {
+                        "contentId":13,
+                        "contentType":0,
+                        "contentImgUrl":"https://one-app-dev-2-1256532032.cos.ap-chengdu.myqcloud.com/images/36260a9a355347749641fd29f9ccb865.jpg",
+                        "title":"发帖1",
+                        "postText":"这些问题就是不喜欢别人就行你还记得我们第一句就可以理解吗……在线的一年级新生",
+                        "publishTime":1695379993000,
+                        "activityStatus":null,
+                        "jumpUrl":null
+                    },
+                    {
+                        "contentId":2000748,
+                        "contentType":1,
+                        "contentImgUrl":"https://avris-uat-1256532032.cos.ap-beijing.myqcloud.com/cms-static/avris/bad5c50bd7d8460893e60e49f25c7160.jpg",
+                        "title":"审核审核",
+                        "postText":null,
+                        "publishTime":1697178778000,
+                        "activityStatus":null,
+                        "jumpUrl":null
+                    },
+                    {
+                        "contentId":1101919,
+                        "contentType":2,
+                        "contentImgUrl":"https://avris-uat-1256532032.cos.ap-beijing.myqcloud.com/cms-static/avris/bad5c50bd7d8460893e60e49f25c7160.jpg",
+                        "title":"新增字段测试",
+                        "postText":null,
+                        "publishTime":1698778732000,
+                        "activityStatus":2,
+                        "jumpUrl":null
+                    }
+                ]
+            },
+            "article":null,
+            "post":null,
+            "activity":null,
+            "theme":null
+        }
+    ]
+}
+自定义页面标题图片
+车型自定义页面
+自定义车系图片已被预加载: 
+自定义页面标题接口数据返回空
+mycar/extension/vpashop/voice/setDefault
+mycar/extension/vpashop/theme/setDefault
+_TtC24OneApp_VehicleManagement21GetMyVehiclesResponse
+/Users/devops/Software/jenkinsAgentNew/workspace/OneApp4/TST/iOS-package/Pods/OneApp-VehicleManagement/OneApp-VehicleManagement/Classes/UI/Vehicles/BP/Views/MoscCarnetAuthListTableViewCell.swift
+MyVehicleSubpage_vw
+Gby_MyVehicleSubpage_clk
+/Users/devops/Software/jenkinsAgentNew/workspace/OneApp4/TST/iOS-package/Pods/OneApp-VehicleManagement/OneApp-VehicleManagement/Classes/UI/Vehicles/BP/ViewControllers/MoscCarnetAuthMainViewController.swift
+/Users/devops/Software/jenkinsAgentNew/workspace/OneApp4/TST/iOS-package/Pods/OneApp-VehicleManagement/OneApp-VehicleManagement/Classes/UI/Vehicles/BP/Views/MoscCarnetRentBindCell.swift
+/Users/devops/Software/jenkinsAgentNew/workspace/OneApp4/TST/iOS-package/Pods/OneApp-VehicleManagement/OneApp-VehicleManagement/Classes/UI/Vehicles/BP/ViewControllers/MoscCarnetSAuthListViewController.swift
+/Users/devops/Software/jenkinsAgentNew/workspace/OneApp4/TST/iOS-package/Pods/OneApp-VehicleManagement/OneApp-VehicleManagement/Classes/UI/Vehicles/BP/Other/MoscCarNetTopImageBottomTextView.swift
+/Users/devops/Software/jenkinsAgentNew/workspace/OneApp4/TST/iOS-package/Pods/OneApp-VehicleManagement/OneApp-VehicleManagement/Classes/UI/Vehicles/BP/ViewControllers/MoscCarnetWebViewController.swift
+_TtC24OneApp_VehicleManagement24MosiCarNetVehicleSimInfo
+_TtC24OneApp_VehicleManagement26OrganizationVehiclesPicker
+/Users/devops/Software/jenkinsAgentNew/workspace/OneApp4/TST/iOS-package/Pods/OneApp-VehicleManagement/OneApp-VehicleManagement/Classes/UI/Vehicles/BP/Other/Category/UIView+Extension.swift
+_TtC24OneApp_VehicleManagement26UserVehiclesPickerItemCell
+T@"_TtC24OneApp_VehicleManagement26UserVehiclesPickerItemView",N,W,Vcontainer
+OneApp_VehicleManagement/UserVehiclesPickerItemCell.swift
+_TtC24OneApp_VehicleManagement26UserVehiclesPickerItemView
+_TtC24OneApp_VehicleManagement32UserVehiclesPickerViewController
+_TtC24OneApp_VehicleManagement29UserVehiclesPickerViewReactor
+/Users/devops/Software/jenkinsAgentNew/workspace/OneApp4/TST/iOS-package/Pods/OneApp-VehicleManagement/OneApp-VehicleManagement/Classes/UI/Vehicles/Bind/VehicleBindTypesViewController.swift
+profile/vehicle/setDefaultVehicle/v1
+com.faw-vw.vehicle.didFetchVehicles
+_TtC24OneApp_VehicleManagement22VehiclesViewController
+OneApp_VehicleManagement/VehiclesViewController.swift
+/Users/devops/Software/jenkinsAgentNew/workspace/OneApp4/TST/iOS-package/Pods/OneApp-VehicleManagement/OneApp-VehicleManagement/Classes/UI/Vehicles/List/VehiclesViewController.swift
+OneApp_VehicleManagement/VehiclesViewController+SetDefaultVehicle.swift
+OneApp_VehicleManagement/VehiclesViewController+UnfreezeVehicle.swift
+/Users/devops/Software/jenkinsAgentNew/workspace/OneApp4/TST/iOS-package/Pods/OneApp-VehicleManagement/OneApp-VehicleManagement/Classes/UI/Vehicles/List/VehiclesViewController+UnfreezeVehicle.swift
+_TtC24OneApp_VehicleManagement19VehiclesViewReactor
+/Users/devops/Software/jenkinsAgentNew/workspace/OneApp4/TST/iOS-package/Pods/OneApp-VehicleManagement/OneApp-VehicleManagement/Classes/UI/Vehicles/Bind/VehicleVINInputViewController.swift
+_vehicleSeriesCode
+_defaultCarMode
+_vehicleSeriesName
+vehicleStatusSwitch
+vehicleSeekSwitch
+vehicleStateChangedEvent
+digitVehicleStateChangedEvent
+T@"VWVehicleState",N,R
+digitVehicleState
+T@"VWDigitVehicleState",N,R
+@"VWVehicleState"16@0:8
+@"VWDigitVehicleState"16@0:8
+ceaVehicleStatusRefreshing
+getRemoteVehicleStatus
+setRemoteVehicleStatus
+_TtC8VWCarnet29AIVehicleStatusValueTransform
+自定义音效 documentPicker无法访问文件
+自定义音效 iCloud文件下载失败
+自定义音效 有效文件准备跳转:
+自定义音效上传页
+自定义你的专属用车场景，
+自定义你的专属用车场景，立即查看>
+_TtC8VWCarnet23CEAVehicleStatusManager
+_TtC8VWCarnet30CEAVehicleStatusViewController
+_TtC8VWCarnet20CEAVehicleStatusCell
+vehicleSerialName
+_TtC8VWCarnet28KdVehicleStatusExceptionCell
+_TtC8VWCarnet29KdVehicleStatusViewController
+vehicleStateView
+T@"UIView",N,&,VswitchVehicleView
+T@"UIImageView",N,W,VvehicleStateView
+_TtC8VWCarnet33MoscCarnetUseVehicleStrategyModel
+VWCarnet.MoscCarnetUseVehicleStrategyModel
+_TtC8VWCarnet30MoscCarnetVehicleStatusManager
+vehicleStatusEntity
+apiVehicleStatusIsLoading
+vehicleSubImage
+_TtC8VWCarnet36MoscCarnetVehicleStatusTableViewCell
+_TtC8VWCarnet37MoscCarnetVehicleStatusViewController
+_TtC8VWCarnet32MoscCarnetVehicleStatusViewModel
+_TtC8VWCarnet30MoscCarnetVehicleSubImageModel
+VWCarnet.MoscCarnetVehicleSubImageModel
+_TtC8VWCarnet34MoscCarnetVehicleSwitchStatusModel
+_TtC8VWCarnet18MoscVehicleSetting
+T@"_TtC8VWCarnet18MoscVehicleSetting",N,R
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+    
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        font-size: 16px;
+        line-height: 1.6;
+        color: #000;
+        padding: 0px;
+        background-color: #fff;
+    }
+    
+    h1 {
+        font-size: 28px;
+        font-weight: 600;
+        margin-bottom: 15px;
+        color: #000;
+        border-bottom: 2px solid #e5e5e5;
+        padding-bottom: 8px;
+    }
+    
+    h2 {
+        font-size: 24px;
+        font-weight: 600;
+        margin-top: 20px;
+        margin-bottom: 12px;
+        color: #222;
+    }
+    
+    p {
+        margin-bottom: 12px;
+        text-align: justify;
+    }
+    
+    ul, ol {
+        margin-bottom: 15px;
+        padding-left: 20px;
+    }
+    
+    li {
+        margin-bottom: 5px;
+    }
+    
+    strong, b {
+        font-weight: 700;
+        color: #1a1a1a;
+    }
+    
+    em, i {
+        font-style: italic;
+    }
+    
+    /* 链接样式 */
+    a {
+        color: #007AFF;
+        text-decoration: none;
+    }
+    
+    a:hover {
+        text-decoration: underline;
+    }
+    
+    /* 表格样式 */
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 15px;
+    }
+    
+    th, td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+    }
+    
+    th {
+        background-color: #f5f5f5;
+        font-weight: 600;
+    }
+    
+    /* 代码块样式 */
+    pre {
+        background-color: #f5f5f5;
+        padding: 12px;
+        border-radius: 4px;
+        overflow-x: auto;
+        margin-bottom: 15px;
+    }
+    
+    code {
+        font-family: 'Courier New', monospace;
+        font-size: 14px;
+    }
+    
+    /* 引用样式 */
+    blockquote {
+        border-left: 4px solid #007AFF;
+        padding: 10px 15px;
+        margin-bottom: 15px;
+        background-color: #f8f9fa;
+        color: #555;
+    }
+    
+    /* 图片样式 */
+    img {
+        max-width: 100%;
+        height: auto;
+        display: block;
+        margin: 15px 0;
+    }
+    
+    /* 自定义字体大小类 */
+    .font-small { font-size: 12px; }
+    .font-medium { font-size: 16px; }
+    .font-large { font-size: 20px; }
+    .font-xlarge { font-size: 24px; }
+</style>
+viewVehicleStatusClick
+拖动图标自定义排序
+faw-vw://cea/vehicleStatus
+faw-vw://carnet/mdkVehicleStatus
+$__lazy_storage_$_defaultVehicleImageView
+VWCarnet/VirtualCEAVehicleStatusSheet.swift
+v16@?0@"_TtC9CarNetLib13VehicleStatus"8
+_TtP15VWCeaVehicleSDK33SelfCalibrationResultBaseProtocol_
+ceaRemoteVehicleStatus
+digitalVehicleStatus
+[CEA] switchVehicle vin: 
+v16@?0@"<_TtP15VWCeaVehicleSDK33SelfCalibrationResultBaseProtocol_>"8
+[CEA] get vehicleStatus error, code: 
+[CEA] get vehicleStatus response: 
+[CEA] init sdk enter account response vehicles: 
+[CEA] get vehicleStatus start
+bleControlVehicleSwitchStatus
+kdVehicleStatus
+_TtC13VWCarnet_Core28MoscCarnetVehicleStatusModel
+vehicleStatusIsLoading
+updateVehicleStatusIsLoading
+oc_vehicleSeriesName
+SwitchVehicleData
+_TtC15VWCeaVehicleSDK21OperateACPowerRequest
+_TtC15VWCeaVehicleSDK16SetACTempRequest
+_TtC15VWCeaVehicleSDK26OperateFrontDefrostRequest
+_TtC15VWCeaVehicleSDK20OperateACCoolRequest
+_TtC15VWCeaVehicleSDK20OperateACWarmRequest
+_TtC15VWCeaVehicleSDK27OperateAntibacterialRequest
+_TtC15VWCeaVehicleSDK21OperateACCleanRequest
+_TtC15VWCeaVehicleSDK23OperateDeodorizeRequest
+_TtC15VWCeaVehicleSDK25OperateBackDefrostRequest
+_TtC15VWCeaVehicleSDK28OperateFrontGlassHeatRequest
+_TtC15VWCeaVehicleSDK20OpenFragranceRequest
+_TtC15VWCeaVehicleSDK21CloseFragranceRequest
+_TtP15VWCeaVehicleSDK20BLEKeyParserProtocol_
+v24@0:8@"_TtC15VWCeaVehicleSDK13BleCanMessage"16
+_TtP15VWCeaVehicleSDK32VWPollingSelfCalibrationProtocol_
+v40@0:8@"_TtC15VWCeaVehicleSDK30VWPollingSelfCalibrationConfig"16@?<v@?@"<_TtP15VWCeaVehicleSDK33SelfCalibrationResultBaseProtocol_>">24@?<v@?@"NSError">32
+_TtP15VWCeaVehicleSDK27VWDigitalKeyManagerDelegate_
+_TtP15VWCeaVehicleSDK24PollingSDKCustomProtocol_
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Function/ParkingManager/AiRoute.swift
+VWCeaVehicleSDK/AiRoute.swift
+VWCeaVehicleSDK.AiRoute
+_TtC15VWCeaVehicleSDK16ApplicationState
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Utilities/Tools/ApplicationState.swift
+VWCeaVehicleSDK/ApplicationState.swift
+_TtC15VWCeaVehicleSDK23GetACAppointmentRequest
+_TtC15VWCeaVehicleSDK23SetACAppointmentRequest
+_TtC15VWCeaVehicleSDK26DeleteACAppointmentRequest
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Function/VehicleControlRequest/Xiaopeng/AppointmentRequest.swift
+VWCeaVehicleSDK/AppointmentRequest.swift
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Core/AppRunState/AppRunState.swift
+VWCeaVehicleSDK/AppRunState.swift
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Function/ParkingManager/AutoDriveManager.swift
+VWCeaVehicleSDK/AutoDriveManager.swift
+VWCeaVehicleSDK.AutoDriveManager
+_TtC15VWCeaVehicleSDK16AutoDriveManager
+_TtC15VWCeaVehicleSDK15AvasHonkRequest
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Function/VehicleControlRequest/CeaRequest/AvasHonkRequest.swift
+VWCeaVehicleSDK/AvasHonkRequest.swift
+_TtC15VWCeaVehicleSDK29BigScreenLoginCodeResultModel
+_TtC15VWCeaVehicleSDK11BleAuthData
+_TtC15VWCeaVehicleSDK11BleAuthFlow
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Core/BLE/Auth/BleAuthFlow.swift
+VWCeaVehicleSDK/BleAuthFlow.swift
+_TtC15VWCeaVehicleSDK15BleCanDataSplit
+_TtC15VWCeaVehicleSDK8CanEvent
+_TtC15VWCeaVehicleSDK13BleCanMessage
+_TtC15VWCeaVehicleSDK10BleCentral
+_TtC15VWCeaVehicleSDK13BLEConnection
+自定义Polling数据
+_TtC15VWCeaVehicleSDK13BLEDataParser
+VWCeaVehicleSDK
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Core/VehicleConnection/BLEConnection/XiaopengBLEConnection+CanEvent.swift
+VWCeaVehicleSDK/XiaopengBLEConnection+CanEvent.swift
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Core/VehicleConnection/BLEConnection/BLEDataParser/BLEDataParser+cpp.swift
+VWCeaVehicleSDK/BLEDataParser+cpp.swift
+_TtC15VWCeaVehicleSDK9BleDevice
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Core/BLE/BleDevice.swift
+VWCeaVehicleSDK/BleDevice.swift
+VWCeaVehicleSDK.BleDevice
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Core/BLE/BleDevice+SendData.swift
+VWCeaVehicleSDK/BleDevice+SendData.swift
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Core/BLE/BLEHandler.swift
+VWCeaVehicleSDK/BLEHandler.swift
+VWCeaVehicleSDK.BLEHandler
+_TtC15VWCeaVehicleSDK10BLEHandler
+_TtC15VWCeaVehicleSDK12ColorDetails
+_TtC15VWCeaVehicleSDK19VehicleInfoResponse
+_TtC15VWCeaVehicleSDK30RequestCardListEmpowerResponse
+_TtC15VWCeaVehicleSDK22VWVehicleBleVerifyCode
+_TtC15VWCeaVehicleSDK37RequestVehicleVerifyCodeInnerResponse
+_TtC15VWCeaVehicleSDK32RequestVehicleVerifyCodeResponse
+_TtC15VWCeaVehicleSDK10Permission
+_TtC15VWCeaVehicleSDK36VWDigitalKeyAuthorizationInfoEmpower
+_TtC15VWCeaVehicleSDK19BLESlaveInfoOutside
+_TtC15VWCeaVehicleSDK28HTTPCreateDigitalKeyResponse
+_TtC15VWCeaVehicleSDK24DeleteDigitalKeyResponse
+_TtC15VWCeaVehicleSDK34HTTPActivateEstaDigitalKeyResponse
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Core/BLE/BLEKeyCarKeySessionHandler.swift
+VWCeaVehicleSDK/BLEKeyCarKeySessionHandler.swift
+_TtC15VWCeaVehicleSDK26BLEKeyCarKeySessionHandler
+_TtC15VWCeaVehicleSDK16BleKeyV3AuthFlow
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Core/BLE/Auth/BleKeyV3AuthFlow.swift
+VWCeaVehicleSDK/BleKeyV3AuthFlow.swift
+_TtC15VWCeaVehicleSDK15BLEKeyV3Handler
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Core/BLE/BLEKeyV3Handler.swift
+VWCeaVehicleSDK/BLEKeyV3Handler.swift
+_TtC15VWCeaVehicleSDK14BLEKeyV3Parser
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Function/ParkingManager/BleParking.swift
+VWCeaVehicleSDK/BleParking.swift
+VWCeaVehicleSDK.BleParking
+_TtC15VWCeaVehicleSDK17BLESelfKeyHandler
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Core/BLE/BLESelfKeyHandler.swift
+VWCeaVehicleSDK/BLESelfKeyHandler.swift
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Core/BLE/BLESelfKeyHandler+tracking.swift
+VWCeaVehicleSDK/BLESelfKeyHandler+tracking.swift
+VWCeaVehicleSDK.BleSendData
+_TtC15VWCeaVehicleSDK11BleSendData
+_TtC15VWCeaVehicleSDK18BleControlIdCreate
+_TtC15VWCeaVehicleSDK15BleSendDataFlow
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Core/BLE/BleSendDataFlow.swift
+VWCeaVehicleSDK/BleSendDataFlow.swift
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Core/VehicleConnection/BLEConnection/BLESwitchCheck.swift
+VWCeaVehicleSDK/BLESwitchCheck.swift
+VWCeaVehicleSDK.BLESwitchCheck
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Core/BLE/Models/BLEUtility.swift
+VWCeaVehicleSDK/BLEUtility.swift
+_TtC15VWCeaVehicleSDK19VehicleCacheManager
+VWCeaVehicleSDK.VehicleCacheManager
+VWCeaVehicleSDK.CarKeySessionError
+_TtC15VWCeaVehicleSDK21CarKeySessionAccesser
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Utilities/Tools/CarKeySessionAccesser.swift
+VWCeaVehicleSDK/CarKeySessionAccesser.swift
+VWCeaVehicleSDK.CarKeySessionAccesser
+_TtC15VWCeaVehicleSDK28CarKeySessionAccesserCreater
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Function/CarKey/CarKeySessionAccesserCreater.swift
+VWCeaVehicleSDK/CarKeySessionAccesserCreater.swift
+_TtC15VWCeaVehicleSDK20FetchCarSettingQuest
+_TtC15VWCeaVehicleSDK21UpdateCarSettingQuest
+_TtC15VWCeaVehicleSDK18StopCarInfoRequest
+_TtC15VWCeaVehicleSDK21RequireCarInfoRequest
+_TtC15VWCeaVehicleSDK25ForceUploadCarInfoRequest
+_TtCV15VWCeaVehicleSDK14CentralManager15CentralDelegate
+_TtCV15VWCeaVehicleSDK14CentralManager18RestorableDelegate
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Utilities/Bluetooth/CentralManager/CentralManager+Live.swift
+VWCeaVehicleSDK/CentralManager+Live.swift
+com.VWCEAVehicleSDK.CentralManager
+_TtC15VWCeaVehicleSDK14CertKeyMessage
+_TtC15VWCeaVehicleSDK25OpenSlowChargePortRequest
+_TtC15VWCeaVehicleSDK26CloseSlowChargePortRequest
+_TtC15VWCeaVehicleSDK25OpenFastChargePortRequest
+_TtC15VWCeaVehicleSDK26CloseFastChargePortRequest
+_TtC15VWCeaVehicleSDK20StartChargingRequest
+_TtC15VWCeaVehicleSDK18EndChargingRequest
+_TtC15VWCeaVehicleSDK21EndDischargingRequest
+_TtC15VWCeaVehicleSDK23StartDischargingRequest
+_TtC15VWCeaVehicleSDK29SetChargeElectricLimitRequest
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Function/VehicleControlRequest/Xiaopeng/ChargePortRequest.swift
+VWCeaVehicleSDK/ChargePortRequest.swift
+_TtC15VWCeaVehicleSDK28SetChargeClockOperateRequest
+_TtC15VWCeaVehicleSDK32SetInsulationClockOperateRequest
+_TtC15VWCeaVehicleSDK30FetchChargeClockOperateRequest
+_TtC15VWCeaVehicleSDK31DeleteChargeClockOperateRequest
+_TtC15VWCeaVehicleSDK35DeleteInsulationClockOperateRequest
+_TtC15VWCeaVehicleSDK34FetchInsulationClockOperateRequest
+_TtC15VWCeaVehicleSDK22UpdateMaxChargeRequest
+_TtC15VWCeaVehicleSDK18BatteryWarmRequest
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Function/VehicleControlRequest/Xiaopeng/ChargeRequest.swift
+VWCeaVehicleSDK/ChargeRequest.swift
+_TtC15VWCeaVehicleSDK18ControlVehicleSend
+_TtC15VWCeaVehicleSDK20ControlVehicleResult
+_TtC15VWCeaVehicleSDK12DefaultModel
+VWCeaVehicleSDK.DigitalKey
+DigitalKey removeAllSafeKeysForAllVehicles
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Function/DigitalKey/DigitalKey+DB.swift
+removeAllSafeKeysForAllVehicles()
+VWCeaVehicleSDK/DigitalKey+DB.swift
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Function/DigitalKey/DigitalKey+KeyMessage.swift
+VWCeaVehicleSDK/DigitalKey+KeyMessage.swift
+_TtC15VWCeaVehicleSDK17DigitalKeyManager
+T@"<_TtP15VWCeaVehicleSDK32VWPollingSelfCalibrationProtocol_>",N,R
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Function/DigitalKey/DigitalKeyManager.swift
+VWCeaVehicleSDK/DigitalKeyManager.swift
+VWCeaVehicleSDK.DigitalKeyManager
+@"<_TtP15VWCeaVehicleSDK32VWPollingSelfCalibrationProtocol_>"16@0:8
+VWCeaVehicleSDK.CreateDigitalKeyErrorResponse
+VWCeaVehicleSDK.DigitalKeyManagerPluginBase
+_TtC15VWCeaVehicleSDK24CreateDigitalKeyResponse
+_TtC15VWCeaVehicleSDK28CreateDigitalKeyListResponse
+_TtC15VWCeaVehicleSDK31RemoveDigitalKeySuccessResponse
+_TtC15VWCeaVehicleSDK29CreateDigitalKeyErrorResponse
+_TtC15VWCeaVehicleSDK29RequestDigitalKeyListResponse
+_TtC15VWCeaVehicleSDK23RequestCardListResponse
+_TtC15VWCeaVehicleSDK27DigitalKeyAuthorizationInfo
+_TtC15VWCeaVehicleSDK27DigitalKeyManagerPluginBase
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Core/VehicleState/DigitVehicleState.swift
+mergeDigitVehicleState(from:)
+VWCeaVehicleSDK/DigitVehicleState.swift
+VWCeaVehicleSDK.DigitVehicleState
+VWDigitVehicleState
+loadVehicleState(vin:)
+VehicleSlideDoorState:(
+VWCeaVehicleSDK.DriveState
+_TtC15VWCeaVehicleSDK11GlobalError
+VWCeaVehicleSDK.ErrorInfo
+_TtC15VWCeaVehicleSDK17FlashLightRequest
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Function/VehicleControlRequest/Xiaopeng/FlashLightRequest.swift
+VWCeaVehicleSDK/FlashLightRequest.swift
+_TtC15VWCeaVehicleSDK17FridgeModeRequest
+_TtC15VWCeaVehicleSDK18FridgePowerRequest
+_TtC15VWCeaVehicleSDK24FridgeTemperatureRequest
+_TtC15VWCeaVehicleSDK21FridgeDurationRequest
+_TtC15VWCeaVehicleSDK9GRDBQueue
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Utilities/Storage/GRDBQueue.swift
+VWCeaVehicleSDK/GRDBQueue.swift
+_TtC15VWCeaVehicleSDK14HookTcpManager
+_TtC15VWCeaVehicleSDK14IBeaconManager
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Function/KeepAlive/IBeaconManager.swift
+VWCeaVehicleSDK/IBeaconManager.swift
+_TtC15VWCeaVehicleSDK22IntervalOperationQueue
+_TtC15VWCeaVehicleSDK21IOTAirPurifierRequest
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Function/VehicleControlRequest/CeaRequest/IOTAirPurifierRequest.swift
+VWCeaVehicleSDK/IOTAirPurifierRequest.swift
+_TtC15VWCeaVehicleSDK19IOTChildSeatRequest
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Function/VehicleControlRequest/CeaRequest/IOTChildSeatRequest.swift
+VWCeaVehicleSDK/IOTChildSeatRequest.swift
+_TtC15VWCeaVehicleSDK29IOTInsectRepellingLampRequest
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Function/VehicleControlRequest/CeaRequest/IOTInsectRepellingLampRequest.swift
+VWCeaVehicleSDK/IOTInsectRepellingLampRequest.swift
+_TtC15VWCeaVehicleSDK21IOTStatusQueryRequest
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Function/VehicleControlRequest/CeaRequest/IOTStatusQueryRequest.swift
+VWCeaVehicleSDK/IOTStatusQueryRequest.swift
+_TtC15VWCeaVehicleSDK24KeyMessageManagerFactory
+_TtC15VWCeaVehicleSDK19VWDatabaseConstants
+_TtC15VWCeaVehicleSDK19KeySettingDataModel
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Function/VehicleControlRequest/Xiaopeng/LockRequest.swift
+VWCeaVehicleSDK/LockRequest.swift
+_TtC15VWCeaVehicleSDK11LockRequest
+_TtC15VWCeaVehicleSDK13UnlockRequest
+_TtC15VWCeaVehicleSDK20OpenSlideDoorRequest
+_TtC15VWCeaVehicleSDK21CloseSlideDoorRequest
+vehicleStateCheck(vehicleState:)
+vehicleStateCheckTimeout()
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Function/LogBridge/LogBridge.swift
+VWCeaVehicleSDK/LogBridge.swift
+_TtC15VWCeaVehicleSDK9LogBridge
+_TtC15VWCeaVehicleSDK7LogImpl
+_TtC15VWCeaVehicleSDK15LoginUidRequest
+_TtC15VWCeaVehicleSDK16LoginCodeRequest
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/MessageCenter/MessageCenter.swift
+VWCeaVehicleSDK/MessageCenter.swift
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Utilities/Tools/MulticastDelegate.swift
+VWCeaVehicleSDK/MulticastDelegate.swift
+_TtC15VWCeaVehicleSDK22MessageCenterMqttModel
+@"_TtC15VWCeaVehicleSDK7Message"
+T@"_TtC15VWCeaVehicleSDK7Message",N,&,Vcontent
+_TtC15VWCeaVehicleSDK7Message
+VWCeaVehicleSDK.MqttAccountModel
+VWCeaVehicleSDK.MQTTHandler
+_TtC15VWCeaVehicleSDK30MQTTHandlerCallbackInfoManager
+_TtCC15VWCeaVehicleSDK30MQTTHandlerCallbackInfoManager23MQTTHandlerCallbackInfo
+VWCeaVehicleSDK.MQTTHandlerCallbackInfo
+VWCeaVehicleSDK.MQTTParams
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Utilities/MQTT/MQTTPublisher.swift
+VWCeaVehicleSDK/MQTTPublisher.swift
+VWCeaVehicleSDK.MQTTLoginInfo
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Function/MqttService/MqttServiceManager.swift
+VWCeaVehicleSDK/MqttServiceManager.swift
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Function/MqttService/MqttServiceManager+Conn.swift
+VWCeaVehicleSDK/MqttServiceManager+Conn.swift
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Core/VehicleConnection/TCPConnection/MQTTSwitchCheck.swift
+VWCeaVehicleSDK/MQTTSwitchCheck.swift
+VWCeaVehicleSDK.NetParking
+_TtC15VWCeaVehicleSDK19NfcCreateCheckModel
+_TtC15VWCeaVehicleSDK23RemoteParkingCheckModel
+VWCeaVehicleSDK.OtaManager
+_TtC15VWCeaVehicleSDK10OtaManager
+_TtC15VWCeaVehicleSDK15OTARequestModel
+_TtC15VWCeaVehicleSDK21ParkingPicRequestInfo
+_TtC15VWCeaVehicleSDK22ParkingRequestPicModel
+_TtCV15VWCeaVehicleSDK10Peripheral18PeripheralDelegate
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Utilities/Bluetooth/Peripheral/Peripheral+Interface.swift
+VWCeaVehicleSDK/Peripheral+Interface.swift
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Utilities/Bluetooth/Peripheral/Peripheral+Live.swift
+VWCeaVehicleSDK/Peripheral+Live.swift
+VWCeaVehicleSDK.PoiCoordinateModel
+VWCeaVehicleSDK.PollingDelegateCaller
+v24@0:8@"<_TtP15VWCeaVehicleSDK24PollingSDKCustomProtocol_>"16
+_TtC15VWCeaVehicleSDK13PollingUnlock
+_TtC15VWCeaVehicleSDK11PollingLock
+_TtC15VWCeaVehicleSDK19PollingUnlockEnable
+_TtC15VWCeaVehicleSDK20PollingUnlockDisable
+_TtC15VWCeaVehicleSDK14PollingWelcome
+_TtC15VWCeaVehicleSDK16TrunkOpenDisable
+_TtC15VWCeaVehicleSDK15TrunkOpenEnable
+_TtC15VWCeaVehicleSDK11BleKeyInCar
+_TtC15VWCeaVehicleSDK12BleKeyOutCar
+_TtC15VWCeaVehicleSDK13BleKeyNearCar
+_TtC15VWCeaVehicleSDK23EnablePollingLockRevert
+_TtC15VWCeaVehicleSDK24DisablePollingLockRevert
+_TtC15VWCeaVehicleSDK23DisableChargePortUnlock
+_TtC15VWCeaVehicleSDK22EnableChargePortUnlock
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Function/VehicleControlRequest/Xiaopeng/PollingRequest.swift
+VWCeaVehicleSDK/PollingRequest.swift
+VehicleSeatOccupied:(
+_TtC15VWCeaVehicleSDK11ProxyManger
+T@"_TtC15VWCeaVehicleSDK11ProxyManger",N,R
+_TtC15VWCeaVehicleSDK15ReadRssiRequest
+_TtC15VWCeaVehicleSDK18RssiCollectRequest
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Function/VehicleControlRequest/Xiaopeng/RssiRequest.swift
+VWCeaVehicleSDK/RssiRequest.swift
+_TtC15VWCeaVehicleSDK22ScissorMainDoorRequest
+_TtC15VWCeaVehicleSDK21ScissorSubDoorRequest
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Function/VehicleControlRequest/Xiaopeng/ScissorDoorRequest.swift
+VWCeaVehicleSDK/ScissorDoorRequest.swift
+_TtC15VWCeaVehicleSDK15SeatHeatRequest
+_TtC15VWCeaVehicleSDK15SeatWindRequest
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Function/SelfCalibration/SelfCalibration.swift
+VWCeaVehicleSDK/SelfCalibration.swift
+VWCeaVehicleSDK/SelfCalibrationBase.swift
+_TtC15VWCeaVehicleSDK19SelfCalibrationBase
+_TtC15VWCeaVehicleSDK21SelfCalibrationDefine
+_TtCC15VWCeaVehicleSDK21SelfCalibrationDefine3Key
+_TtCC15VWCeaVehicleSDK21SelfCalibrationDefine8Constant
+_TtCC15VWCeaVehicleSDK21SelfCalibrationDefine16NotificationName
+_TtCC15VWCeaVehicleSDK21SelfCalibrationDefine11ErrorDomain
+_TtC15VWCeaVehicleSDK29VWSelfCalibrationResultV2Item
+_TtC15VWCeaVehicleSDK21SelfCalibrationResult
+_TtCC15VWCeaVehicleSDK21SelfCalibrationResult4Base
+_TtCC15VWCeaVehicleSDK21SelfCalibrationResult2V2
+_TtCC15VWCeaVehicleSDK21SelfCalibrationResult2V3
+_TtC15VWCeaVehicleSDK30VWPollingSelfCalibrationConfig
+_TtP15VWCeaVehicleSDK31SelfCalibrationResultV2Protocol_
+_TtP15VWCeaVehicleSDK31SelfCalibrationResultV3Protocol_
+_TtC15VWCeaVehicleSDK24SelfCalibrationHandlerV3
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Function/SelfCalibration/SelfCalibrationHandlerV3.swift
+VWCeaVehicleSDK/SelfCalibrationHandlerV3.swift
+_TtC15VWCeaVehicleSDK14SelfKeyMessage
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Function/DigitalKey/KeyMessage/SelfKeyMessage.swift
+VWCeaVehicleSDK/SelfKeyMessage.swift
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Function/DigitalKey/Plugins/SelfKeyV3Manager.swift
+VWCeaVehicleSDK/SelfKeyV3Manager.swift
+_TtC15VWCeaVehicleSDK16SelfKeyV3Manager
+_TtC15VWCeaVehicleSDK23SelfKeyV3MessageManager
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Function/DigitalKey/KeyMessage/KeyMessageManager/SelfKeyV3MessageManager.swift
+VWCeaVehicleSDK/SelfKeyV3MessageManager.swift
+_TtC15VWCeaVehicleSDK15SentinelRequest
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Function/VehicleControlRequest/Xiaopeng/SentinelRequest.swift
+VWCeaVehicleSDK/SentinelRequest.swift
+_TtC15VWCeaVehicleSDK12StartRequest
+_TtC15VWCeaVehicleSDK21StartAndUnlockRequest
+_TtC15VWCeaVehicleSDK18RemoteStartRequest
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Function/VehicleControlRequest/Xiaopeng/StartRequest.swift
+VWCeaVehicleSDK/StartRequest.swift
+_TtC15VWCeaVehicleSDK22StatisticsBleInfoModel
+_TtC15VWCeaVehicleSDK22StatisticsControlModel
+_TtC15VWCeaVehicleSDK19StatisticsMqttModel
+_TtC15VWCeaVehicleSDK24SteeringWheelHeatRequest
+_TtC15VWCeaVehicleSDK3Log
+VWCeaVehicleSDK/TCPConnection.swift
+requestVehicleState() has not been implemented
+_TtC15VWCeaVehicleSDK13TCPConnection
+_TtC15VWCeaVehicleSDK15TempLockRequest
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Function/VehicleControlRequest/Xiaopeng/TempLockRequest.swift
+VWCeaVehicleSDK/TempLockRequest.swift
+_TtC15VWCeaVehicleSDK4Text
+_TtC15VWCeaVehicleSDK10TraceScope
+_TtC15VWCeaVehicleSDK18TrumpetAVASRequest
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Function/VehicleControlRequest/CeaRequest/TrumpetAVASRequest.swift
+VWCeaVehicleSDK/TrumpetAVASRequest.swift
+_TtC15VWCeaVehicleSDK14TrumpetRequest
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Function/VehicleControlRequest/Xiaopeng/TrumpetRequest.swift
+VWCeaVehicleSDK/TrumpetRequest.swift
+_TtC15VWCeaVehicleSDK17TrunkPowerRequest
+_TtC15VWCeaVehicleSDK22FetchTrunkPowerRequest
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Function/VehicleControlRequest/Xiaopeng/TrunkRequest.swift
+VWCeaVehicleSDK/TrunkRequest.swift
+_TtC15VWCeaVehicleSDK16OpenTrunkRequest
+_TtC15VWCeaVehicleSDK17CloseTrunkRequest
+_TtC15VWCeaVehicleSDK8UserInfo
+VWCeaVehicleSDK.UWBCapabilities
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Utilities/Tools/UWBSupportChecker.swift
+VWCeaVehicleSDK/UWBSupportChecker.swift
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Function/Factory/VehicleCmdRequestFactory.swift
+VWCeaVehicleSDK/VehicleCmdRequestFactory.swift
+VWCeaVehicleSDK.
+_TtC15VWCeaVehicleSDK24VehicleCmdRequestFactory
+_TtCC15VWCeaVehicleSDK13CommandParams19CommonCommandParams
+_TtCC15VWCeaVehicleSDK13CommandParams16SetACTemperature
+_TtCC15VWCeaVehicleSDK13CommandParams19ChargeElectricLimit
+_TtCC15VWCeaVehicleSDK13CommandParams8Schedule
+_TtCC15VWCeaVehicleSDK13CommandParams17UpdateMaxCharging
+_TtCC15VWCeaVehicleSDK13CommandParams13OpenFragrance
+_TtCC15VWCeaVehicleSDK13CommandParams8SeatHeat
+_TtCC15VWCeaVehicleSDK13CommandParams13SeatVentilate
+_TtCC15VWCeaVehicleSDK13CommandParams13OpenWheelHeat
+_TtCC15VWCeaVehicleSDK13CommandParams16UpdateCarSetting
+_TtCC15VWCeaVehicleSDK13CommandParams20SetFridgeTemperature
+_TtCC15VWCeaVehicleSDK13CommandParams17SetFridgeDuration
+_TtCC15VWCeaVehicleSDK13CommandParams21StartParkingHeartBeat
+_TtCC15VWCeaVehicleSDK13CommandParams14OpenTrunkPower
+_TtCC15VWCeaVehicleSDK13CommandParams14IOTAirPurifier
+_TtCC15VWCeaVehicleSDK13CommandParams12IOTChildSeat
+_TtCC15VWCeaVehicleSDK13CommandParams22IOTInsectRepellingLamp
+_TtC15VWCeaVehicleSDK13VehicleCommon
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Core/VehicleConnection/VehicleConnection.swift
+VWCeaVehicleSDK/VehicleConnection.swift
+VWCeaVehicleSDK.VehicleConnection
+_TtC15VWCeaVehicleSDK17VehicleConnection
+VWCeaVehicleSDK.VehicleControlRequest
+_TtC15VWCeaVehicleSDK21VehicleControlRequest
+_TtC15VWCeaVehicleSDK28VehicleControlRequestManager
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Function/VehicleControlRequest/VehicleControlRequestManager.swift
+VWCeaVehicleSDK/VehicleControlRequestManager.swift
+com.CeaVehicleSDK.VehicleControlRequestManager
+VWCeaVehicleSDK.VehicleData
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Function/VehicleManager/VehicleData+Ext.swift
+VWCeaVehicleSDK/VehicleData+Ext.swift
+DigitVehicleState
+_TtC15VWCeaVehicleSDK16VehicleDBManager
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Utilities/Storage/VehicleDBManager.swift
+VWCeaVehicleSDK/VehicleDBManager.swift
+/VWCeaVehicleSDK/
+VWCeaVehicleSDK.VehicleEvent
+_TtC15VWCeaVehicleSDK15EventSubscriber
+VWCeaVehicleSDK.VehicleExtInfo
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Core/VehicleInfo/VehicleExtInfo.swift
+VWCeaVehicleSDK/VehicleExtInfo.swift
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Function/VehicleManager/VehicleExtInfo+Manager.swift
+VWCeaVehicleSDK/VehicleExtInfo+Manager.swift
+_TtC15VWCeaVehicleSDK25VehicleHttpRequestManager
+/biz/v6/vehicle/v2/myVehicles
+removeAllVehicles 删除后数据库剩余Vehicles: 
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Core/VehicleInfo/VehicleInfo.swift
+removeAllVehicles()
+VWCeaVehicleSDK/VehicleInfo.swift
+VehicleSwitchedObject<vin:
+VWCeaVehicleSDK.VehicleSwitchedObject
+CEA_VehicleManager.switchVehicle
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Function/VehicleManager/VehicleManager.swift
+VWCeaVehicleSDK/VehicleManager.swift
+切车VehicleManager switchVehicle vin:
+switchVehicle(_:callback:)
+VehicleManager switchVehicle vin为空，不执行切车
+切车VehicleManager switchVehicle 本地车列表不存在: 
+VehicleManager switchVehicle 正在切车，不接受重复切车
+VWVehicleSwitchedObject
+vehicleSwitchedEvent
+switchVehicleQueue
+T@"VWVehicleEvent",N,R,VvehicleSwitchedEvent
+T@"VWVehicleEvent",N,R,VvehicleStateChangedEvent
+T@"VWVehicleEvent",N,R,VdigitVehicleStateChangedEvent
+[切车]VehicleManager _switchVehicle vin:
+_switchVehicle(_:vehiclePreference:switchByManual:callback:)
+[切车]VehicleManager _switchVehicle 车Vin未发生变化，只刷新参数即可 vin:
+_switchVehicle success
+VehicleManager notifyMyVehicles encodeToDictionary return nil
+notifyMyVehicles(isCache:)
+VehicleManager clearVehicles
+VehicleManager switchVehicle 车架号相同，不执行切车
+切车VehicleManager switchVehicle 网络车列表中也不存在vin: 
+切车VehicleManager switchVehicle 请求网络车列表失败: 
+VWCeaVehicleSDK.MQTTConnectionNotiObject
+VWCeaVehicleSDK.BLESysStateNotiObject
+VWCeaVehicleSDK.AutoLockNotiObject
+VWCeaVehicleSDK.BLEConnectionNotiObject
+VWCeaVehicleSDK.BLEConnectErrorNotiObject
+VehicleStateNotiObject:<channel:
+, diffVehicleState:
+VWCeaVehicleSDK.VehicleStateNotiObject
+DigitVehicleStateNotiObject:<diffState:
+VWCeaVehicleSDK.DigitVehicleStateNotiObject
+VWCeaVehicleSDK.BleDidReadRssiNotiObject
+VWCeaVehicleSDK.ParkStateChangedNotiObject
+VehicleStateChanged
+DigitVehicleStateChanged
+VehicleStartService
+myVehicles
+VWVehicleStateNotiObject
+fullVehicleState
+@"VWVehicleState"
+diffVehicleState
+T@"VWVehicleState",N,R,VfullVehicleState
+T@"VWVehicleState",N,R,VdiffVehicleState
+VWDigitVehicleStateNotiObject
+@"VWDigitVehicleState"
+T@"VWDigitVehicleState",N,R,VfullState
+T@"VWDigitVehicleState",N,R,VdiffState
+_TtC15VWCeaVehicleSDK26ParkStateChangedNotiObject
+VWVehicleNotificationMyVehicles
+VWVehicleNotificationVehicleStartService
+VWVehicleNotificationDigitVehicleStateChanged
+VWVehicleNotificationVehicleStateChanged
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Function/VehicleManager/VehiclePreference.swift
+VWCeaVehicleSDK/VehiclePreference.swift
+VWCeaVehicleSDK.VehicleResponse
+VWCeaVehicleSDK.VehicleError
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Core/VehicleState/VehicleState.swift
+mergeVehicleState(from:)
+VWCeaVehicleSDK/VehicleState.swift
+VWCeaVehicleSDK.VehicleState
+VWVehicleState
+VehicleStateModle init vin:
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Core/VehicleStateModel/VehicleStateModel.swift
+VWCeaVehicleSDK/VehicleStateModel.swift
+VehicleStateModle deinit vin:
+VWCeaVehicleSDK.VehicleStateModel
+_TtC15VWCeaVehicleSDK17VehicleStateModel
+saveDigitVehicleState()
+saveVehicleState()
+loadDigitVehicleState()
+loadVehicleState()
+_TtC15VWCeaVehicleSDK20VWBaseControlRequest
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Function/VehicleControlRequest/Xiaopeng/VWBaseControlRequest.swift
+VWCeaVehicleSDK/VWBaseControlRequest.swift
+可以忽略继续执行checkVehicleState
+VWCeaVehicleSDK.CarKeyPassEventError
+VWCeaVehicleSDK.CarKeyPassState
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Utilities/Tools/VWCarKeyPassAccesser.swift
+VWCeaVehicleSDK/VWCarKeyPassAccesser.swift
+_TtC15VWCeaVehicleSDK20VWCarKeyPassAccesser
+VWCeaVehicleSDK1
+_TtC15VWCeaVehicleSDK15VWCeaCmdFactory
+_TtC15VWCeaVehicleSDK17VWCeaSDKProviding
+_TtC15VWCeaVehicleSDK11VWTrackInfo
+MQTT VehicleState
+BLE VehicleState
+_TtC15VWCeaVehicleSDK14VWTrackManager
+T@"_TtC15VWCeaVehicleSDK14VWTrackManager",N,R
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Utilities/Volcengine/VWTrackManager.swift
+VWCeaVehicleSDK/VWTrackManager.swift
+assemblyVehicleStateInfo: lists:
+_TtC15VWCeaVehicleSDK9VWVehicle
+T@"VWVehicleEvent",N,&,VvehicleStateChangedEvent
+T@"VWVehicleEvent",N,&,VdigitVehicleStateChangedEvent
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Function/Presenter/Xiaopeng/VWVehicle.swift
+VWCeaVehicleSDK/VWVehicle.swift
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Core/VehicleConnection/TCPConnection/XiaopengTCPConnection.swift
+VWCeaVehicleSDK/XiaopengTCPConnection.swift
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Core/VehicleConnection/BLEConnection/XiaopengBLEConnection.swift
+VWCeaVehicleSDK/XiaopengBLEConnection.swift
+vehicleStateChanged(diffState:connectionType:)
+vehicleStateChangedEvent_send:
+requestVehicleState(_:failed:)
+请求刷新车态 未返回 VehicleSate，继续监听车态...
+请求刷新车态成功 直接返回了 VehicleSate 刷新耗时:(
+请求刷新车态成功 监听到车态更新 VehicleStateChanged 回调success 刷新耗时:(
+VWCeaVehicleSDK.VWVehicle
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK.swift
+VWCeaVehicleSDK/VWVehicleSDK.swift
+_TtC15VWCeaVehicleSDK12VWVehicleSDK
+T@"_TtC15VWCeaVehicleSDK12VWVehicleSDK",N,R
+VWCeaVehicleSDK2
+_TtC15VWCeaVehicleSDK17OpenWindowRequest
+_TtC15VWCeaVehicleSDK18CloseWindowRequest
+_TtC15VWCeaVehicleSDK26OneKeyAllWindowDownRequest
+_TtC15VWCeaVehicleSDK21OperateSunroofRequest
+_TtC15VWCeaVehicleSDK25OperateSkySunShadeRequest
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Function/VehicleControlRequest/Xiaopeng/WindowRequest.swift
+VWCeaVehicleSDK/WindowRequest.swift
+VehicleSunroofStatus:(
+_TtC15VWCeaVehicleSDK15VWBLEConnection
+recieveBleVehicleStateSubject
+recieveBleVehicleStatePublisher
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Core/BLE/BLEHandlerFactory.swift
+VWCeaVehicleSDK/BLEHandlerFactory.swift
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Core/VehicleConnection/BLEConnection/XiaopengBLEConnection+AppRunEvent.swift
+VWCeaVehicleSDK/XiaopengBLEConnection+AppRunEvent.swift
+didReceiveVehicleState(state:)
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Core/VehicleConnection/BLEConnection/XiaopengBLEConnection+Connect.swift
+VWCeaVehicleSDK/XiaopengBLEConnection+Connect.swift
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Core/VehicleConnection/BLEConnection/XiaopengBLEConnection+SendData.swift
+VWCeaVehicleSDK/XiaopengBLEConnection+SendData.swift
+_TtC15VWCeaVehicleSDK16VWKeyDataSetting
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Core/VehicleConnection/BLEConnection/XiaopengKeyDataSetting.swift
+VWCeaVehicleSDK/XiaopengKeyDataSetting.swift
+requestVehicleState(success:failed:)
+_TtC15VWCeaVehicleSDK15VWTCPConnection
+requestVehicleStateNotify(success:failed:)
+digitVehicleStateChange(with:forceRefresh:)
+vehicleStateChange(with:)
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Core/VehicleConnection/TCPConnection/XiaopengTCPConnection+HandleMqttMessage.swift
+VWCeaVehicleSDK/XiaopengTCPConnection+HandleMqttMessage.swift
+VWVehicleStateModel init vin:
+/Users/packbot/.jenkins/workspace/GC/mobile/iOS_Build_SDK/VWCeaVehicleSDK/Sources/VWVehicleSDK/VehicleControl/Core/VehicleStateModel/XiaopengVehicleStateModel.swift
+VWCeaVehicleSDK/XiaopengVehicleStateModel.swift
+VWVehicleStateModel deinit vin:
+VWVehicleStateModel_收到车态变化__
+vehicleState_merge后：
+fromBLE__vehicleState_merge后：
+_TtC15VWCeaVehicleSDK19VWVehicleStateModel
+VWVehicleStateModel 蓝牙断开 清理蓝牙车态数据 vin:
+TB,N,VisDefaultVehicle
+isCEAAndNotAppDefaultVehicle

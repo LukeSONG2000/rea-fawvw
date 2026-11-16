@@ -1,0 +1,21 @@
+{
+  "artifact": "FAWVW-444.28.0-CarControlOnly-dev-signed.ipa",
+  "sha256": "44ce7107113af661d52365ef4157420a71c03a42e9ab662bcdb960db4856f66b",
+  "bytes": 399209413,
+  "bundle_id": "com.lukev.aftermarket",
+  "status": "installed-development-build",
+  "checks": [
+    "codesign deep strict",
+    "ZIP CRC",
+    "same-bundle overlay installation succeeded",
+    "proxy business-check instruction verified in installed candidate",
+    "password login user confirmed in earlier build",
+    "proxy-enabled runtime observed and user confirmed usable"
+  ],
+  "pending": [
+    "vehicle-name picker native default action discovery",
+    "marketing cleanup visual verification"
+  ],
+  "vehicle_commands_tested": false,
+  "store_install_metadata_removed": true
+}

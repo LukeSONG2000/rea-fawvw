@@ -1,0 +1,24 @@
+# 敏感现场：设备备份、偏好 plist、运行日志（含账号/令牌/VIN 风险，绝不入库）
+output/device-backups/
+output/*.plist
+output/*.log
+output/*.ips
+output/signed/
+
+# 大体积构建产物与二进制（走 Release 附件，不进 git）
+output/*.ipa
+output/*.dylib
+output/OneApp.patched
+output/decode-vehicles
+packages/
+
+# 超大分析 dump（133MB，压缩后放 Release 附件）
+analysis/objc-runtime-metadata.txt
+
+# 解包后的原 App（只读研究输入，数百 MB，不入库）
+recovered/
+
+# 环境
+.venv-device/
+.DS_Store
+__pycache__/
