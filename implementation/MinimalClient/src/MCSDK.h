@@ -40,6 +40,7 @@ typedef void (^MCSDKVoidBlock)(void);
 
 /// 当前选中车辆（useVehicle: 之后可查状态）。
 - (BOOL)useVehicleWithVIN:(NSString *)vin;
+- (void)selectVehicleWithVIN:(NSString *)vin completion:(void (^_Nullable)(NSError *_Nullable error))completion;
 
 /// 只读车辆状态（P0 只读验证项，不发任何控制指令）。
 - (void)statusOfCurrentVehicleWithCompletion:(void (^)(NSString *_Nullable summary,
@@ -47,13 +48,6 @@ typedef void (^MCSDKVoidBlock)(void);
 
 /// 退出登录并关闭 SDK（对应 shutDown）。
 - (void)shutdown;
-
-/// MBB 参数探针：遍历候选 brand（appId 可参数化），定位 400 Invalid Payload 的枚举值。
-- (void)probeMBBLoginWithIdentityToken:(NSString *)token
-                                brands:(NSArray<NSString *> *)brands
-                                 appId:(NSString *)appId
-                            onProgress:(void (^)(NSString *brand, NSError *_Nullable err))progress
-                               onFinish:(void (^)(NSString *_Nullable okBrand, NSError *_Nullable lastErr))finish;
 
 /// 调试辅助：打印 SDK 关键类的方法签名（验证 Block 签名用）。
 + (void)dumpSDKMethodSignatures;

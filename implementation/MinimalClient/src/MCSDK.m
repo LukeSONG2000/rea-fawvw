@@ -158,22 +158,24 @@ static inline Class MCClass(NSString *runtimeName) {
         return;
     }
     __weak __typeof(self) weakSelf = self;
-    // -[StageActionsImpl authenticateWithClientID:identityToken:successFunction:] → Flow
-    // clientID 取自官方会话 JWT 的 aud（VWGMBB01CNLIV1，对应 Widget loginMBBWithClientId:）。
-    // 无 clientID 变体会先走 registerClient 流程（请求体带 AppInfo 参数，appId 占位值污染 payload → 400）。
-    id flow = ((id(*)(id,SEL,id,id,id))objc_msgSend)(self.stageActions,
-        @selector(authenticateWithClientID:identityToken:successFunction:),
-        MCMbbClientID, identityToken,
-        ^(id account) {
-            // 成功：CarNetLib.Account。+[CarNetLib useAccount:] → AccountActionsImpl
-            weakSelf.account = account;
-            weakSelf.accountActions = ms_ret_id_id(MCClass(@(CLS_CarNetLib)),
-                                                   @selector(useAccount:), account);
-            NSLog(@"[MCSDK] MBB 登录成功 account=%@", account);
-            !completion ? : completion(nil);
-        });
+    // A registered client ID is an opaque runtime value, not a JWT audience.
+    NSString *clientID = [NSUserDefaults.standardUserDefaults stringForKey:@"imported.clientID"];
+    void (^success)(id) = ^(id account) {
+        weakSelf.account = account;
+        weakSelf.accountActions = ms_ret_id_id(MCClass(@(CLS_CarNetLib)), @selector(useAccount:), account);
+        NSLog(@"[MCSDK] MBB authentication succeeded");
+        if (completion) completion(nil);
+    };
+    id flow;
+    if (clientID.length) {
+        flow = ((id(*)(id,SEL,id,id,id))objc_msgSend)(self.stageActions,
+            @selector(authenticateWithClientID:identityToken:successFunction:), clientID, identityToken, success);
+    } else {
+        flow = ((id(*)(id,SEL,id,id))objc_msgSend)(self.stageActions,
+            @selector(authenticateWithIdentityToken:accountFunction:), identityToken, success);
+    }
     // -[Flow executeWithErrorFunction:]
-    ((id(*)(id,SEL,id))objc_msgSend)(flow, @selector(executeWithErrorFunction:),
+    ((void(*)(id,SEL,id))objc_msgSend)(flow, @selector(executeWithErrorFunction:),
         ^(id sdkError) {
             NSString *msg = [sdkError respondsToSelector:@selector(errorMessage)]
                 ? [sdkError performSelector:@selector(errorMessage)] : [sdkError description];
@@ -193,10 +195,10 @@ static inline Class MCClass(NSString *runtimeName) {
     id action = ((id(*)(id,SEL,id))objc_msgSend)(self.accountActions,
         @selector(vehicleVinsWithSuccessFunction:),
         ^(NSArray<NSString *> *vins) {
-            NSLog(@"[MCSDK] vehicleVins = %@", vins);
+            NSLog(@"[MCSDK] vehicle count=%lu",(unsigned long)vins.count);
             !completion ? : completion(vins, nil);
         });
-    ((id(*)(id,SEL,id))objc_msgSend)(action, @selector(executeWithErrorFunction:),
+    ((void(*)(id,SEL,id))objc_msgSend)(action, @selector(loadWithErrorFunction:),
         ^(id sdkError) {
             !completion ? : completion(nil, [NSError errorWithDomain:@"MCSDK" code:-21
                         userInfo:@{NSLocalizedDescriptionKey:[sdkError description]}]);
@@ -204,21 +206,28 @@ static inline Class MCClass(NSString *runtimeName) {
 }
 
 - (BOOL)useVehicleWithVIN:(NSString *)vin {
-    if (!self.accountActions) return NO;
-    __block BOOL ok = NO;
-    id action = ((id(*)(id,SEL,id,id))objc_msgSend)(self.accountActions,
-        @selector(vehicleWithVin:successFunction:), vin,
-        ^(id vehicle) {
-            // +[CarNetLib useVehicle:] → VehicleActionsImpl
-            [MCSDK shared].vehicleActions = ms_ret_id_id(MCClass(@(CLS_CarNetLib)),
-                                                         @selector(useVehicle:), vehicle);
-            ok = YES;
-        });
-    ((id(*)(id,SEL,id))objc_msgSend)(action, @selector(executeWithErrorFunction:),
-        ^(id sdkError) { NSLog(@"[MCSDK] useVehicle 失败 %@", sdkError); });
-    // vehicleWithVin 为异步 QueryAction；这里只登记选择意图，状态回调里完成绑定。
+    if (!self.accountActions || !vin.length) return NO;
+    [self selectVehicleWithVIN:vin completion:nil];
+    return YES; // Accepted for asynchronous processing, not a completed selection.
+}
+
+- (void)selectVehicleWithVIN:(NSString *)vin completion:(void (^)(NSError *))completion {
+    if (!self.accountActions || !vin.length) {
+        if (completion) completion([NSError errorWithDomain:@"MCSDK" code:-22 userInfo:@{NSLocalizedDescriptionKey:@"尚未登录或车辆标识为空"}]);
+        return;
+    }
     self.pendingVIN = vin;
-    return YES;
+    self.vehicleActions = nil;
+    id action = ((id(*)(id,SEL,id,id))objc_msgSend)(self.accountActions,
+        @selector(vehicleWithVin:successFunction:), vin, ^(id vehicle) {
+            if (![self.pendingVIN isEqualToString:vin]) return;
+            self.vehicleActions = ms_ret_id_id(MCClass(@(CLS_CarNetLib)), @selector(useVehicle:), vehicle);
+            if (completion) completion(nil);
+        });
+    ((void(*)(id,SEL,id))objc_msgSend)(action, @selector(loadWithErrorFunction:), ^(id sdkError) {
+        if (![self.pendingVIN isEqualToString:vin]) return;
+        if (completion) completion([NSError errorWithDomain:@"MCSDK" code:-23 userInfo:@{NSLocalizedDescriptionKey:@"SDK 选车失败"}]);
+    });
 }
 
 - (void)statusOfCurrentVehicleWithCompletion:(void (^)(NSString *, NSError *))completion {
@@ -231,78 +240,30 @@ static inline Class MCClass(NSString *runtimeName) {
     id action = ((id(*)(id,SEL,id))objc_msgSend)(self.vehicleActions,
         @selector(statusWithStatusFunction:),
         ^(id status) {
-            NSLog(@"[MCSDK] status = %@", status);
-            !completion ? : completion([status description], nil);
+            NSLog(@"[MCSDK] vehicle status callback received");
+            NSMutableDictionary *details = [NSMutableDictionary dictionaryWithObject:NSStringFromClass([status class]) forKey:@"statusClass"];
+            for (NSString *key in @[@"timestamp",@"mileage",@"fuelLevel",@"electricLevel",@"primaryEngineRange",@"combinedRange"]) {
+                @try {
+                    id value = [status valueForKey:key];
+                    if ([value isKindOfClass:NSDate.class]) details[key] = @([value timeIntervalSince1970]);
+                    else if ([value isKindOfClass:NSNumber.class] || [value isKindOfClass:NSString.class]) details[key] = value;
+                    else if (value) {
+                        NSMutableDictionary *parts = [NSMutableDictionary dictionary];
+                        for (NSString *part in @[@"mileage",@"range",@"level",@"unit"]) {
+                            @try { id v=[value valueForKey:part]; if ([v isKindOfClass:NSNumber.class] || [v isKindOfClass:NSString.class]) parts[part]=v; } @catch (NSException *e) {}
+                        }
+                        if (parts.count) details[key]=parts;
+                    }
+                } @catch (NSException *e) {}
+            }
+            NSData *json = [NSJSONSerialization dataWithJSONObject:details options:0 error:nil];
+            if (completion) completion([[NSString alloc] initWithData:json encoding:NSUTF8StringEncoding], nil);
         });
-    ((id(*)(id,SEL,id))objc_msgSend)(action, @selector(executeWithErrorFunction:),
+    ((void(*)(id,SEL,id))objc_msgSend)(action, @selector(loadWithErrorFunction:),
         ^(id sdkError) {
             !completion ? : completion(nil, [NSError errorWithDomain:@"MCSDK" code:-31
                         userInfo:@{NSLocalizedDescriptionKey:[sdkError description]}]);
         });
-}
-
-// MBB brand/appId 探针：逐个候选重建初始化并尝试令牌交换，
-// 直到成功或遍历完。用于定位 400 Invalid Payload 的枚举型参数。
-- (void)probeMBBLoginWithIdentityToken:(NSString *)token
-                                brands:(NSArray<NSString *> *)brands
-                                 appId:(NSString *)appId
-                            onProgress:(void (^)(NSString *brand, NSError *_Nullable err))progress
-                            onFinish:(void (^)(NSString *_Nullable okBrand, NSError *_Nullable lastErr))finish {
-    dispatch_async(dispatch_get_main_queue(), ^{
-        __block NSString *found = nil;
-        __block NSError *lastErr = nil;
-        __block void (^tryNext)(NSUInteger) = nil;
-        tryNext = ^(NSUInteger idx) {
-            if (found || idx >= brands.count) {
-                !finish ? : finish(found, lastErr);
-                return;
-            }
-            NSString *brand = brands[idx];
-            // 全链重建：AppInfo(参数化 appId) → initialize → stage(参数化 brand) → authenticate
-            Class carNetLib = MCClass(@(CLS_CarNetLib));
-            id appInfo = ((id(*)(id,SEL,id,id,id,id,id))objc_msgSend)(
-                [MCClass(@(CLS_AppInfo)) alloc],
-                @selector(initWithAppName:appVersion:appId:clientName:clientBrand:),
-                MCAppInfoName, MCAppInfoVersion, appId, MCAppInfoClientName, MCAppInfoClientBrand);
-            id config = ((id(*)(Class,SEL))objc_msgSend)(MCClass(@(CLS_CarNetConfig)),
-                                                         @selector(defaultConfig));
-            ((void(*)(id,SEL,id,id,id))objc_msgSend)(carNetLib,
-                @selector(initializeWithAppInfo:config:extensionDispatchQueue:),
-                appInfo, config, dispatch_get_main_queue());
-            id stage = ((id(*)(Class,SEL,id,id,id,id,id,id))objc_msgSend)(
-                MCClass(@(CLS_MbbChinaStage)),
-                @selector(mbbStageWithAuthenticationServerBaseUrl:falServerBaseUrl:malServerBaseUrl:scope:brand:country:),
-                MCMbbAuthServerURL, MCMbbFalServerURL, MCMbbMalServerURL,
-                MCMbbScope, brand, MCMbbCountry);
-            id actions = ms_ret_id_id(carNetLib, @selector(useMbbStage:), stage);
-            // 探针同样走 clientID 路径（无 clientID 变体是 register 流程，必 400）
-            id flow = ((id(*)(id,SEL,id,id,id))objc_msgSend)(actions,
-                @selector(authenticateWithClientID:identityToken:successFunction:),
-                MCMbbClientID, token,
-                ^(id account) {
-                    found = brand;
-                    self->_stageActions = actions;
-                    self->_account = account;
-                    self->_accountActions = ms_ret_id_id(carNetLib, @selector(useAccount:), account);
-                    NSLog(@"[MCSDK] 探针命中 brand=%@ account=%@", brand, account);
-                    !progress ? : progress(brand, nil);
-                    !finish ? : finish(found, nil);
-                });
-            ((id(*)(id,SEL,id))objc_msgSend)(flow, @selector(executeWithErrorFunction:),
-                ^(id sdkError) {
-                    lastErr = [NSError errorWithDomain:@"MCSDK" code:-50
-                                userInfo:@{NSLocalizedDescriptionKey:
-                                    [sdkError respondsToSelector:@selector(errorMessage)]
-                                        ? [sdkError performSelector:@selector(errorMessage)]
-                                        : [sdkError description]}];
-                    NSLog(@"[MCSDK] 探针 brand=%@ 失败: %@", brand, lastErr.localizedDescription);
-                    !progress ? : progress(brand, lastErr);
-                    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.8 * NSEC_PER_SEC)),
-                                   dispatch_get_main_queue(), ^{ tryNext(idx + 1); });
-                });
-        };
-        tryNext(0);
-    });
 }
 
 - (void)shutdown {

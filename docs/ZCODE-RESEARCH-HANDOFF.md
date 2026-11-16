@@ -200,3 +200,7 @@ SDK 的直接非系统动态依赖已见：AEXML、AnyDate、EVReflectionCore、
 - brand 探针 6 候选全败（错误与 brand 无关）；头号嫌疑是 token 类型（官方 AT vs SDK 期望的 ID Token，idToken 不落盘）。
 - 官方会话导入通道可用（偏好 tokens 归档 → PoC 沙盒 imported.idToken）；AT 有效期至 2026-11-19。
 - 完整卡点与取证途径见 `docs/P0-BLOCKER.md`；全部代码已推送 GitHub main（最新 commit 含探针与 clientID 路径）。
+
+## Codex 接手进展（2026-11-16）
+
+MBB 阻塞已通过原宿主运行时插桩解决，真实身份令牌、AppInfo 与 stage 配置已确认。独立宿主在导入注册 clientID 和不导入该标识两种路径下均完成认证、两车列表与两车状态查询；修复 QueryAction 调用方法和异步选车。完整密码/短信登录及刷新、pin 集合对齐和正式 UI/控制仍未完成。详情以 `P0-RESOLUTION.md` 为准，旧占位值及 audience=clientID 假设已作废。

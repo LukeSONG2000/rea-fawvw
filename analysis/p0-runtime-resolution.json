@@ -1,0 +1,76 @@
+{
+  "evidence_type": "runtime-original-host-and-independent-device-verification",
+  "date": "2026-11-16",
+  "method": "signed original-host constructor and SDK authentication hooks; isolated six-framework host",
+  "configuration": {
+    "AppInfo": {
+      "appId": "com.tima.aftermarket",
+      "appName": "BootstrapApp",
+      "appVersion": "1.0",
+      "clientBrand": "VW",
+      "clientName": "Maton"
+    },
+    "stageInit7": {
+      "authenticationServer": {
+        "baseUrl": "https://mbboauth-1d.prd.cn.vwg-connect.cn",
+        "class": "CarNetLib.EndpointConfiguration"
+      },
+      "brand": "VW",
+      "country": "CN",
+      "falServer": {
+        "baseUrl": "https://msg.audi-connect.cn/fs-car",
+        "class": "CarNetLib.EndpointConfiguration"
+      },
+      "malServer": {
+        "baseUrl": "https://mal-1a.prd.cn.vwg-connect.cn/api",
+        "class": "CarNetLib.EndpointConfiguration"
+      },
+      "scope": "t2_fawvw:fal"
+    },
+    "useMbbStage": {
+      "authenticationServer": {
+        "baseUrl": "https://mbboauth-1d.prd.cn.vwg-connect.cn",
+        "class": "CarNetLib.EndpointConfiguration"
+      },
+      "brand": "VW",
+      "country": "CN",
+      "falServer": {
+        "baseUrl": "https://msg.audi-connect.cn/fs-car",
+        "class": "CarNetLib.EndpointConfiguration"
+      },
+      "malServer": {
+        "baseUrl": "https://mal-1a.prd.cn.vwg-connect.cn/api",
+        "class": "CarNetLib.EndpointConfiguration"
+      },
+      "scope": "t2_fawvw:fal"
+    }
+  },
+  "identity_token": {
+    "typ": "identity",
+    "type": "identity",
+    "source": "actual StageActionsImpl authentication argument; credential omitted"
+  },
+  "client_id": {
+    "source": "actual SDK authentication argument; runtime registration identifier, not JWT audience",
+    "value_omitted": true
+  },
+  "verification": {
+    "original_client_id_import": {
+      "authentication": true,
+      "vehicles": 2,
+      "statuses": 2
+    },
+    "no_imported_client_id": {
+      "authentication": true,
+      "vehicles": 2,
+      "statuses": 2,
+      "registration_network_exchange_not_separately_traced": true
+    },
+    "physical_commands_sent": false
+  },
+  "remaining": [
+    "standalone password/SMS gateway login and identity-token refresh",
+    "production pin-set replication",
+    "user-facing menu and capability-based controls"
+  ]
+}

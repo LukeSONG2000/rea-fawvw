@@ -26,3 +26,7 @@ analysis/objc-runtime-metadata.txt.gz
 
 # MinimalClient 构建产物（build.py 可重现，不入库）
 output/minimalclient/
+
+# Local runtime credential capture and diagnostic overlays
+output/private-p0*/
+output/runtime-probe/

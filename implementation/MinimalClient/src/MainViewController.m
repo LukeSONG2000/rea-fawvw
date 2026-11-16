@@ -5,6 +5,7 @@
 #import "MCSDK.h"
 #import "MCHostAuth.h"
 #import "MCConfiguration.h"
+#import "MCReadonlyVerification.h"
 
 @interface MainViewController ()
 @end
@@ -16,20 +17,8 @@
     // NSUserDefaults(imported.idToken)。存在则跳过网关密码登录，直接做 MBB 令牌交换。
     NSString *imported = [[NSUserDefaults standardUserDefaults] stringForKey:@"imported.idToken"];
     if (imported.length > 0) {
-        [self log:@"官方会话已导入，brand 探针（clientID 路径）…"];
-        NSArray<NSString *> *brands = @[ @"fawvw", @"FAWVW", @"V", @"VW", @"FAW_VW", @"faw-vw" ];
-        [[MCSDK shared] probeMBBLoginWithIdentityToken:imported brands:brands appId:MCAppInfoId
-            onProgress:^(NSString *brand, NSError *err) {
-                [self log:@"  brand=%@ → %@", brand,
-                    err ? err.localizedDescription : @"✅ 命中（登录成功）"];
-            }
-            onFinish:^(NSString *okBrand, NSError *lastErr) {
-                if (okBrand) {
-                    [self log:@"探针完成：brand=%@ 登录成功（只读会话），可读取 VIN", okBrand];
-                } else {
-                    [self log:@"探针完成：全部失败（最后: %@）", lastErr.localizedDescription];
-                }
-            }];
+        [self log:@"使用本机导入的身份令牌进行一次 MBB 验证…"];
+        [self runSDKInitAndMBBLoginWithToken:imported];
         return;
     }
     [self.userField resignFirstResponder]; [self.passField resignFirstResponder];
@@ -119,6 +108,11 @@
     // 触发与点击登录相同的 initializeSDK 路径，配合 console 启动捕获 fatalError 消息。
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(5 * NSEC_PER_SEC)),
                    dispatch_get_main_queue(), ^{
+        if ([NSProcessInfo.processInfo.environment[@"MC_P0_AUTORUN"] isEqualToString:@"1"]) {
+            [self log:@"开始一次只读链路验证…"];
+            [MCReadonlyVerification runWithProgress:^(NSString *message) { [self log:@"%@",message]; }];
+            return;
+        }
         [self log:@"自动初始化（取证模式）…"];
         [[MCSDK shared] initializeSDK:^(NSError *err) {
             [self log:@"自动初始化结果: %@", err ? err.localizedDescription : @"成功"];
