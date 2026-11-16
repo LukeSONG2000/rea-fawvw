@@ -41,6 +41,10 @@ extern NSString *const MCAppInfoClientName;
 // [TODO-RUNTIME] clientBrand（密文 2B，0x109ee5710，与 MCMbbBrand 同一常量）
 extern NSString *const MCAppInfoClientBrand;
 
+// [EVIDENCE-RUNTIME] 官方会话 JWT(RS256) 的 aud 首项；即 Widget loginMBBWithClientId: 传入的
+// MBB clientID。authenticateWithClientID:identityToken: 使用（2026-11-16 取证）。
+extern NSString *const MCMbbClientID;      // VWGMBB01CNLIV1
+
 #pragma mark - NetworkConfig（initializeCarNetLib 明文浮点常量）
 
 // [EVIDENCE-STATIC] fmov d0,=123.0; fmov d1,=2.0 → initWithPollJobTimeout:pollRequestDelay:

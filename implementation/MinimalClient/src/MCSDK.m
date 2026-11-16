@@ -158,10 +158,12 @@ static inline Class MCClass(NSString *runtimeName) {
         return;
     }
     __weak __typeof(self) weakSelf = self;
-    // -[StageActionsImpl authenticateWithIdentityToken:accountFunction:] → Flow
-    id flow = ((id(*)(id,SEL,id,id))objc_msgSend)(self.stageActions,
-        @selector(authenticateWithIdentityToken:accountFunction:),
-        identityToken,
+    // -[StageActionsImpl authenticateWithClientID:identityToken:successFunction:] → Flow
+    // clientID 取自官方会话 JWT 的 aud（VWGMBB01CNLIV1，对应 Widget loginMBBWithClientId:）。
+    // 无 clientID 变体会先走 registerClient 流程（请求体带 AppInfo 参数，appId 占位值污染 payload → 400）。
+    id flow = ((id(*)(id,SEL,id,id,id))objc_msgSend)(self.stageActions,
+        @selector(authenticateWithClientID:identityToken:successFunction:),
+        MCMbbClientID, identityToken,
         ^(id account) {
             // 成功：CarNetLib.Account。+[CarNetLib useAccount:] → AccountActionsImpl
             weakSelf.account = account;
@@ -237,6 +239,70 @@ static inline Class MCClass(NSString *runtimeName) {
             !completion ? : completion(nil, [NSError errorWithDomain:@"MCSDK" code:-31
                         userInfo:@{NSLocalizedDescriptionKey:[sdkError description]}]);
         });
+}
+
+// MBB brand/appId 探针：逐个候选重建初始化并尝试令牌交换，
+// 直到成功或遍历完。用于定位 400 Invalid Payload 的枚举型参数。
+- (void)probeMBBLoginWithIdentityToken:(NSString *)token
+                                brands:(NSArray<NSString *> *)brands
+                                 appId:(NSString *)appId
+                            onProgress:(void (^)(NSString *brand, NSError *_Nullable err))progress
+                            onFinish:(void (^)(NSString *_Nullable okBrand, NSError *_Nullable lastErr))finish {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        __block NSString *found = nil;
+        __block NSError *lastErr = nil;
+        __block void (^tryNext)(NSUInteger) = nil;
+        tryNext = ^(NSUInteger idx) {
+            if (found || idx >= brands.count) {
+                !finish ? : finish(found, lastErr);
+                return;
+            }
+            NSString *brand = brands[idx];
+            // 全链重建：AppInfo(参数化 appId) → initialize → stage(参数化 brand) → authenticate
+            Class carNetLib = MCClass(@(CLS_CarNetLib));
+            id appInfo = ((id(*)(id,SEL,id,id,id,id,id))objc_msgSend)(
+                [MCClass(@(CLS_AppInfo)) alloc],
+                @selector(initWithAppName:appVersion:appId:clientName:clientBrand:),
+                MCAppInfoName, MCAppInfoVersion, appId, MCAppInfoClientName, MCAppInfoClientBrand);
+            id config = ((id(*)(Class,SEL))objc_msgSend)(MCClass(@(CLS_CarNetConfig)),
+                                                         @selector(defaultConfig));
+            ((void(*)(id,SEL,id,id,id))objc_msgSend)(carNetLib,
+                @selector(initializeWithAppInfo:config:extensionDispatchQueue:),
+                appInfo, config, dispatch_get_main_queue());
+            id stage = ((id(*)(Class,SEL,id,id,id,id,id,id))objc_msgSend)(
+                MCClass(@(CLS_MbbChinaStage)),
+                @selector(mbbStageWithAuthenticationServerBaseUrl:falServerBaseUrl:malServerBaseUrl:scope:brand:country:),
+                MCMbbAuthServerURL, MCMbbFalServerURL, MCMbbMalServerURL,
+                MCMbbScope, brand, MCMbbCountry);
+            id actions = ms_ret_id_id(carNetLib, @selector(useMbbStage:), stage);
+            // 探针同样走 clientID 路径（无 clientID 变体是 register 流程，必 400）
+            id flow = ((id(*)(id,SEL,id,id,id))objc_msgSend)(actions,
+                @selector(authenticateWithClientID:identityToken:successFunction:),
+                MCMbbClientID, token,
+                ^(id account) {
+                    found = brand;
+                    self->_stageActions = actions;
+                    self->_account = account;
+                    self->_accountActions = ms_ret_id_id(carNetLib, @selector(useAccount:), account);
+                    NSLog(@"[MCSDK] 探针命中 brand=%@ account=%@", brand, account);
+                    !progress ? : progress(brand, nil);
+                    !finish ? : finish(found, nil);
+                });
+            ((id(*)(id,SEL,id))objc_msgSend)(flow, @selector(executeWithErrorFunction:),
+                ^(id sdkError) {
+                    lastErr = [NSError errorWithDomain:@"MCSDK" code:-50
+                                userInfo:@{NSLocalizedDescriptionKey:
+                                    [sdkError respondsToSelector:@selector(errorMessage)]
+                                        ? [sdkError performSelector:@selector(errorMessage)]
+                                        : [sdkError description]}];
+                    NSLog(@"[MCSDK] 探针 brand=%@ 失败: %@", brand, lastErr.localizedDescription);
+                    !progress ? : progress(brand, lastErr);
+                    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.8 * NSEC_PER_SEC)),
+                                   dispatch_get_main_queue(), ^{ tryNext(idx + 1); });
+                });
+        };
+        tryNext(0);
+    });
 }
 
 - (void)shutdown {

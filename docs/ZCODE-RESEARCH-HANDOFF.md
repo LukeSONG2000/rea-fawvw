@@ -192,3 +192,11 @@ SDK 的直接非系统动态依赖已见：AEXML、AnyDate、EVReflectionCore、
 2. 网关登录协议：一次抓包或 `probeLoginSchema` 确认 loginByPassword/v1 字段与 data 解密（响应样例显示 data 为 base64 密文，注意 GMObjC）。
 3. 用户输凭据全链路只读验证：登录 → MBB → 两车 VIN → 一车状态（P0 验收线）。
 4. P0 通过后：P1 左上角按 VIN 单选下拉（`UIButton.menu`/`UIMenu`），再 P2 能力化车控。
+
+## zcode 进展补记（2026-11-16 晚，交接 codex）
+
+- 闪退已修：initializeWithAppInfo 的 queue 参数为 Non-Optional（传 nil 触发 SDK 日志渲染 fatalError）；改为 dispatch_get_main_queue 后初始化三步全通。
+- MBB 已连到生产端点；clientID=VWGMBB01CNLIV1（官方会话 JWT aud[0]）使错误从 400 Invalid Payload 进化为 AuthError(3:missingAccessRights)。
+- brand 探针 6 候选全败（错误与 brand 无关）；头号嫌疑是 token 类型（官方 AT vs SDK 期望的 ID Token，idToken 不落盘）。
+- 官方会话导入通道可用（偏好 tokens 归档 → PoC 沙盒 imported.idToken）；AT 有效期至 2026-11-19。
+- 完整卡点与取证途径见 `docs/P0-BLOCKER.md`；全部代码已推送 GitHub main（最新 commit 含探针与 clientID 路径）。

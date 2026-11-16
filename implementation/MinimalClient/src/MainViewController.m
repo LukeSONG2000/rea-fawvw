@@ -16,8 +16,20 @@
     // NSUserDefaults(imported.idToken)。存在则跳过网关密码登录，直接做 MBB 令牌交换。
     NSString *imported = [[NSUserDefaults standardUserDefaults] stringForKey:@"imported.idToken"];
     if (imported.length > 0) {
-        [self log:@"官方会话已导入（idToken %lu 字符），直接 MBB 令牌交换…", (unsigned long)imported.length];
-        [self runSDKInitAndMBBLoginWithToken:imported];
+        [self log:@"官方会话已导入，brand 探针（clientID 路径）…"];
+        NSArray<NSString *> *brands = @[ @"fawvw", @"FAWVW", @"V", @"VW", @"FAW_VW", @"faw-vw" ];
+        [[MCSDK shared] probeMBBLoginWithIdentityToken:imported brands:brands appId:MCAppInfoId
+            onProgress:^(NSString *brand, NSError *err) {
+                [self log:@"  brand=%@ → %@", brand,
+                    err ? err.localizedDescription : @"✅ 命中（登录成功）"];
+            }
+            onFinish:^(NSString *okBrand, NSError *lastErr) {
+                if (okBrand) {
+                    [self log:@"探针完成：brand=%@ 登录成功（只读会话），可读取 VIN", okBrand];
+                } else {
+                    [self log:@"探针完成：全部失败（最后: %@）", lastErr.localizedDescription];
+                }
+            }];
         return;
     }
     [self.userField resignFirstResponder]; [self.passField resignFirstResponder];

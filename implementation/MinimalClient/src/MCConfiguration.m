@@ -19,5 +19,7 @@ NSString *const MCAppInfoClientBrand = @"fawvw";         // TODO-RUNTIME 0x109ee
 double const MCPollJobTimeout   = 123.0;
 double const MCPollRequestDelay = 2.0;
 
+NSString *const MCMbbClientID = @"VWGMBB01CNLIV1";
+
 NSString *const MCHostGatewayBaseURL     = @"https://oneapp-api.faw-vw.com";
 NSString *const MCHostLoginPasswordPath  = @"account/login/loginByPassword/v1";
