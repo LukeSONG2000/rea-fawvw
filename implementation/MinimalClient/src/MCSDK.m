@@ -46,6 +46,7 @@ static inline Class MCClass(NSString *runtimeName) {
 
 @interface MCSDK ()
 @property (nonatomic, strong, nullable) id stageActions;   // StageActionsImpl
+@property (nonatomic, strong, nullable) id rawStage;       // MbbChinaStage（分步定位用）
 @property (nonatomic, strong, nullable) id account;        // CarNetLib.Account
 @property (nonatomic, strong, nullable) id accountActions; // AccountActionsImpl
 @property (nonatomic, strong, nullable) id vehicleActions; // VehicleActionsImpl
@@ -68,6 +69,27 @@ static inline Class MCClass(NSString *runtimeName) {
 
 - (void)initializeSDK:(void (^)(NSError *))completion {
     MCLoadCarNetLib();
+    // 分步打点：SDK 的日志渲染器在主队列异步执行，每步间隔 1.2s，
+    // 崩溃发生在哪一步之后即可定位是哪个调用触发的渲染强转。
+    [self stepA_appInfoAndInitialize:^(NSError *err) {
+        if (err) { !completion ? : completion(err); return; }
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.2 * NSEC_PER_SEC)),
+                       dispatch_get_main_queue(), ^{
+            [self stepB_buildStage:^(NSError *err2) {
+                if (err2) { !completion ? : completion(err2); return; }
+                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.2 * NSEC_PER_SEC)),
+                               dispatch_get_main_queue(), ^{
+                    [self stepC_useStage:^(NSError *err3) {
+                        !completion ? : completion(err3);
+                    }];
+                });
+            }];
+        });
+    }];
+}
+
+- (void)stepA_appInfoAndInitialize:(void (^)(NSError *))completion {
+    NSLog(@"[MCSDK] stepA 开始");
     Class carNetLib = MCClass(@(CLS_CarNetLib));
     if (!carNetLib) {
         !completion ? : completion([NSError errorWithDomain:@"MCSDK" code:-1
@@ -92,10 +114,17 @@ static inline Class MCClass(NSString *runtimeName) {
                                                  @selector(defaultConfig));
 
     // +[CarNetLib initializeWithAppInfo:config:extensionDispatchQueue:]（类方法）
+    // 崩溃取证结论：extensionDispatchQueue 在 Swift 侧是 Non-Optional DispatchQueue，
+    // 传 nil 会在 SDK 日志渲染时触发 "null pointer in Non-Optional" 断言 → 传主队列。
     ((void(*)(id,SEL,id,id,id))objc_msgSend)(carNetLib,
         @selector(initializeWithAppInfo:config:extensionDispatchQueue:),
-        appInfo, config, nil);
+        appInfo, config, dispatch_get_main_queue());
+    NSLog(@"[MCSDK] stepA 完成（AppInfo+config+initialize）");
+    !completion ? : completion(nil);
+}
 
+- (void)stepB_buildStage:(void (^)(NSError *))completion {
+    NSLog(@"[MCSDK] stepB 开始");
     // MbbChinaStage：mbbStageWithAuthenticationServerBaseUrl:...:scope:brand:country:
     id stage = ((id(*)(Class,SEL,id,id,id,id,id,id))objc_msgSend)(
         MCClass(@(CLS_MbbChinaStage)),
@@ -107,9 +136,17 @@ static inline Class MCClass(NSString *runtimeName) {
                     userInfo:@{NSLocalizedDescriptionKey:@"MbbChinaStage 构造失败"}]);
         return;
     }
-    // +[CarNetLib useMbbStage:] → StageActionsImpl
-    self.stageActions = ms_ret_id_id(carNetLib, @selector(useMbbStage:), stage);
-    NSLog(@"[MCSDK] 初始化完成 stage=%@", self.stageActions);
+    self.rawStage = stage;
+    NSLog(@"[MCSDK] stepB 完成（stage=%@）", stage);
+    !completion ? : completion(nil);
+}
+
+- (void)stepC_useStage:(void (^)(NSError *))completion {
+    NSLog(@"[MCSDK] stepC 开始");
+    Class carNetLib = MCClass(@(CLS_CarNetLib));
+    id actions = ms_ret_id_id(carNetLib, @selector(useMbbStage:), self.rawStage);
+    NSLog(@"[MCSDK] stepC useMbbStage 返回 %@", actions);
+    self.stageActions = actions;
     !completion ? : completion(nil);
 }
 

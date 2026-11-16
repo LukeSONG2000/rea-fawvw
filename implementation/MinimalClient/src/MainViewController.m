@@ -11,6 +11,52 @@
 
 @implementation MainViewController
 
+- (void)doLogin:(id)sender {
+    // 复用官方登录（会话导入模式）：官方 App 的 idToken 已写入本 App 沙盒
+    // NSUserDefaults(imported.idToken)。存在则跳过网关密码登录，直接做 MBB 令牌交换。
+    NSString *imported = [[NSUserDefaults standardUserDefaults] stringForKey:@"imported.idToken"];
+    if (imported.length > 0) {
+        [self log:@"官方会话已导入（idToken %lu 字符），直接 MBB 令牌交换…", (unsigned long)imported.length];
+        [self runSDKInitAndMBBLoginWithToken:imported];
+        return;
+    }
+    [self.userField resignFirstResponder]; [self.passField resignFirstResponder];
+    if (self.userField.text.length == 0 || self.passField.text.length == 0) {
+        [self log:@"请输入账号与密码（或导入官方会话）"]; return;
+    }
+    [self runSDKInitAndGatewayLogin];
+}
+
+- (void)runSDKInitAndMBBLoginWithToken:(NSString *)identityToken {
+    [self log:@"SDK 初始化…"];
+    [[MCSDK shared] initializeSDK:^(NSError *err) {
+        if (err) { [self log:@"SDK 初始化失败: %@", err.localizedDescription]; return; }
+        [self log:@"MBB 令牌交换…"];
+        [[MCSDK shared] loginMBBWithIdentityToken:identityToken completion:^(NSError *merr) {
+            [self log:@"%@", merr ? [NSString stringWithFormat:@"MBB 登录失败: %@", merr.localizedDescription]
+                                  : @"登录完成（只读会话）"];
+        }];
+    }];
+}
+
+- (void)runSDKInitAndGatewayLogin {
+    [self log:@"1/3 SDK 初始化…"];
+    [[MCSDK shared] initializeSDK:^(NSError *err) {
+        if (err) { [self log:@"SDK 初始化失败: %@", err.localizedDescription]; return; }
+        [self log:@"2/3 宿主网关密码登录…"];
+        [MCHostAuth loginWithUsername:self.userField.text password:self.passField.text
+            completion:^(NSString *token, NSError *gerr) {
+                if (!token) { [self log:@"网关登录失败: %@", gerr.localizedDescription];
+                              [self log:@"（请求字段/令牌字段未取证，属预期；见 P0-EVIDENCE）"]; return; }
+                [self log:@"3/3 MBB 令牌交换…"];
+                [[MCSDK shared] loginMBBWithIdentityToken:token completion:^(NSError *merr) {
+                    [self log:@"%@", merr ? [NSString stringWithFormat:@"MBB 登录失败: %@", merr.localizedDescription]
+                                          : @"登录完成（只读会话）"];
+                }];
+            }];
+    }];
+}
+
 - (void)viewDidLoad {
     [super viewDidLoad];
     self.view.backgroundColor = UIColor.systemBackgroundColor;
@@ -56,6 +102,16 @@
         [self.view addSubview:v];
 
     [self log:@"PoC 就绪。SDK 类探测: %@", [MCSDK shared].sdkAvailable ? @"可用" : @"不可用"];
+
+    // 崩溃取证模式：启动 5 秒后自动执行 SDK 初始化（无需凭据、不发网络请求）。
+    // 触发与点击登录相同的 initializeSDK 路径，配合 console 启动捕获 fatalError 消息。
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(5 * NSEC_PER_SEC)),
+                   dispatch_get_main_queue(), ^{
+        [self log:@"自动初始化（取证模式）…"];
+        [[MCSDK shared] initializeSDK:^(NSError *err) {
+            [self log:@"自动初始化结果: %@", err ? err.localizedDescription : @"成功"];
+        }];
+    });
 }
 
 - (void)log:(NSString *)fmt, ... {
@@ -66,28 +122,6 @@
         self.logView.text = [NSString stringWithFormat:@"%@%@\n", self.logView.text, line];
         NSLog(@"[MC] %@", line);
     });
-}
-
-- (void)doLogin:(id)sender {
-    [self.userField resignFirstResponder]; [self.passField resignFirstResponder];
-    if (self.userField.text.length == 0 || self.passField.text.length == 0) {
-        [self log:@"请输入账号与密码"]; return;
-    }
-    [self log:@"1/3 SDK 初始化…"];
-    [[MCSDK shared] initializeSDK:^(NSError *err) {
-        if (err) { [self log:@"SDK 初始化失败: %@", err.localizedDescription]; return; }
-        [self log:@"2/3 宿主网关密码登录…"];
-        [MCHostAuth loginWithUsername:self.userField.text password:self.passField.text
-            completion:^(NSString *token, NSError *gerr) {
-                if (!token) { [self log:@"网关登录失败: %@", gerr.localizedDescription];
-                              [self log:@"（请求字段/令牌字段未取证，属预期；见 P0-EVIDENCE）"]; return; }
-                [self log:@"3/3 MBB 令牌交换…"];
-                [[MCSDK shared] loginMBBWithIdentityToken:token completion:^(NSError *merr) {
-                    [self log:@"%@", merr ? [NSString stringWithFormat:@"MBB 登录失败: %@", merr.localizedDescription]
-                                          : @"登录完成（只读会话）"];
-                }];
-            }];
-    }];
 }
 
 - (void)loadVins:(id)sender {
