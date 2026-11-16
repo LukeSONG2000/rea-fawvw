@@ -58,7 +58,7 @@ def main():
     bid = plistlib.loads((APPDIR / 'Info.plist').read_bytes())['CFBundleIdentifier']
     ent = profile['Entitlements'].copy()
     ent['application-identifier'] = f'{team}.{bid}'
-    ent['keychain-access-groups'] = [f'{team}.{bid}']
+    ent['keychain-access-groups'] = [f'{team}.{bid}', f'{team}.com.fawvw.aftermarket']  # 复用官方登录会话的读取组
     entpath = OUT / 'entitlements.plist'
     entpath.write_bytes(plistlib.dumps(ent))
 

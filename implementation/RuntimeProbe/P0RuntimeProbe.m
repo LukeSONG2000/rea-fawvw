@@ -2,6 +2,7 @@
 #import <objc/runtime.h>
 #import <objc/message.h>
 #import <CommonCrypto/CommonDigest.h>
+#import <Security/Security.h>
 #import <sys/stat.h>
 
 static NSMutableDictionary *Findings;
@@ -18,6 +19,41 @@ static void Record(NSString *key, id value) {
         chmod(path.fileSystemRepresentation, 0600);
     }
 }
+// ===== Keychain 属性枚举（找 identity token 的持久化位；只取属性与长度摘要，不导出本体）=====
+static NSString *SHA256Prefix(NSData *data) {
+    unsigned char hash[CC_SHA256_DIGEST_LENGTH]; CC_SHA256(data.bytes, (CC_LONG)data.length, hash);
+    NSMutableString *s = [NSMutableString string];
+    for (int i = 0; i < 4; i++) [s appendFormat:@"%02x", hash[i]];
+    return s;
+}
+static void DumpKeychain(void) {
+    NSDictionary *query = @{
+        (__bridge id)kSecClass: (__bridge id)kSecClassGenericPassword,
+        (__bridge id)kSecMatchLimit: (__bridge id)kSecMatchLimitAll,
+        (__bridge id)kSecReturnAttributes: @YES,
+        (__bridge id)kSecReturnData: @YES,
+    };
+    CFTypeRef out = NULL;
+    OSStatus st = SecItemCopyMatching((__bridge CFDictionaryRef)query, &out);
+    if (st != errSecSuccess) { Record(@"keychain-dump-status", @(st)); return; }
+    NSArray *items = CFBridgingRelease(out);
+    NSMutableArray *list = [NSMutableArray array];
+    for (NSDictionary *item in items) {
+        NSData *value = item[(__bridge id)kSecValueData];
+        [list addObject:@{
+            @"service": item[(__bridge id)kSecAttrService] ?: @"<nil>",
+            @"account": item[(__bridge id)kSecAttrAccount] ?: @"<nil>",
+            @"group": item[(__bridge id)kSecAttrAccessGroup] ?: @"<nil>",
+            @"bytes": @(value.length),
+            @"sha256-8": value ? SHA256Prefix(value) : @"<nil>",
+            @"accessible": item[(__bridge id)kSecAttrAccessible] ?: @"<nil>",
+        }];
+    }
+    Record(@"keychain-generic-password", list);
+    Record(@"keychain-dump-count", @(list.count));
+}
+
+
 static id Read(id object, NSString *key) {
     @try { id value = [object valueForKey:key]; return value; } @catch (NSException *e) { return nil; }
 }
@@ -55,6 +91,80 @@ static void CaptureToken(NSString *source, id token) {
     chmod(path.fileSystemRepresentation,0600);
     Record(source, info);
 }
+// ===== 登录链路取证（P1）：oneapp-api 网关请求/响应 + tokens 写入 =====
+// 数据只写入本机受限目录（0700），不进日志。请求体可能含用户密码，仅本机分析用。
+static NSDateFormatter *StampFormatter;
+static NSString *Stamp(void) {
+    if (!StampFormatter) {
+        StampFormatter = [NSDateFormatter new];
+        StampFormatter.dateFormat = @"HHmmss.SSS";
+    }
+    return [StampFormatter stringFromDate:[NSDate date]];
+}
+static BOOL HostInteresting(NSURL *url) {
+    NSString *host = url.host.lowercaseString;
+    return [host containsString:@"faw-vw.com"] || [host containsString:@"fawvw"]
+        || [host containsString:@"volkswagen"] || [host containsString:@"vwg-connect"];
+}
+static void SaveBlob(NSString *kind, NSURL *url, NSData *data) {
+    if (!data.length) return;
+    NSString *host = [url.host.lowercaseString stringByReplacingOccurrencesOfString:@":" withString:@"-"];
+    NSString *name = [NSString stringWithFormat:@"%@-%@-%@.bin", Stamp(), kind, host];
+    NSString *path = [ProbeDirectory() stringByAppendingPathComponent:name];
+    [data writeToFile:path options:NSDataWritingAtomic|NSDataWritingFileProtectionCompleteUntilFirstUserAuthentication error:nil];
+    chmod(path.fileSystemRepresentation, 0600);
+}
+static NSMutableDictionary *MakeCaptureEntry(NSURLRequest *request) {
+    NSMutableDictionary *entry = [NSMutableDictionary dictionary];
+    entry[@"url"] = request.URL.absoluteString;
+    entry[@"method"] = request.HTTPMethod;
+    entry[@"stamp"] = Stamp();
+    NSMutableDictionary *headers = [NSMutableDictionary dictionary];
+    [request.allHTTPHeaderFields enumerateKeysAndObjectsUsingBlock:^(id k, id v, BOOL *stop) {
+        NSString *key = [(NSString *)k lowercaseString];
+        // 脱敏：授权/票据类头只记长度
+        headers[key] = ([key containsString:@"authorization"] || [key containsString:@"token"])
+            ? [NSString stringWithFormat:@"<len=%lu>", (unsigned long)[(NSString *)v length]] : v;
+    }];
+    entry[@"requestHeaders"] = headers;
+    return entry;
+}
+static IMP DataTaskReq, UploadTaskData;
+static id HookDataTask(id self, SEL sel, NSURLRequest *request, id handler) {
+    // 只捕获请求侧；不包装 completionHandler（CFNetwork task 销毁路径析构崩溃，见 17:03 崩溃报告）
+    if (HostInteresting(request.URL)) {
+        NSMutableDictionary *entry = MakeCaptureEntry(request);
+        if (request.HTTPBody) SaveBlob(@"reqbody", request.URL, request.HTTPBody);
+        Record([@"net-" stringByAppendingString:entry[@"stamp"]], entry);
+    }
+    return ((id(*)(id,SEL,id,id))DataTaskReq)(self, sel, request, handler);
+}
+static id HookUploadTask(id self, SEL sel, NSURLRequest *request, NSData *body, id handler) {
+    if (HostInteresting(request.URL)) {
+        NSMutableDictionary *entry = MakeCaptureEntry(request);
+        if (body) SaveBlob(@"reqbody", request.URL, body);
+        Record([@"netup-" stringByAppendingString:entry[@"stamp"]], entry);
+    }
+    return ((id(*)(id,SEL,id,id,id))UploadTaskData)(self, sel, request, body, handler);
+}
+static IMP DefaultsSetObject, DefaultsSetData;
+static void HookDefaultsSet(id self, SEL sel, id value, NSString *key) {
+    if ([key isKindOfClass:NSString.class] && ([key containsString:@"coreentity.tokens"] || [key containsString:@"currentUser"])) {
+        // tokens 归档含令牌本体：摘要+长度进 findings，原文写入受限目录供本地解包
+        NSData *raw = [value isKindOfClass:NSData.class] ? value : [NSKeyedArchiver archivedDataWithRootObject:value requiringSecureCoding:NO error:nil];
+        if (raw.length) {
+            SaveBlob([NSString stringWithFormat:@"defaults-%@", key.lastPathComponent], [NSURL URLWithString:@"file://defaults"], raw);
+            Record([NSString stringWithFormat:@"defaults-write-%@", key.lastPathComponent],
+                   @{@"stamp": Stamp(), @"bytes": @(raw.length)});
+        }
+    }
+    if (sel == NSSelectorFromString(@"setData:forKey:")) {
+        ((void(*)(id,SEL,id,id))DefaultsSetData)(self, sel, value, key);
+    } else {
+        ((void(*)(id,SEL,id,id))DefaultsSetObject)(self, sel, value, key);
+    }
+}
+
 static IMP AppInfoInit, StageFactory, StageInit7, StageInit6, UseStage, Authenticate, AuthenticateClient, SendIdentity, HostLogin;
 static id HookAppInfo(id self, SEL sel, id name, id version, id appID, id client, id brand) {
     Record(@"AppInfo", @{@"appName":Describe(name),@"appVersion":Describe(version),@"appId":Describe(appID),@"clientName":Describe(client),@"clientBrand":Describe(brand)});
@@ -105,7 +215,12 @@ static void Replace(Class cls, NSString *name, IMP replacement, IMP *original, B
     if (!class_addMethod(cls,NSSelectorFromString(name),replacement,method_getTypeEncoding(method))) method_setImplementation(method,replacement);
 }
 __attribute__((constructor)) static void InstallProbe(void) {
-    Findings=[NSMutableDictionary dictionary]; Record(@"probeVersion",@1);
+    Findings=[NSMutableDictionary dictionary]; Record(@"probeVersion",@2);
+    // P1 登录链取证：网关请求/响应 + tokens/currentUser 写入
+    Replace([NSURLSession class], @"dataTaskWithRequest:completionHandler:", (IMP)HookDataTask, &DataTaskReq, NO);
+    Replace([NSURLSession class], @"uploadTaskWithRequest:fromData:completionHandler:", (IMP)HookUploadTask, &UploadTaskData, NO);
+    Replace([NSUserDefaults class], @"setObject:forKey:", (IMP)HookDefaultsSet, &DefaultsSetObject, NO);
+    Replace([NSUserDefaults class], @"setData:forKey:", (IMP)HookDefaultsSet, &DefaultsSetData, NO);
     Replace(NSClassFromString(@"_TtC9CarNetLib7AppInfo"),@"initWithAppName:appVersion:appId:clientName:clientBrand:",(IMP)HookAppInfo,&AppInfoInit,NO);
     Class stage=NSClassFromString(@"_TtC9CarNetLib13MbbChinaStage");
     Replace(stage,@"mbbStageWithAuthenticationServerBaseUrl:falServerBaseUrl:malServerBaseUrl:scope:brand:country:",(IMP)HookStageFactory,&StageFactory,YES);
@@ -119,6 +234,7 @@ __attribute__((constructor)) static void InstallProbe(void) {
     Replace(host,@"sendIdToken:",(IMP)HookSendIdentity,&SendIdentity,NO);
     Replace(host,@"loginMBBWithIdentityToken:completion:",(IMP)HookHostLogin,&HostLogin,NO);
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW,15*NSEC_PER_SEC),dispatch_get_main_queue(),^{
+        DumpKeychain();
         Class cls=NSClassFromString(@"VWPCHybridMotion");
         if (![cls respondsToSelector:NSSelectorFromString(@"sharedManager")]) return;
         id manager=((id(*)(id,SEL))objc_msgSend)(cls,NSSelectorFromString(@"sharedManager"));

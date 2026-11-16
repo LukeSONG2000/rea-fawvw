@@ -204,3 +204,10 @@ SDK 的直接非系统动态依赖已见：AEXML、AnyDate、EVReflectionCore、
 ## Codex 接手进展（2026-11-16）
 
 MBB 阻塞已通过原宿主运行时插桩解决，真实身份令牌、AppInfo 与 stage 配置已确认。独立宿主在导入注册 clientID 和不导入该标识两种路径下均完成认证、两车列表与两车状态查询；修复 QueryAction 调用方法和异步选车。完整密码/短信登录及刷新、pin 集合对齐和正式 UI/控制仍未完成。详情以 `P0-RESOLUTION.md` 为准，旧占位值及 audience=clientID 假设已作废。
+
+## zcode 进展补记二（2026-11-16 深夜）
+
+- 密码登录取证：登录页为 H5（原生 NSURLSession hook 全程零捕获）；api-ubtas 实为二进制日志网关。identity token（typ=identity, iss=idp.mosc.faw-vw.com）有效期 60 天，不在 tokens 归档，920B 副本在本机受限目录并已注入 PoC。
+- Keychain 组共享：profile 授权 KC9H2N4239.*，PoC 声明官方组后枚举仍 -25300，待查；不阻塞。
+- 17:40 实测 PoC 完整只读链路：initialize → useMbbStage → authenticate(identity token) → Account/MbbTokens 返回；用户确认两车 VIN 与状态读取成功。
+- 详见 docs/P0-LOGIN-FORENSICS.md。下一步建议 P1（左上角 VIN 单选下拉）。

@@ -5,6 +5,7 @@
 #import "MCSDK.h"
 #import "MCHostAuth.h"
 #import "MCConfiguration.h"
+#import "MCKeychainForensics.h"
 #import "MCReadonlyVerification.h"
 
 @interface MainViewController ()
@@ -103,6 +104,10 @@
         [self.view addSubview:v];
 
     [self log:@"PoC 就绪。SDK 类探测: %@", [MCSDK shared].sdkAvailable ? @"可用" : @"不可用"];
+    dispatch_async(dispatch_get_global_queue(0, 0), ^{
+        [MCKeychainForensics dumpGenericPasswordSummary];
+        [MCKeychainForensics findIdentityTokenCandidates];
+    });
 
     // 崩溃取证模式：启动 5 秒后自动执行 SDK 初始化（无需凭据、不发网络请求）。
     // 触发与点击登录相同的 initializeSDK 路径，配合 console 启动捕获 fatalError 消息。
