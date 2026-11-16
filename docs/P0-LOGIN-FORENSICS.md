@@ -55,3 +55,13 @@ result: Account(uniqueId=…, mbbUserId=…, mbbTokens=MbbTokens)
 - 取证数据（本机受限，不入库）：`/tmp/p1probe/`（设备侧 `Library/Application Support/P0Probe/`）
 - PoC 新增：`MCKeychainForensics.{h,m}`、entitlements 官方 keychain 组
 - 设备状态：官方 App = 探针版（数据完好）；PoC = 可用状态（偏好含有效 identity token）
+
+## 七、持久会话与滚动延期（2026-11-16 17:51 实测收官）
+
+- **启动自动登录已实现**：冷启动 3 秒自动「初始化→MBB 认证」，无感恢复；实测
+  Account 返回 + 用户确认两车 VIN + 状态（里程/油量/续航真实数据）。
+- **滚动延期工具**：`implementation/MinimalClient/sync-session.py`——从官方探针
+  捕获的最新 identity token 一键同步进 PoC 偏好。60 天窗口内官方 App 重登一次
+  → 跑一次脚本即完成"滑动延期"。
+- **自动延期展望**：官方 App 的 idp.mosc 刷新请求（RT 体系，JWT rt-id 佐证）尚未
+  被捕获——探针常驻官方 App，其自然刷新或下次重登时自动留证，届时还原协议。

@@ -109,19 +109,32 @@
         [MCKeychainForensics findIdentityTokenCandidates];
     });
 
-    // 崩溃取证模式：启动 5 秒后自动执行 SDK 初始化（无需凭据、不发网络请求）。
-    // 触发与点击登录相同的 initializeSDK 路径，配合 console 启动捕获 fatalError 消息。
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(5 * NSEC_PER_SEC)),
+    // 启动自动登录（持久会话）：有导入的 identity token 即在初始化后自动完成
+    // MBB 认证，冷启动无感恢复；无 token 时保持手动登录路径。
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(3 * NSEC_PER_SEC)),
                    dispatch_get_main_queue(), ^{
         if ([NSProcessInfo.processInfo.environment[@"MC_P0_AUTORUN"] isEqualToString:@"1"]) {
             [self log:@"开始一次只读链路验证…"];
             [MCReadonlyVerification runWithProgress:^(NSString *message) { [self log:@"%@",message]; }];
             return;
         }
-        [self log:@"自动初始化（取证模式）…"];
-        [[MCSDK shared] initializeSDK:^(NSError *err) {
-            [self log:@"自动初始化结果: %@", err ? err.localizedDescription : @"成功"];
-        }];
+        NSString *imported = [[NSUserDefaults standardUserDefaults] stringForKey:@"imported.idToken"];
+        if (imported.length > 0) {
+            [self log:@"检测到持久会话，自动登录…"];
+            [[MCSDK shared] initializeSDK:^(NSError *err) {
+                if (err) { [self log:@"自动登录初始化失败: %@", err.localizedDescription]; return; }
+                [[MCSDK shared] loginMBBWithIdentityToken:imported completion:^(NSError *merr) {
+                    if (merr) {
+                        [self log:@"自动登录失败: %@（token 可能过期，需重新导入）", merr.localizedDescription];
+                    } else {
+                        [self log:@"✅ 自动登录完成，可直接读取车辆"];
+                        [self.vehicleLabel setText:@"车辆：已登录（自动恢复）"];
+                    }
+                }];
+            }];
+        } else {
+            [self log:@"无持久会话；输入账号密码或导入官方会话后登录"];
+        }
     });
 }
 
