@@ -23,3 +23,6 @@ recovered/
 .DS_Store
 __pycache__/
 analysis/objc-runtime-metadata.txt.gz
+
+# MinimalClient 构建产物（build.py 可重现，不入库）
+output/minimalclient/
