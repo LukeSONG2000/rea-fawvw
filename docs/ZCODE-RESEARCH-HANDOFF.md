@@ -211,3 +211,12 @@ MBB 阻塞已通过原宿主运行时插桩解决，真实身份令牌、AppInfo
 - Keychain 组共享：profile 授权 KC9H2N4239.*，PoC 声明官方组后枚举仍 -25300，待查；不阻塞。
 - 17:40 实测 PoC 完整只读链路：initialize → useMbbStage → authenticate(identity token) → Account/MbbTokens 返回；用户确认两车 VIN 与状态读取成功。
 - 详见 docs/P0-LOGIN-FORENSICS.md。下一步建议 P1（左上角 VIN 单选下拉）。
+
+## zcode 交接 codex（2026-11-17 上午）
+
+- 全量功能轮完成：20+ 控制（SPIN 弹窗）/12 项深度探测/行程统计/4 个原始接口直连；
+  三轮 Swift runtime abort 坑修复（未暴露属性×2、动作协议混用×1）
+- 油量绝对值定论：vsr 服务两车未开通，体系内无升数通道
+- mosc 数字钥匙评估放弃（全加密+SE 绑定）
+- 深度探测最终版与控制逐项实测待跑；keychain -25300 与 H5 登录待解
+- 完整交接见 `docs/ZCODE-HANDOFF-CODEX.md`

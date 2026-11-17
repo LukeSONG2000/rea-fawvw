@@ -7,14 +7,25 @@ static NSString *KVC(id o, NSString *k) { @try { return NS([o valueForKey:k]); }
 
 static void RunQuery(id target, id action, NSString *name, void (^onLine)(NSString *)) {
     if (!action) { onLine([NSString stringWithFormat:@"%@: 动作构造失败", name]); return; }
-    ((void(*)(id,SEL,id))objc_msgSend)(action, @selector(loadWithErrorFunction:),
+    // QueryAction→loadWithErrorFunction:；ExecutableAction→executeWithErrorFunction:（不能混用，会 abort）
+    SEL run = @selector(loadWithErrorFunction:);
+    if (![action respondsToSelector:run]) {
+        run = @selector(executeWithErrorFunction:);
+        if (![action respondsToSelector:run]) {
+            onLine([NSString stringWithFormat:@"%@: 非动作返回（%@）", name, [action class]]);
+            return;
+        }
+    }
+    ((void(*)(id,SEL,id))objc_msgSend)(action, run,
         ^(id e) { onLine([NSString stringWithFormat:@"%@: ✗ %@", name, [e description]]); });
 }
 static id Action1(id target, SEL sel, id block) {
     return ((id(*)(id,SEL,id))objc_msgSend)(target, sel, block);
 }
 static id FacadeSub(id vehicleActions, NSString *prop) {
-    @try { return [vehicleActions valueForKey:prop]; } @catch (id e) { return nil; }
+    // Swift 计算属性若未暴露 ObjC，valueForKey 走 doesNotRecognizeSelector: 直接 abort
+    // （@catch 拦不住）——必须先 respondsToSelector 探测。
+    return MCSafeGet(vehicleActions, prop);
 }
 
 @implementation MCSDK (Deep)
@@ -63,8 +74,7 @@ static id FacadeSub(id vehicleActions, NSString *prop) {
         });
         add(@"门窗细态", ^(void (^done)(NSString *)) {
             id a = Action1(va, @selector(statusWithStatusFunction:), ^(id st){
-                id body = nil;
-                @try { body = [st valueForKey:@"bodyStatus"]; } @catch (id e) {}
+                id body = MCSafeGet(st, @"bodyStatus");
                 done(body ? [NSString stringWithFormat:@"%@", NS(body)] : @"无 bodyStatus"); });
             RunQuery(va, a, @"门窗细态", onLine);
         });

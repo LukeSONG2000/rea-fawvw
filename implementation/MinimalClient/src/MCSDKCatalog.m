@@ -52,11 +52,11 @@ static NSDictionary *MCFeatureMap(void) {
                     MCVehicleInfo *info = [MCVehicleInfo new];
                     info.vin = vin;
                     info.rawVehicle = vehicle;
-                    id vd = [vehicle valueForKey:@"vehicleData"];
+                    id vd = MCSafeGet(vehicle, @"vehicleData");
                     if (vd) {
                         info.brand = [vd valueForKey:@"brand"];
                         info.country = [vd valueForKey:@"country"];
-                        id cp = [vd valueForKey:@"carportData"];
+                        id cp = MCSafeGet(vd, @"carportData");
                         if ([cp respondsToSelector:@selector(modelName)]) {
                             info.modelCode = [cp valueForKey:@"modelCode"];
                             info.modelName = [cp valueForKey:@"modelName"];
@@ -74,7 +74,9 @@ static NSDictionary *MCFeatureMap(void) {
                     NSMutableArray *feats = [NSMutableArray array];
                     NSDictionary *map = MCFeatureMap();
                     for (NSString *key in map) {
-                        @try { if ([vehicle valueForKey:key]) [feats addObject:key]; } @catch (id e) {}
+                        if (![vehicle respondsToSelector:NSSelectorFromString(key)]) continue;
+                        id v = ((id(*)(id,SEL))objc_msgSend)(vehicle, NSSelectorFromString(key));
+                        if (v) [feats addObject:key];
                     }
                     info.features = feats;
                     [infos addObject:info];
@@ -148,8 +150,7 @@ static NSDictionary *MCFeatureMap(void) {
 
 - (void)healthWarningsWithCompletion:(void (^)(NSString *, NSError *))completion {
     if (!self.vehicleActions) { if (completion) completion(nil, [NSError errorWithDomain:@"MCSDK" code:-30 userInfo:@{NSLocalizedDescriptionKey:@"未选车"}]); return; }
-    id health = nil;
-    @try { health = [self.vehicleActions valueForKey:@"healthReport"]; } @catch (id e) {}
+    id health = MCSafeGet(self.vehicleActions, @"healthReport");
     if (!health) { if (completion) completion(nil, [NSError errorWithDomain:@"MCSDK" code:-72 userInfo:@{NSLocalizedDescriptionKey:@"不支持健康报告"}]); return; }
     id action = ((id(*)(id,SEL,id))objc_msgSend)(health, @selector(warningsWithSuccessFunction:),
         ^(id warnings) { if (completion) completion([warnings description], nil); });

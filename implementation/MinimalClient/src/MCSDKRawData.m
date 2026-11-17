@@ -18,14 +18,11 @@
 
 - (NSString *)mbbAccessToken {
     if (!self.account) return nil;
-    id tokens = nil;
-    @try { tokens = [self.account valueForKey:@"mbbTokens"]; } @catch (id e) {}
+    id tokens = MCSafeGet(self.account, @"mbbTokens");
     if (!tokens) return nil;
-    id at = nil;
-    @try { at = [tokens valueForKey:@"accessToken"]; } @catch (id e) {}
+    id at = MCSafeGet(tokens, @"accessToken");
     if ([at isKindOfClass:NSString.class]) return at;
-    id tok = nil;
-    @try { tok = [at valueForKey:@"token"]; } @catch (id e) {}
+    id tok = MCSafeGet(at, @"token");
     return [tok isKindOfClass:NSString.class] ? tok : nil;
 }
 

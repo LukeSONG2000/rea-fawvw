@@ -1,5 +1,6 @@
 // MCSDK_Internal.h — 适配层内部状态（实现文件间共享，不对外）
 #import "MCSDK.h"
+#import <objc/message.h>
 
 @interface MCSDK ()
 @property (nonatomic, strong, nullable) id stageActions;
@@ -14,3 +15,11 @@
 /// SPIN（车机安全码）：仅内存持有，不落盘。nil = 走低安全级路径。
 @property (nonatomic, copy, nullable) NSString *spinCode;
 @end
+
+// SDK 对象安全取属性：未暴露 ObjC 的 Swift 计算属性 valueForKey 会 abort，必须先探测
+static inline __attribute__((always_inline)) id MCSafeGet(id obj, NSString *prop) {
+    if (!obj) return nil;
+    SEL sel = NSSelectorFromString(prop);
+    if (![obj respondsToSelector:sel]) return nil;
+    return ((id(*)(id,SEL))objc_msgSend)(obj, sel);
+}
