@@ -46,12 +46,15 @@
         @"车窗通风", @"车窗全开", @"车窗全关", @"空调开22℃",
         @"空调关", @"辅热开", @"辅热关", @"发动机启",
         @"发动机停", @"刷新状态", @"停车位置", @"行程记录",
-        @"空调状态", @"健康告警", @"门窗细态", @"能力清单"];
-    NSMutableArray *rows = [NSMutableArray array];
-    for (NSUInteger r = 0; r < 5; r++) {
+        @"空调状态", @"健康告警", @"门窗细态", @"能力清单", @"原始数据", @"状态详情"];
+    NSUInteger gridRows = (titles.count + 3) / 4;
+    NSMutableArray *allRows = [NSMutableArray array];
+    for (NSUInteger r = 0; r < gridRows; r++) {
         NSMutableArray *row = [NSMutableArray array];
         for (NSUInteger c = 0; c < 4; c++) {
-            NSString *t = titles[r * 4 + c];
+            NSUInteger idx = r * 4 + c;
+            if (idx >= titles.count) break;
+            NSString *t = titles[idx];
             UIButton *b = [UIButton buttonWithType:UIButtonTypeSystem];
             [b setTitle:t forState:UIControlStateNormal];
             [b.layer setBorderWidth:1];
@@ -66,9 +69,9 @@
         sv.axis = UILayoutConstraintAxisHorizontal;
         sv.distribution = UIStackViewDistributionFillEqually;
         sv.spacing = 8;
-        [rows addObject:sv];
+        [allRows addObject:sv];
     }
-    UIStackView *grid = [[UIStackView alloc] initWithArrangedSubviews:rows];
+    UIStackView *grid = [[UIStackView alloc] initWithArrangedSubviews:allRows];
     grid.axis = UILayoutConstraintAxisVertical;
     grid.spacing = 8;
 
@@ -230,6 +233,39 @@
         @"健康告警": ^{ [[MCSDK shared] healthWarningsWithCompletion:^(NSString *sum, NSError *err) {
             dispatch_async(dispatch_get_main_queue(), ^{ self.statusLabel.text = err ? [NSString stringWithFormat:@"健康告警失败: %@", err.localizedDescription] : [NSString stringWithFormat:@"健康告警: %@", sum]; }); }]; },
         @"门窗细态": ^{ [self refreshStatus]; },
+        @"状态详情": ^{ [[MCSDK shared] rawStatusReportForVIN:self.currentVIN completion:^(NSString *xml, NSError *err) {
+            if (err) { [self log:@"原始数据失败: %@", err.localizedDescription]; return; }
+            [self log:@"原始数据 %lu 字符", (unsigned long)xml.length];
+            NSLog(@"[MC] XML 前 2500 字符:\n%@", [xml substringToIndex:MIN(2500, xml.length)]);
+            // 解析为字段表 + 中文标注
+            NSArray *fields = [[MCSDK shared] parseRawXML:xml];
+            NSDictionary *zh = @{
+                @"mileage": @"总里程", @"fuel": @"燃油", @"volume": @"容积/体积", @"level": @"液位/等级",
+                @"range": @"续航", @"oil": @"机油", @"temperature": @"温度", @"speed": @"速度",
+                @"door": @"车门", @"window": @"车窗", @"lock": @"锁", @"sunroof": @"天窗",
+                @"battery": @"电池", @"clima": @"空调", @"heater": @"加热", @"engine": @"发动机",
+                @"service": @"保养", @"pressure": @"胎压", @"position": @"位置", @"time": @"时间",
+                @"ignition": @"点火", @"outer": @"车外", @"tank": @"油箱",
+            };
+            NSMutableString *s = [NSMutableString string];
+            [s appendFormat:@"%lu 个信号字段：\n\n", (unsigned long)fields.count];
+            for (NSDictionary *f in fields) {
+                NSMutableArray *parts = [NSMutableArray array];
+                for (NSString *k in f) {
+                    if ([k hasPrefix:@"_"]) continue;
+                    [parts addObject:[NSString stringWithFormat:@"%@=%@", k, f[k]]];
+                }
+                if (!parts.count) continue;
+                NSString *line = [parts componentsJoinedByString:@"  "];
+                // 中文标注命中
+                NSString *low = line.lowercaseString;
+                NSMutableArray *tags = [NSMutableArray array];
+                for (NSString *key in zh) if ([low containsString:key]) [tags addObject:zh[key]];
+                if (tags.count) [s appendFormat:@"【%@】%@\n", [tags componentsJoinedByString:@"/"], line];
+            }
+            if (s.length < 40) s.string = [xml substringToIndex:MIN(1500, xml.length)];
+            dispatch_async(dispatch_get_main_queue(), ^{ self.statusLabel.text = s; });
+        }]; },
         @"行程记录": ^{ [[MCSDK shared] tripsOfCurrentVehicleWithCompletion:^(NSArray<NSDictionary *> *trips, NSError *err) {
             if (err) { [self log:@"行程失败: %@", err.localizedDescription]; return; }
             [self log:@"%lu 条行程", (unsigned long)trips.count];

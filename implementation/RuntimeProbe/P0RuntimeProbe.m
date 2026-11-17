@@ -131,11 +131,36 @@ static NSMutableDictionary *MakeCaptureEntry(NSURLRequest *request) {
 }
 static IMP DataTaskReq, UploadTaskData;
 static id HookDataTask(id self, SEL sel, NSURLRequest *request, id handler) {
-    // 只捕获请求侧；不包装 completionHandler（CFNetwork task 销毁路径析构崩溃，见 17:03 崩溃报告）
+    // 请求侧全量捕获；仅对原始信号接口（vehicledata/getStatus）安全包装响应：
+    // block 只捕获不可变副本（URL 字符串拷贝）与 handler 强引用，规避 17:03 的析构悬垂。
     if (HostInteresting(request.URL)) {
         NSMutableDictionary *entry = MakeCaptureEntry(request);
         if (request.HTTPBody) SaveBlob(@"reqbody", request.URL, request.HTTPBody);
         Record([@"net-" stringByAppendingString:entry[@"stamp"]], entry);
+        NSString *path = request.URL.path.lowercaseString;
+        BOOL raw = [path containsString:@"vehicledata"] || [path containsString:@"getstatus"];
+        if (raw && handler) {
+            NSString *urlCopy = [request.URL.absoluteString copy];
+            NSString *stampCopy = [entry[@"stamp"] copy];
+            id original = handler;
+            void (^wrapped)(NSData *, NSURLResponse *, NSError *) =
+                ^(NSData *data, NSURLResponse *response, NSError *error) {
+                NSData *copy = [data copy];
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    if (copy.length) {
+                        NSString *name = [NSString stringWithFormat:@"%@-respbody.bin", stampCopy];
+                        NSString *p = [ProbeDirectory() stringByAppendingPathComponent:name];
+                        [copy writeToFile:p options:NSDataWritingAtomic error:nil];
+                        chmod(p.fileSystemRepresentation, 0600);
+                        Record([@"resp-" stringByAppendingString:stampCopy],
+                               @{@"url": urlCopy, @"bytes": @(copy.length)});
+                    }
+                });
+                void (^origBlock)(NSData *, NSURLResponse *, NSError *) = original;
+                origBlock(data, response, error);
+            };
+            return ((id(*)(id,SEL,id,id))DataTaskReq)(self, sel, request, wrapped);
+        }
     }
     return ((id(*)(id,SEL,id,id))DataTaskReq)(self, sel, request, handler);
 }

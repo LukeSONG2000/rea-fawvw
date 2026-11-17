@@ -110,3 +110,16 @@ NS_ASSUME_NONNULL_END
 - (void)climateStatusWithCompletion:(void (^)(NSString *_Nullable summary, NSError *_Nullable error))completion;
 - (void)healthWarningsWithCompletion:(void (^)(NSString *_Nullable summary, NSError *_Nullable error))completion;
 @end
+
+@interface MCSDK (RawData)
+/// 当前 MBB 访问令牌（内存，来自 SDK 会话）。
+- (NSString *_Nullable)mbbAccessToken;
+/// 直连 MAL vehicledata v2 原始信号（XML）。completion 返回全文。
+- (void)rawVehicleDataForVIN:(NSString *)vin
+                  completion:(void (^)(NSString *_Nullable xml, NSError *_Nullable error))completion;
+- (void)rawStatusReportForVIN:(NSString *)vin
+                   completion:(void (^)(NSString *_Nullable xml, NSError *_Nullable error))completion;
+/// XML → 字段表（每个元素的属性对）。
+- (NSArray<NSDictionary *> *)parseRawXML:(NSString *)xml;
+@end
+
