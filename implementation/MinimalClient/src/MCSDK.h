@@ -55,3 +55,58 @@ typedef void (^MCSDKVoidBlock)(void);
 @end
 
 NS_ASSUME_NONNULL_END
+
+NS_ASSUME_NONNULL_BEGIN
+
+/// 车辆人类可读信息（VIN → CarportData 映射）。
+@interface MCVehicleInfo : NSObject
+@property (copy) NSString *vin;
+@property (copy) NSString *modelCode, *modelName, *modelYear, *color, *engine, *transmission, *mmi, *countryCode;
+@property (copy) NSString *brand, *country;          // VehicleData
+@property (copy) NSString *displayName;              // modelName 优先
+@property (strong) NSArray<NSString *> *features;    // 支持的能力标识列表
+@property (strong) id rawVehicle;                    // SDK Vehicle 对象（选车用）
+@end
+
+@interface MCSDK (Catalog)
+/// 拉取全部车辆并解析人类可读信息（CarportData + 能力矩阵）。
+- (void)catalogWithCompletion:(void (^)(NSArray<MCVehicleInfo *> *_Nullable infos,
+                                        NSError *_Nullable error))completion;
+/// 能力标识 → 中文说明 + 对应控制接口（只读展示用）。
++ (NSDictionary<NSString *, NSString *> *)featureDescriptions;
++ (NSDictionary<NSString *, NSString *> *)controlCatalog;
+/// 只读位置查询（P0 范围内）。
+- (void)locationOfCurrentVehicleWithCompletion:(void (^)(NSString *summary, NSError *error))completion;
+@end
+
+@interface MCSDK (Control)
+/// SPIN（车机安全码）：仅内存，不落盘。nil = 走低安全级路径。
+@property (nonatomic, copy, nullable) NSString *spinCode;
+/// 物理控制（用户已授权执行；UI 层负责确认弹窗）。
+- (void)flashLights:(void (^)(NSString *status))onStatus error:(void (^)(NSString *error))onError;
+- (void)honkAndFlash:(void (^)(NSString *status))onStatus error:(void (^)(NSString *error))onError;
+- (void)lockVehicle:(void (^)(NSString *status))onStatus error:(void (^)(NSString *error))onError;
+- (void)unlockVehicle:(void (^)(NSString *status))onStatus error:(void (^)(NSString *error))onError;
+- (void)windowVenting:(void (^)(NSString *status))onStatus error:(void (^)(NSString *error))onError;
+- (void)windowOpen:(void (^)(NSString *status))onStatus error:(void (^)(NSString *error))onError;
+- (void)windowClose:(void (^)(NSString *status))onStatus error:(void (^)(NSString *error))onError;
+- (void)climateStart:(double)tempC onStatus:(void (^)(NSString *status))onStatus error:(void (^)(NSString *error))onError;
+- (void)climateStop:(void (^)(NSString *status))onStatus error:(void (^)(NSString *error))onError;
+- (void)auxHeatStart:(void (^)(NSString *status))onStatus error:(void (^)(NSString *error))onError;
+- (void)auxHeatStop:(void (^)(NSString *status))onStatus error:(void (^)(NSString *error))onError;
+- (void)engineStartWithSpin:(NSString *)spin onStatus:(void (^)(NSString *status))onStatus error:(void (^)(NSString *error))onError;
+- (void)engineStop:(void (^)(NSString *status))onStatus error:(void (^)(NSString *error))onError;
+@end
+
+NS_ASSUME_NONNULL_END
+
+@interface MCSDK (Trips)
+/// 当前车历史行程列表（单次车程：时长/里程/均速/平均油耗等）。
+- (void)tripsOfCurrentVehicleWithCompletion:(void (^)(NSArray<NSDictionary *> *_Nullable trips,
+                                                       NSError *_Nullable error))completion;
+@end
+
+@interface MCSDK (StatusQueries)
+- (void)climateStatusWithCompletion:(void (^)(NSString *_Nullable summary, NSError *_Nullable error))completion;
+- (void)healthWarningsWithCompletion:(void (^)(NSString *_Nullable summary, NSError *_Nullable error))completion;
+@end

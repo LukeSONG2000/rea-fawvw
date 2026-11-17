@@ -6,7 +6,7 @@
 //  - VWPCHybridMotion.loginMBBWithIdentityToken:completion: (0x1074cdf44)
 //  - VWPCHybridMotion.fetchVehicleByVin:account:completion: (0x1074cdccc)
 // Swift 类以运行时名加载；typed objc_msgSend 全部集中在本文件。
-#import "MCSDK.h"
+#import "MCSDK_Internal.h"
 #import "MCConfiguration.h"
 #import <objc/message.h>
 #import <objc/runtime.h>
@@ -43,15 +43,6 @@ static inline Class MCClass(NSString *runtimeName) {
     Class c = NSClassFromString(runtimeName);
     return c;
 }
-
-@interface MCSDK ()
-@property (nonatomic, strong, nullable) id stageActions;   // StageActionsImpl
-@property (nonatomic, strong, nullable) id rawStage;       // MbbChinaStage（分步定位用）
-@property (nonatomic, strong, nullable) id account;        // CarNetLib.Account
-@property (nonatomic, strong, nullable) id accountActions; // AccountActionsImpl
-@property (nonatomic, strong, nullable) id vehicleActions; // VehicleActionsImpl
-@property (nonatomic, copy, nullable) NSString *pendingVIN; // 异步选车完成前的登记
-@end
 
 @implementation MCSDK
 
