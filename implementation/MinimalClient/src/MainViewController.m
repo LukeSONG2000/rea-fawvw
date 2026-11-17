@@ -46,7 +46,7 @@
         @"车窗通风", @"车窗全开", @"车窗全关", @"空调开22℃",
         @"空调关", @"辅热开", @"辅热关", @"发动机启",
         @"发动机停", @"刷新状态", @"停车位置", @"行程记录",
-        @"空调状态", @"健康告警", @"门窗细态", @"能力清单", @"原始数据", @"状态详情"];
+        @"空调状态", @"健康告警", @"门窗细态", @"能力清单", @"原始数据", @"状态详情", @"权限地图", @"深度探测"];
     NSUInteger gridRows = (titles.count + 3) / 4;
     NSMutableArray *allRows = [NSMutableArray array];
     for (NSUInteger r = 0; r < gridRows; r++) {
@@ -233,6 +233,22 @@
         @"健康告警": ^{ [[MCSDK shared] healthWarningsWithCompletion:^(NSString *sum, NSError *err) {
             dispatch_async(dispatch_get_main_queue(), ^{ self.statusLabel.text = err ? [NSString stringWithFormat:@"健康告警失败: %@", err.localizedDescription] : [NSString stringWithFormat:@"健康告警: %@", sum]; }); }]; },
         @"门窗细态": ^{ [self refreshStatus]; },
+        @"权限地图": ^{ [[MCSDK shared] rawOperationListForVIN:self.currentVIN completion:^(NSString *xml, NSError *err) {
+            if (err) { [self log:@"权限地图失败: %@", err.localizedDescription]; return; }
+            NSLog(@"[MC] OPS XML 前 2500 字符:\n%@", [xml substringToIndex:MIN(2500, xml.length)]);
+            NSArray *fields = [[MCSDK shared] parseRawXML:xml];
+            NSMutableString *s = [NSMutableString stringWithFormat:@"%@ 个操作权限:\n", @(fields.count)];
+            for (NSDictionary *f in fields) {
+                NSString *op = f[@"operationId"] ?: f[@"id"] ?: f[@"name"];
+                NSString *role = f[@"requiredUserRole"] ?: @"";
+                if (op) [s appendFormat:@"• %@ %@\n", op, role];
+            }
+            if (s.length < 30) s.string = [xml substringToIndex:MIN(1200, xml.length)];
+            dispatch_async(dispatch_get_main_queue(), ^{ self.statusLabel.text = s; });
+        }]; },
+        @"深度探测": ^{ [[MCSDK shared] deepProbeAll:^(NSString *line) {
+            [self log:@"%@", line];
+        }]; },
         @"状态详情": ^{ [[MCSDK shared] rawStatusReportForVIN:self.currentVIN completion:^(NSString *xml, NSError *err) {
             if (err) { [self log:@"原始数据失败: %@", err.localizedDescription]; return; }
             [self log:@"原始数据 %lu 字符", (unsigned long)xml.length];

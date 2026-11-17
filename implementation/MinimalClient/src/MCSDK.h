@@ -115,6 +115,8 @@ NS_ASSUME_NONNULL_END
 /// 当前 MBB 访问令牌（内存，来自 SDK 会话）。
 - (NSString *_Nullable)mbbAccessToken;
 /// 直连 MAL vehicledata v2 原始信号（XML）。completion 返回全文。
+- (void)rawGet:(NSString *)urlString accept:(NSString *)accept
+    completion:(void (^)(NSString *_Nullable body, NSError *_Nullable error))completion;
 - (void)rawVehicleDataForVIN:(NSString *)vin
                   completion:(void (^)(NSString *_Nullable xml, NSError *_Nullable error))completion;
 - (void)rawStatusReportForVIN:(NSString *)vin
@@ -123,3 +125,11 @@ NS_ASSUME_NONNULL_END
 - (NSArray<NSDictionary *> *)parseRawXML:(NSString *)xml;
 @end
 
+
+@interface MCSDK (Deep)
+/// 深度探测：SDK 门面下全部剩余查询，逐行回调结果（只读）。
+- (void)deepProbeAll:(void (^)(NSString *line))onLine;
+/// 原始：操作权限地图（operationlist v3 XML）与家区域（JSON）。
+- (void)rawOperationListForVIN:(NSString *)vin completion:(void (^)(NSString *_Nullable xml, NSError *_Nullable error))completion;
+- (void)rawHomeRegionForVIN:(NSString *)vin completion:(void (^)(NSString *_Nullable json, NSError *_Nullable error))completion;
+@end
