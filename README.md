@@ -1,38 +1,40 @@
-# fawvw — 一汽大众 App 最小车控客户端研究
+# fawvw — 一汽大众最小车控客户端
 
-目标：用可独立构建的原生最小宿主复用 `CarNetLib.framework`，只保留登录、账号车辆身份、车控与相关查询；去除资讯、商城、营销等非车控功能。原 OneApp UI 补丁版仅作过渡与证据，不以隐藏入口冒充彻底移除。
+独立原生 iOS 客户端，只保留账号车辆身份、车辆控制与信息查询。当前界面采用拟物遥控器、单色 LCD、中文按键、触觉反馈和分级信息页。原 OneApp 补丁版仅作为过渡和研究证据。
 
-- 状态：**P0（证明独立宿主能工作）进行中**，尚未宣称 SDK 已可脱离原宿主运行。
-- 物理控制（开锁/启动/鸣笛）从未执行过；当前阶段只做只读验证。
-- 详见 [docs/ZCODE-RESEARCH-HANDOFF.md](docs/ZCODE-RESEARCH-HANDOFF.md)（验收标准与全部约束）。
+已在真机完成 SDK 初始化、现有身份会话恢复、车辆目录及 GTI 多项只读查询。完整新账号登录、MOSC 定位接入和物理控制逐项验收仍未完成。能力已开通不等于指令已实车成功。
+
+## 开发与构建
+
+```bash
+python3 implementation/MinimalClient/build.py --ipa
+```
+
+构建自动从本机 `packages/` 原始 IPA 恢复必要的 6 个 SDK，产物为 `output/FAWVW-MinimalClient-PoC-dev.ipa`。签名使用本机 Xcode 已有开发证书和描述文件；不在仓库保存签名私钥、身份令牌或账号密码。
+
+需要继续原宿主逆向或构建过渡版时，再恢复完整研究输入：
+
+```bash
+python3 implementation/prepare_inputs.py --full
+```
+
+原始 IPA、旧过渡版和完整 ObjC 元数据压缩包已保存在私有 [research-baseline Release](https://github.com/LukeSONG2000/fawvw/releases/tag/research-baseline)。清理后的本地布局与恢复方法见 [LOCAL-MAINTENANCE.md](docs/LOCAL-MAINTENANCE.md)。
 
 ## 目录
 
 | 路径 | 内容 |
 |---|---|
-| `packages/` | 原始 IPA（不进 git，见 Release） |
-| `recovered/ios-444.28.0/` | 解包后的 `OneApp.app`（只读输入，不修改） |
-| `analysis/` | REA 证据、SDK 符号/ObjC 元数据清单、接口候选、探针源码 |
-| `implementation/CarControlOnly/` | 旧宿主过渡补丁（dylib 注入 + 重签脚本） |
-| `implementation/MinimalClient/` | P0 独立最小宿主（建设中） |
-| `docs/` | 研究文档与交接记录 |
-| `output/` | 构建产物、截图、设备验证日志（敏感项不入库） |
+| `implementation/MinimalClient/` | 独立客户端、构建脚本和测试 |
+| `implementation/LocationProbe/` | GTI 只读定位取证探针 |
+| `implementation/CarControlOnly/`、`RuntimeProbe/` | 原宿主过渡补丁和认证研究 |
+| `analysis/` | 脱敏能力、接口、SDK 和定位证据 |
+| `docs/` | 设计、接口结论、交接与验收边界 |
+| `packages/` | 原始 IPA，本机保留，不进 Git |
+| `recovered/` | 按需解出的输入缓存，不进 Git |
+| `output/` | 最新 IPA、必要备份和私密证据；整个目录不进 Git |
 
-## 关键结论速览
+- [界面与交互规格](docs/CONTROL-APP-UI.md)
+- [GTI 信息能力与定位结论](docs/GTI-INFORMATION-AND-LOCATION.md)
+- [能力调查](docs/CAPABILITY-EXPLORATION-2026-11-17.md)
 
-- 原宿主通过 `VWPCHybridMotion` 类适配 CarNetLib：`initializeCarNetLib` → `fetchMbbStage` → `loginMBBWithIdentityToken:completion:` → `fetchVehicleByVin:account:completion:` / `fetchVehicleStatusWithVehicle:complete:`。
-- CarNetLib 非系统直接依赖仅 4 个：AEXML、AnyDate、EVReflectionCore、TrustKit（见 `analysis/rea-carnet-sdk-evidence.json`）。
-- SDK 内有一汽大众专属身份提供器 `FAWVWIdentityProviderStage` 与 `MbbChinaStage`；密码登录入口 `IdentityProviderStageActionsImpl.fetchIdentityTokenWithClientId:username:password:identityTokenFunction:`。
-
-## Release 归档
-
-见 Release `research-baseline`：
-
-- `com.fawvw.aftermarket_444.28.0_cn_iphone_dumpipa.com.ipa`：原始输入 IPA（SHA-256 见交接文档）。
-- `FAWVW-444.28.0-CarControlOnly-dev-signed.ipa`：过渡补丁版，用户确认可用（密码登录 + 代理 + GTI 车控页）；多车切换不可靠，不是最终交付。
-- `objc-runtime-metadata.txt.gz`：原主程序 133MB ObjC 运行时元数据 dump。
-
-## 安全与合规
-
-- 本仓库为**私有研究仓库**。设备备份、偏好 plist、运行日志、凭据、令牌、VIN、手机号不入库。
-- 登录凭据由用户在设备端输入；分析产物仅含静态二进制证据。
+设备备份、运行日志、偏好、VIN、手机号和令牌保留在本机受限目录。该仓库为私有研究仓库。

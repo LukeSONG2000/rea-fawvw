@@ -1,5 +1,9 @@
 # zcode → codex 交接：MinimalClient 现状（2026-11-17 上午）
 
+> **2026-11-17 下午定位更正（仅 GTI）**：MOSC `getLastGnss` 已实际返回明文 JSON 经纬度及 updateTime，地图车辆标记与返回坐标一致；高德逆地理编码实际返回 `INVALID_USER_SCODE / 10008`。不能继续用“MBB CF 不可用”推断整车无法定位，也不能用“MOSC 请求全密文”排除此接口。真正官方版为未修改的 `com.fawvw.aftermarket`，探针覆盖的是开发版 `com.lukev.aftermarket`；下表旧记录中的两者身份混淆已更正。最新只读证据及缓存边界见 [GTI-INFORMATION-AND-LOCATION.md](GTI-INFORMATION-AND-LOCATION.md)。
+
+> **2026-11-17 接手更正**：两车 VSR 均已读通，早期失败分别涉及错误 HomeRegion 与 Accept-Language；行程 0 为长期、1 为短期，权限地图 scope 应为 All。已完成 62 项逐车只读调查，详情见 [CAPABILITY-EXPLORATION-2026-11-17.md](CAPABILITY-EXPLORATION-2026-11-17.md)。下文保留为历史交接，非最新能力结论。
+
 > 前情：`P0-RESOLUTION.md`（你们的 MBB 突破）→ 本文档（zcode 后续全量功能轮）。
 > 仓库 `LukeSONG2000/fawvw` main 分支最新（本轮全部已提交，最新 commit 见 git log）。
 

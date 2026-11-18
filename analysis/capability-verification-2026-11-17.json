@@ -1,0 +1,26 @@
+{
+  "date": "2026-11-17",
+  "bundle_id": "com.lukev.minimalclient",
+  "artifact": "FAWVW-MinimalClient-PoC-dev.ipa",
+  "sha256": "1edfef4c3fe07c770e94b63e7ec5da016884035b2608d419d1d7d3617906d347",
+  "bytes": 21838192,
+  "verification": [
+    "codesign deep strict",
+    "same-bundle overlay install",
+    "31 persisted read-only survey tasks per vehicle",
+    "dynamic HomeRegion resolution",
+    "both raw VSR endpoints HTTP 200",
+    "both scoped operation-list endpoints HTTP 200",
+    "three trip types per vehicle returned successfully",
+    "safe getter ABI fixture test",
+    "XML signal-value and namespace fixture test",
+    "normal startup authentication and two-vehicle catalog and status callback",
+    "git diff --check"
+  ],
+  "physical_commands_executed": false,
+  "notes": [
+    "Not all surveyed features are supported; exact rejections are preserved in capability matrix",
+    "Control adapter changes compiled and checked against shipped signatures, not tested on vehicle",
+    "Existing imported identity session; full password login/refresh not completed"
+  ]
+}

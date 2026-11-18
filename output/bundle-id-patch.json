@@ -1,6 +1,0 @@
-{
-  "file_offset": 58360,
-  "original": "40010036",
-  "replacement": "1f2003d5",
-  "reason": "AppLaunchDelegate local app identity gate permits development bundle"
-}

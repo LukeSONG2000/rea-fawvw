@@ -1,0 +1,1566 @@
+{
+  "探影 T-CROSS": [
+    {
+      "fieldId": "0x0101010001",
+      "textId": null,
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x020203A21E",
+      "textId": "warning.msgA21E",
+      "unit": null,
+      "valuePresent": false,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x020203A222",
+      "textId": "warning.msgA222",
+      "unit": null,
+      "valuePresent": false,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x020203DF08",
+      "textId": "warning.msgDF08",
+      "unit": null,
+      "valuePresent": false,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0203010001",
+      "textId": "interval.oil.distance",
+      "unit": "km",
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0203010002",
+      "textId": "interval.oil.time",
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0203010003",
+      "textId": "interval.inspection.distance",
+      "unit": "km",
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0203010004",
+      "textId": "interval.inspection.time",
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0204040001",
+      "textId": null,
+      "unit": "l",
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0204040003",
+      "textId": "oil.level",
+      "unit": "%",
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0204040004",
+      "textId": "oilDisplay.0",
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0204040006",
+      "textId": "oil.level",
+      "unit": "%",
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x02040C0001",
+      "textId": "not_supported",
+      "unit": null,
+      "valuePresent": false,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0301010001",
+      "textId": "status_parking_light_off",
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0301020001",
+      "textId": "temperature_outside_valid",
+      "unit": "dK",
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0301030001",
+      "textId": "parking_brake_inactive",
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0301030003",
+      "textId": "bem_ok",
+      "unit": "%",
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0301030004",
+      "textId": "speed_ok",
+      "unit": "km/h",
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0301030005",
+      "textId": "range_ok",
+      "unit": "km",
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0301030006",
+      "textId": "range_ok",
+      "unit": "km",
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0301030007",
+      "textId": "engine_type_gasoline",
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0301030008",
+      "textId": "range_error",
+      "unit": null,
+      "valuePresent": false,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0301030009",
+      "textId": "engine_type_unsupported",
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x030103000A",
+      "textId": "fuel_level_ok",
+      "unit": "%",
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x030103000B",
+      "textId": "fuel_level_calculated",
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x030103000D",
+      "textId": "gas_level_error",
+      "unit": null,
+      "valuePresent": false,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0301040001",
+      "textId": "door_locked",
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0301040002",
+      "textId": "door_closed",
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0301040003",
+      "textId": "door_unsafe",
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0301040004",
+      "textId": "door_locked",
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0301040005",
+      "textId": "door_closed",
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0301040006",
+      "textId": "door_unsafe",
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0301040007",
+      "textId": "door_locked",
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0301040008",
+      "textId": "door_closed",
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0301040009",
+      "textId": "door_unsafe",
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x030104000A",
+      "textId": "door_locked",
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x030104000B",
+      "textId": "door_closed",
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x030104000C",
+      "textId": "door_unsafe",
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x030104000D",
+      "textId": "door_locked",
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x030104000E",
+      "textId": "door_closed",
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x030104000F",
+      "textId": "door_unsafe",
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0301040010",
+      "textId": "door_unlocked",
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0301040011",
+      "textId": "door_closed",
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0301040012",
+      "textId": "door_unsafe",
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0301050001",
+      "textId": "window_closed",
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0301050002",
+      "textId": null,
+      "unit": "%",
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0301050003",
+      "textId": "window_closed",
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0301050004",
+      "textId": null,
+      "unit": "%",
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0301050005",
+      "textId": "window_closed",
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0301050006",
+      "textId": null,
+      "unit": "%",
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0301050007",
+      "textId": "window_closed",
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0301050008",
+      "textId": null,
+      "unit": "%",
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0301050009",
+      "textId": "window_unsupported",
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x030105000B",
+      "textId": "window_closed",
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x030105000C",
+      "textId": null,
+      "unit": "%",
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x030105000D",
+      "textId": "window_invalid",
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x030105000F",
+      "textId": "window_unsupported",
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0301050011",
+      "textId": "window_invalid",
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0301060001",
+      "textId": "tyre_invalid",
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0301060002",
+      "textId": "tyre_invalid",
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0301060003",
+      "textId": "tyre_invalid",
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0301060004",
+      "textId": "tyre_invalid",
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0301060005",
+      "textId": "tyre_invalid",
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0301060006",
+      "textId": "tyre_invalid",
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0301060007",
+      "textId": "tyre_invalid",
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0301060008",
+      "textId": "tyre_invalid",
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0301060009",
+      "textId": "tyre_invalid",
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x030106000A",
+      "textId": "tyre_invalid",
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x030106000B",
+      "textId": "tyre_invalid",
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x030106000C",
+      "textId": "tyre_invalid",
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x030106000D",
+      "textId": "tyre_invalid",
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x030106000E",
+      "textId": "tyre_invalid",
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x030106000F",
+      "textId": "tyre_invalid",
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0101010002",
+      "textId": null,
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    }
+  ],
+  "高尔夫 GTI": [
+    {
+      "fieldId": "0x0101010001",
+      "textId": null,
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0101010002",
+      "textId": null,
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0203010001",
+      "textId": "interval.oil.distance",
+      "unit": "km",
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0203010002",
+      "textId": "interval.oil.time",
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0203010003",
+      "textId": "interval.inspection.distance",
+      "unit": "km",
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0203010004",
+      "textId": "interval.inspection.time",
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x020203A222",
+      "textId": "warning.msgA222",
+      "unit": null,
+      "valuePresent": false,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x020203DF08",
+      "textId": "warning.msgDF08",
+      "unit": null,
+      "valuePresent": false,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0204040001",
+      "textId": null,
+      "unit": "l",
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0204040003",
+      "textId": "oil.level",
+      "unit": "%",
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0204040004",
+      "textId": "oilDisplay.0",
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0204040006",
+      "textId": "oil.level",
+      "unit": "%",
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0204040007",
+      "textId": "oil.level",
+      "unit": "%",
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x02040C0001",
+      "textId": "not_supported",
+      "unit": null,
+      "valuePresent": false,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0301010001",
+      "textId": "status_parking_light_off",
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0301030001",
+      "textId": "parking_brake_active",
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0301030003",
+      "textId": "bem_ok",
+      "unit": "%",
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0301030004",
+      "textId": "speed_ok",
+      "unit": "km/h",
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0301030006",
+      "textId": "range_ok",
+      "unit": "km",
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0301030007",
+      "textId": "engine_type_gasoline",
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0301030008",
+      "textId": "range_error",
+      "unit": null,
+      "valuePresent": false,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0301030009",
+      "textId": "engine_type_unsupported",
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x030103000A",
+      "textId": "fuel_level_ok",
+      "unit": "%",
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x030103000B",
+      "textId": "fuel_level_calculated",
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x030103000D",
+      "textId": "gas_level_error",
+      "unit": null,
+      "valuePresent": false,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0301040001",
+      "textId": "door_locked",
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0301040002",
+      "textId": "door_closed",
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0301040003",
+      "textId": "door_unsafe",
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0301040004",
+      "textId": "door_locked",
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0301040005",
+      "textId": "door_closed",
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0301040006",
+      "textId": "door_unsafe",
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0301040007",
+      "textId": "door_locked",
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0301040008",
+      "textId": "door_closed",
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0301040009",
+      "textId": "door_unsafe",
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x030104000A",
+      "textId": "door_locked",
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x030104000B",
+      "textId": "door_closed",
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x030104000C",
+      "textId": "door_unsafe",
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x030104000D",
+      "textId": "door_locked",
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x030104000E",
+      "textId": "door_closed",
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x030104000F",
+      "textId": "door_unsafe",
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0301040010",
+      "textId": "door_unlocked",
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0301040011",
+      "textId": "door_closed",
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0301040012",
+      "textId": "door_unsafe",
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0301050001",
+      "textId": "window_closed",
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0301050002",
+      "textId": null,
+      "unit": "%",
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0301050003",
+      "textId": "window_closed",
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0301050004",
+      "textId": null,
+      "unit": "%",
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0301050005",
+      "textId": "window_closed",
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0301050006",
+      "textId": null,
+      "unit": "%",
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0301050007",
+      "textId": "window_closed",
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0301050008",
+      "textId": null,
+      "unit": "%",
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x0301050009",
+      "textId": "window_unsupported",
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x030105000B",
+      "textId": "window_closed",
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x030105000C",
+      "textId": null,
+      "unit": "%",
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x030105000D",
+      "textId": "window_closed",
+      "unit": null,
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    },
+    {
+      "fieldId": "0x030105000E",
+      "textId": null,
+      "unit": "%",
+      "valuePresent": true,
+      "timestampFields": [
+        "tsCarCaptured",
+        "tsCarSent",
+        "tsCarSentUtc",
+        "tsTssReceivedUtc"
+      ]
+    }
+  ]
+}

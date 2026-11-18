@@ -1,0 +1,1220 @@
+{
+  "date": "2026-11-17",
+  "scope": "CarNetLib current-account two-vehicle SDK and regional raw GET survey",
+  "surveyVersion": 3,
+  "physicalCommandsSent": false,
+  "vehicles": [
+    {
+      "name": "探影 T-CROSS",
+      "model": {
+        "engine": "DMB",
+        "color": "LC9A",
+        "mmi": "7T0",
+        "modelCode": "C713CY",
+        "countryCode": "CN",
+        "transmission": "TDT",
+        "modelName": "T-CROSS 1.5 COMFO 83SRE A6F",
+        "modelYear": "2022"
+      },
+      "region": "https://mal-1a.prd.cn.vwg-connect.cn/api",
+      "rights": {
+        "role": "SECONDARY_USER",
+        "securityLevel": "HG_3",
+        "status": "ENABLED",
+        "services": {
+          "owner_v1": [
+            "D_VENROLLMENTRESET",
+            "D_VUSERENROLLMENTRESET",
+            "G_ENROLLMENTCODE",
+            "G_VENROLLMENTSTATUS",
+            "G_VUSERENROLLMENTSTATUS",
+            "P_INITENROLLMENTCODE"
+          ],
+          "rhonk_v1": [
+            "G_CONF",
+            "G_REQSTATUS",
+            "G_RHIST",
+            "P_VREQ"
+          ],
+          "rolesrights_secondaryuser_v1": [
+            "nominateSecondaryUser",
+            "revokeSecondaryUser"
+          ],
+          "vehiclehealth_v1": [
+            "G_VHR2"
+          ],
+          "rolesrights_securitypin_v2": [
+            "prepareSecurityPinTransmission"
+          ],
+          "carfinder_v1": [
+            "FIND_CAR"
+          ],
+          "rlu_v1": [
+            "G_LACT",
+            "G_RQSTAT",
+            "LOCK",
+            "UNLOCK"
+          ],
+          "rolesrights_primaryuser_v2": [
+            "assignPrimaryUser"
+          ],
+          "lsd_v1": [],
+          "rolesrights_securitypin_v1": [
+            "confirmRestoredSecurityPin",
+            "prepareSecurityPinTransmission"
+          ],
+          "trip_statistic_v1": [
+            "D_TRIPDATA",
+            "G_AGGR_TRIPDATA",
+            "G_JOBSTATUS",
+            "G_TRIPDATA"
+          ],
+          "usermanagement_users_v1": [
+            "addPairing",
+            "getPairingStatus",
+            "removePairing"
+          ],
+          "rolesrights_permissions_v1": [
+            "fetchRole"
+          ],
+          "rolesrights_authorization_v2": [
+            "completeExtAuthV100",
+            "completeExtAuthV200",
+            "requestExtAuthV100",
+            "requestExtAuthV200"
+          ],
+          "statusreport_v1": [
+            "G_CVDATA",
+            "G_CVDATAID",
+            "G_RQSTAT",
+            "G_SVDATA"
+          ],
+          "rolesrights_primaryuser_v1": [
+            "revokePrimaryUser"
+          ],
+          "fod_v1": [],
+          "speedalert_v1": [
+            "D_ALERT",
+            "D_ALERTS",
+            "D_RHENTRY",
+            "D_RHIST",
+            "G_ALERTS",
+            "G_CONF",
+            "G_DLIST",
+            "G_DLSTATUS",
+            "G_RHIST",
+            "P_DLIST"
+          ],
+          "geofence_v1": [
+            "D_ALERT",
+            "D_ALERTS",
+            "D_RHENTRY",
+            "D_RHIST",
+            "G_ALERTS",
+            "G_CONF",
+            "G_DLIST",
+            "G_DLSTATUS",
+            "G_RHIST",
+            "P_DLIST"
+          ]
+        }
+      },
+      "features": {
+        "pushSubscriptionsFeature": null,
+        "climaterFeature": null,
+        "speedAlertFeature": {
+          "serviceDisableReason": 7,
+          "_class": "CarNetLib.SpeedAlertFeature",
+          "unavailable": false,
+          "requestDefinitionsWithUserRoleGranted": false,
+          "serviceEnabled": true,
+          "requestHistoryWithUserRoleGranted": false,
+          "serviceDisabledReasons": {
+            "count": 0,
+            "items": []
+          }
+        },
+        "antiTheftAlertFeature": null,
+        "batteryChargingFeatureV2": null,
+        "flightModeFeature": {
+          "serviceDisableReason": 7,
+          "serviceDisabledReasons": {
+            "count": 0,
+            "items": []
+          },
+          "serviceEnabled": true,
+          "_class": "CarNetLib.FlightModeFeature",
+          "unavailable": false
+        },
+        "remoteProfileTimerFeature": null,
+        "remoteStartFeature": null,
+        "remotePretripClimatisationFeature": null,
+        "lockUnlockFeature": {
+          "windowSunroofVentingOpenSupported": false,
+          "serviceDisabledReasons": {
+            "count": 0,
+            "items": []
+          },
+          "lockSupported": true,
+          "unavailable": false,
+          "_class": "CarNetLib.LockUnlockFeature",
+          "windowSunroofCloseSupported": false,
+          "windowSunroofVentingOpenSecurityLevelReached": false,
+          "unlockSecurityLevelReached": true,
+          "lockSecurityLevelReached": true,
+          "serviceDisableReason": 7,
+          "unlockSupported": true,
+          "windowSunroofOpenSupported": false,
+          "serviceEnabled": true,
+          "windowSunroofCloseSecurityLevelReached": false,
+          "windowSunroofOpenSecurityLevelReached": false
+        },
+        "departureTimerFeature": null,
+        "geoFenceAlertFeature": {
+          "serviceDisableReason": 7,
+          "_class": "CarNetLib.GeoFenceAlertFeature",
+          "unavailable": false,
+          "requestDefinitionsWithUserRoleGranted": false,
+          "serviceEnabled": true,
+          "requestHistoryWithUserRoleGranted": false,
+          "serviceDisabledReasons": {
+            "count": 0,
+            "items": []
+          }
+        },
+        "batteryChargingFeature": null,
+        "tripStatisticsFeature": {
+          "supportsAuxiliaryConsumption": false,
+          "unavailable": false,
+          "supportsLongTermTrips": true,
+          "supportsElectricConsumption": false,
+          "_class": "CarNetLib.TripStatisticsFeature",
+          "supportsRecuperation": false,
+          "supportsShortTermTrips": true,
+          "serviceDisableReason": 7,
+          "supportsElectricOverallConsumption": false,
+          "supportsCNGOverallConsumption": false,
+          "supportsFuelOverallConsumption": true,
+          "supportsCyclicTrips": true,
+          "serviceEnabled": true,
+          "serviceDisabledReasons": {
+            "count": 0,
+            "items": []
+          }
+        },
+        "vehicleStatusFeature": {
+          "_class": "CarNetLib.VehicleStatusFeature",
+          "unavailable": false,
+          "doorLayout": 1,
+          "serviceDisableReason": 7,
+          "isOilServiceIntervalSupported": true,
+          "isNextServiceIntervalSupported": true,
+          "isWindowStateSupported": true,
+          "vehicleType": 0,
+          "serviceEnabled": true,
+          "serviceDisabledReasons": {
+            "count": 0,
+            "items": []
+          }
+        },
+        "auxiliaryHeatingFeature": null,
+        "poiFeature": null,
+        "remoteBatteryChargingFeature": null,
+        "mobileDevicePairingFeature": null,
+        "vehicleHealthReportFeature": {
+          "serviceDisableReason": 7,
+          "_class": "CarNetLib.VehicleHealthReportFeature",
+          "unavailable": false,
+          "serviceEnabled": true,
+          "isSecurityLevelReachedForHistory": true,
+          "isHistorySupported": true,
+          "serviceDisabledReasons": {
+            "count": 0,
+            "items": []
+          }
+        },
+        "remoteVehicleStatusFeature": {
+          "_class": "CarNetLib.VehicleStatusFeature",
+          "unavailable": false,
+          "doorLayout": 1,
+          "serviceDisableReason": 7,
+          "isOilServiceIntervalSupported": true,
+          "isNextServiceIntervalSupported": true,
+          "isWindowStateSupported": true,
+          "vehicleType": 0,
+          "serviceEnabled": true,
+          "serviceDisabledReasons": {
+            "count": 0,
+            "items": []
+          }
+        },
+        "lastParkingPositionFeature": {
+          "serviceDisableReason": 7,
+          "serviceDisabledReasons": {
+            "count": 0,
+            "items": []
+          },
+          "serviceEnabled": true,
+          "_class": "CarNetLib.LastParkingPositionFeature",
+          "unavailable": false
+        },
+        "parkingAssistantFeature": null,
+        "honkFlashFeature": {
+          "serviceDisableReason": 7,
+          "serviceDisabledReasons": {
+            "count": 0,
+            "items": []
+          },
+          "serviceEnabled": true,
+          "_class": "CarNetLib.HonkAndFlashFeature",
+          "unavailable": false
+        }
+      },
+      "controls": {
+        "lock": {
+          "sdkServiceEnabled": true,
+          "sdkFlag": true,
+          "backendPermission": true,
+          "physicalExecutionTested": false
+        },
+        "unlock": {
+          "sdkServiceEnabled": true,
+          "sdkFlag": true,
+          "backendPermission": true,
+          "physicalExecutionTested": false
+        },
+        "windowOpen": {
+          "sdkServiceEnabled": true,
+          "sdkFlag": false,
+          "backendPermission": false,
+          "physicalExecutionTested": false
+        },
+        "windowClose": {
+          "sdkServiceEnabled": true,
+          "sdkFlag": false,
+          "backendPermission": false,
+          "physicalExecutionTested": false
+        },
+        "windowVenting": {
+          "sdkServiceEnabled": true,
+          "sdkFlag": false,
+          "backendPermission": false,
+          "physicalExecutionTested": false
+        },
+        "engineStart": {
+          "sdkServiceEnabled": false,
+          "sdkFlag": false,
+          "backendPermission": false,
+          "physicalExecutionTested": false
+        },
+        "engineStop": {
+          "sdkServiceEnabled": false,
+          "sdkFlag": false,
+          "backendPermission": false,
+          "physicalExecutionTested": false
+        },
+        "honkFlash": {
+          "sdkServiceEnabled": true,
+          "sdkFlag": true,
+          "backendPermission": true,
+          "physicalExecutionTested": false
+        }
+      },
+      "queryCount": 31,
+      "queryStates": {
+        "success": 14,
+        "sdk-error": 17
+      },
+      "queries": {
+        "vehicleStatus": {
+          "state": "success",
+          "runner": "loadWithErrorFunction:",
+          "emptyResult": false,
+          "resultClass": "CarNetLib.VehicleStatus",
+          "availableFields": [
+            "bodyStatus",
+            "bonnetStatus",
+            "combinedRange",
+            "doorPositions",
+            "frontLeftDoorStatus",
+            "frontLeftWindowStatus",
+            "frontRightDoorStatus",
+            "frontRightWindowStatus",
+            "fuelLevel",
+            "leftParkingLightStatus",
+            "mileage",
+            "nextOilServiceInDays",
+            "nextOilServiceInKm",
+            "nextServiceInDays",
+            "nextServiceInKm",
+            "parkingLightPositions",
+            "primaryEngineRange",
+            "primaryEngineType",
+            "rearLeftDoorStatus",
+            "rearLeftWindowStatus",
+            "rearRightDoorStatus",
+            "rearRightWindowStatus",
+            "rightParkingLightStatus",
+            "secondaryEngineType",
+            "sunroofStatus",
+            "timestamp",
+            "trunkStatus",
+            "windowPositions"
+          ]
+        },
+        "parkingPosition": {
+          "state": "success",
+          "runner": "loadWithErrorFunction:",
+          "emptyResult": false,
+          "resultClass": "CarNetLib.VehicleLocation"
+        },
+        "climateStatus": {
+          "state": "sdk-error",
+          "runner": "loadWithErrorFunction:",
+          "error": "errorCode=(1:featureNotAvailable)"
+        },
+        "pretripClimateStatus": {
+          "state": "sdk-error",
+          "runner": "loadWithErrorFunction:",
+          "error": "errorCode=(1:featureNotAvailable)"
+        },
+        "chargerStatus": {
+          "state": "sdk-error",
+          "runner": "loadWithErrorFunction:",
+          "error": "errorCode=(1:featureNotAvailable)"
+        },
+        "chargerStatusV2": {
+          "state": "sdk-error",
+          "runner": "loadWithErrorFunction:",
+          "error": "errorCode=(1:featureNotAvailable)"
+        },
+        "auxiliaryHeatingStatus": {
+          "state": "sdk-error",
+          "runner": "loadWithErrorFunction:",
+          "error": "errorCode=(1:featureNotAvailable)"
+        },
+        "pairingStatus": {
+          "state": "sdk-error",
+          "runner": "loadWithErrorFunction:",
+          "error": "errorCode=(1:featureNotAvailable)"
+        },
+        "honkFlashConfiguration": {
+          "state": "success",
+          "runner": "loadWithErrorFunction:",
+          "emptyResult": false,
+          "resultClass": "CarNetLib.InternalHonkAndFlashConfiguration",
+          "configuration": {
+            "maximumDistanceToVehicle": 0,
+            "maximumServiceDuration": 30,
+            "flashForbidden": false,
+            "defaultServiceDuration": 15,
+            "honkForbidden": false
+          }
+        },
+        "vehicleUsers": {
+          "state": "success",
+          "runner": "loadWithErrorFunction:",
+          "emptyResult": false,
+          "resultClass": null,
+          "returnedCount": 2,
+          "snapshotItemCount": 2,
+          "nonNullItemFields": [
+            "deletedInBackend",
+            "identityProviderID",
+            "isInVehicle",
+            "mbbUserId",
+            "pushToVehicle",
+            "securityLevel",
+            "spinLockedWaitingTime",
+            "spinStatus",
+            "ssoId",
+            "userRole",
+            "userStatus"
+          ]
+        },
+        "healthWarnings": {
+          "state": "success",
+          "runner": "loadWithErrorFunction:",
+          "emptyResult": false,
+          "resultClass": "CarNetLib.InternalWarningsReport",
+          "warningCount": 1,
+          "warnings": [
+            {
+              "textId": "warning.msgA21E",
+              "text": "请更换遥控钥匙电池。"
+            }
+          ]
+        },
+        "engineHistory": {
+          "state": "sdk-error",
+          "runner": "executeWithErrorFunction:",
+          "error": "errorCode=(1:featureNotAvailable)"
+        },
+        "enginePairStatus": {
+          "state": "sdk-error",
+          "runner": "executeWithErrorFunction:",
+          "error": "errorCode=(1:featureNotAvailable)"
+        },
+        "departureConfiguration": {
+          "state": "sdk-error",
+          "runner": "loadWithErrorFunction:",
+          "error": "errorCode=(1:featureNotAvailable)"
+        },
+        "profileTimers": {
+          "state": "sdk-error",
+          "runner": "executeWithErrorFunction:",
+          "error": "errorCode=(1:featureNotAvailable)"
+        },
+        "remoteProfileTimer": {
+          "state": "sdk-error",
+          "runner": "loadWithErrorFunction:",
+          "error": "errorCode=(1:featureNotAvailable)"
+        },
+        "geofenceDefinitions": {
+          "state": "sdk-error",
+          "runner": "loadWithErrorFunction:",
+          "error": "Unable to map error (statusCode=403, errorCode=mbbc.rolesandrights.unauthorized, description=The context has not gained a legitimation due to missing access rights.)"
+        },
+        "geofenceNotifications": {
+          "state": "sdk-error",
+          "runner": "loadWithErrorFunction:",
+          "error": "Unable to map error (statusCode=403, errorCode=mbbc.rolesandrights.unauthorized, description=The context has not gained a legitimation due to missing access rights.)"
+        },
+        "speedDefinitions": {
+          "state": "sdk-error",
+          "runner": "loadWithErrorFunction:",
+          "error": "Unable to map error (statusCode=403, errorCode=mbbc.rolesandrights.unauthorized, description=The context has not gained a legitimation due to missing access rights.)"
+        },
+        "speedNotifications": {
+          "state": "sdk-error",
+          "runner": "loadWithErrorFunction:",
+          "error": "Unable to map error (statusCode=403, errorCode=mbbc.rolesandrights.unauthorized, description=The context has not gained a legitimation due to missing access rights.)"
+        },
+        "antiTheftNotifications": {
+          "state": "sdk-error",
+          "runner": "loadWithErrorFunction:",
+          "error": "errorCode=(1:featureNotAvailable)"
+        },
+        "pairingLastStatus": {
+          "state": "sdk-error",
+          "runner": "executeWithErrorFunction:",
+          "error": "errorCode=(1:featureNotAvailable)"
+        },
+        "tripsLongTerm": {
+          "state": "success",
+          "runner": "loadWithErrorFunction:",
+          "emptyResult": false,
+          "resultClass": null,
+          "returnedCount": 16,
+          "snapshotItemCount": 16,
+          "nonNullItemFields": [
+            "averageFuelConsumption",
+            "averageSpeed",
+            "id",
+            "mileage",
+            "overallMileage",
+            "reportReason",
+            "startMileage",
+            "travelTime",
+            "tripEnd",
+            "tripType"
+          ]
+        },
+        "tripsShortTerm": {
+          "state": "success",
+          "runner": "loadWithErrorFunction:",
+          "emptyResult": false,
+          "resultClass": null,
+          "returnedCount": 500,
+          "snapshotItemCount": 100,
+          "nonNullItemFields": [
+            "averageFuelConsumption",
+            "averageSpeed",
+            "id",
+            "mileage",
+            "overallMileage",
+            "reportReason",
+            "startMileage",
+            "travelTime",
+            "tripEnd",
+            "tripType"
+          ]
+        },
+        "tripsCyclic": {
+          "state": "success",
+          "runner": "loadWithErrorFunction:",
+          "emptyResult": false,
+          "resultClass": null,
+          "returnedCount": 100,
+          "snapshotItemCount": 100,
+          "nonNullItemFields": [
+            "averageFuelConsumption",
+            "averageSpeed",
+            "id",
+            "mileage",
+            "overallMileage",
+            "reportReason",
+            "startMileage",
+            "travelTime",
+            "tripEnd",
+            "tripType"
+          ]
+        },
+        "vehicleData": {
+          "state": "success",
+          "httpStatus": 200,
+          "bytes": 1282
+        },
+        "statusReport": {
+          "state": "success",
+          "httpStatus": 200,
+          "bytes": 20026
+        },
+        "operationList": {
+          "state": "success",
+          "httpStatus": 200,
+          "bytes": 34065
+        },
+        "operationListUnscoped": {
+          "state": "success",
+          "httpStatus": 200,
+          "bytes": 34065
+        },
+        "carFinder": {
+          "state": "success",
+          "httpStatus": 200,
+          "bytes": 554
+        },
+        "homeRegion": {
+          "state": "success",
+          "httpStatus": 200,
+          "bytes": 105
+        }
+      },
+      "rawSignalCount": 74,
+      "rawSignalsWithValues": 68
+    },
+    {
+      "name": "高尔夫 GTI",
+      "model": {
+        "engine": "DTJ",
+        "color": "L0K1",
+        "mmi": "7UY",
+        "modelCode": "CN29SZ",
+        "countryCode": "CN",
+        "transmission": "WNL",
+        "modelName": "GOLF 2,0 GTIBM 162 TSID7F",
+        "modelYear": "2026"
+      },
+      "region": "https://mal-3a.prd.cn.dp.vwg-connect.cn/api",
+      "rights": {
+        "role": "PRIMARY_USER",
+        "securityLevel": "HG_3",
+        "status": "ENABLED",
+        "services": {
+          "rolesrights_securitypin_v1": [
+            "confirmRestoredSecurityPin",
+            "prepareSecurityPinTransmission"
+          ],
+          "rhonk_v1": [
+            "G_CONF",
+            "G_REQSTATUS",
+            "G_RHIST",
+            "P_VREQ"
+          ],
+          "mobiledevicemgmt_v1": [
+            "registerMkiaaid"
+          ],
+          "trip_statistic_v1": [
+            "D_TRIPDATA",
+            "G_AGGR_TRIPDATA",
+            "G_JOBSTATUS",
+            "G_TRIPDATA"
+          ],
+          "vehicleusers_v2": [],
+          "statusreport_v1": [
+            "G_CVDATA",
+            "G_CVDATAID",
+            "G_RQSTAT",
+            "G_SVDATA"
+          ],
+          "rolesrights_authorization_v2": [
+            "completeExtAuthV100",
+            "completeExtAuthV200",
+            "initVTAN",
+            "requestExtAuthV100",
+            "requestExtAuthV200"
+          ],
+          "dwap": [
+            "D_NHIST",
+            "G_NHIST",
+            "G_NHISTLAST",
+            "G_VCONF"
+          ],
+          "rolesrights_primaryuser_v1": [
+            "revokePrimaryUser"
+          ],
+          "mdp_v1": [
+            "MDP_INITIAL",
+            "MDP_QUERY",
+            "MDP_REMOVE",
+            "MDP_REQUEST",
+            "MDP_REQUEST_STATUS"
+          ],
+          "devicereset_v1": [],
+          "rstart_v1": [
+            "ACTION_REQUEST_STATUS",
+            "GET_LAST_ACTIONS",
+            "START_ACTION",
+            "STOP_ACTION"
+          ],
+          "rolesrights_securitypin_v2": [
+            "prepareSecurityPinTransmission"
+          ],
+          "rolesrights_primaryuser_v2": [
+            "assignPrimaryUser"
+          ],
+          "lsd_v1": [],
+          "idp_v1": [],
+          "rlu_v1": [
+            "G_LACT",
+            "G_RQSTAT",
+            "LOCK",
+            "UNLOCK",
+            "WINDOWSUNROOFCLOSE",
+            "WINDOWSUNROOFOPEN",
+            "WINDOWSUNROOFVENTINGOPEN"
+          ],
+          "communicationConf_v1": [],
+          "rolesrights_secondaryuser_v2": [
+            "nominateSecondaryUser"
+          ],
+          "pso_v1": [
+            "G_PSO_INFOS",
+            "G_SETTINGS",
+            "G_SETTINGS_VIN",
+            "G_SETTING_IDS",
+            "G_SETTING_INFOS",
+            "G_SETTING_INFOS_VIN",
+            "P_SETTINGS",
+            "P_SETTINGS_VIN"
+          ],
+          "vehiclehealth_v1": [
+            "G_VHR2"
+          ],
+          "rolesrights_secondaryuser_v1": [
+            "nominateSecondaryUser",
+            "revokeSecondaryUser"
+          ],
+          "usermanagement_users_v1": [
+            "addPairing",
+            "getPairingStatus",
+            "removePairing"
+          ],
+          "powerManagementConf_v1": [],
+          "mbboauth_v1": [],
+          "license_v2": [],
+          "cc_breakdown_v2": [],
+          "rolesrights_permissions_v1": [
+            "fetchRole"
+          ],
+          "services_v1": [],
+          "owner_v1": [
+            "D_VENROLLMENTRESET",
+            "D_VUSERENROLLMENTRESET",
+            "G_ENROLLMENTCODE",
+            "G_VENROLLMENTSTATUS",
+            "G_VUSERENROLLMENTSTATUS"
+          ]
+        }
+      },
+      "features": {
+        "pushSubscriptionsFeature": null,
+        "climaterFeature": null,
+        "speedAlertFeature": null,
+        "antiTheftAlertFeature": {
+          "serviceDisableReason": 7,
+          "requestHistoryWithUserRoleGranted": true,
+          "_class": "CarNetLib.AntiTheftAlertFeature",
+          "unavailable": false,
+          "serviceEnabled": true,
+          "serviceDisabledReasons": {
+            "count": 0,
+            "items": []
+          }
+        },
+        "batteryChargingFeatureV2": null,
+        "flightModeFeature": {
+          "serviceDisableReason": 7,
+          "serviceDisabledReasons": {
+            "count": 0,
+            "items": []
+          },
+          "serviceEnabled": true,
+          "_class": "CarNetLib.FlightModeFeature",
+          "unavailable": false
+        },
+        "remoteProfileTimerFeature": null,
+        "remoteStartFeature": {
+          "_class": "CarNetLib.RemoteStartFeature",
+          "startActionSecurityLevelReached": true,
+          "unavailable": false,
+          "stopActionSupported": true,
+          "stopActionSecurityLevelReached": true,
+          "serviceDisableReason": 7,
+          "startActionSupported": true,
+          "serviceEnabled": true,
+          "serviceDisabledReasons": {
+            "count": 0,
+            "items": []
+          }
+        },
+        "remotePretripClimatisationFeature": null,
+        "lockUnlockFeature": {
+          "windowSunroofVentingOpenSupported": true,
+          "serviceDisabledReasons": {
+            "count": 0,
+            "items": []
+          },
+          "lockSupported": true,
+          "unavailable": false,
+          "_class": "CarNetLib.LockUnlockFeature",
+          "windowSunroofCloseSupported": true,
+          "windowSunroofVentingOpenSecurityLevelReached": true,
+          "unlockSecurityLevelReached": true,
+          "lockSecurityLevelReached": true,
+          "serviceDisableReason": 7,
+          "unlockSupported": true,
+          "windowSunroofOpenSupported": true,
+          "serviceEnabled": true,
+          "windowSunroofCloseSecurityLevelReached": true,
+          "windowSunroofOpenSecurityLevelReached": true
+        },
+        "departureTimerFeature": null,
+        "geoFenceAlertFeature": null,
+        "batteryChargingFeature": null,
+        "tripStatisticsFeature": {
+          "supportsAuxiliaryConsumption": false,
+          "unavailable": false,
+          "supportsLongTermTrips": true,
+          "supportsElectricConsumption": false,
+          "_class": "CarNetLib.TripStatisticsFeature",
+          "supportsRecuperation": false,
+          "supportsShortTermTrips": true,
+          "serviceDisableReason": 7,
+          "supportsElectricOverallConsumption": false,
+          "supportsCNGOverallConsumption": false,
+          "supportsFuelOverallConsumption": true,
+          "supportsCyclicTrips": true,
+          "serviceEnabled": true,
+          "serviceDisabledReasons": {
+            "count": 0,
+            "items": []
+          }
+        },
+        "vehicleStatusFeature": {
+          "_class": "CarNetLib.VehicleStatusFeature",
+          "unavailable": false,
+          "doorLayout": 5,
+          "serviceDisableReason": 7,
+          "isOilServiceIntervalSupported": true,
+          "isNextServiceIntervalSupported": true,
+          "isWindowStateSupported": true,
+          "vehicleType": 0,
+          "serviceEnabled": true,
+          "serviceDisabledReasons": {
+            "count": 0,
+            "items": []
+          }
+        },
+        "auxiliaryHeatingFeature": null,
+        "poiFeature": null,
+        "remoteBatteryChargingFeature": null,
+        "mobileDevicePairingFeature": {
+          "removeSupported": true,
+          "requestSecurityLevelReached": true,
+          "querySupported": true,
+          "unavailable": false,
+          "serviceDisabledReasons": {
+            "count": 0,
+            "items": []
+          },
+          "initialSecurityLevelReached": true,
+          "_class": "CarNetLib.MobileDevicePairingFeature",
+          "serviceDisableReason": 7,
+          "requestStatusSecurityLevelReached": true,
+          "initialSupported": true,
+          "querySecurityLevelReached": true,
+          "removeSecurityLevelReached": true,
+          "requestSupported": true,
+          "serviceEnabled": true,
+          "requestStatusSupported": true
+        },
+        "vehicleHealthReportFeature": {
+          "serviceDisableReason": 7,
+          "_class": "CarNetLib.VehicleHealthReportFeature",
+          "unavailable": false,
+          "serviceEnabled": true,
+          "isSecurityLevelReachedForHistory": true,
+          "isHistorySupported": true,
+          "serviceDisabledReasons": {
+            "count": 0,
+            "items": []
+          }
+        },
+        "remoteVehicleStatusFeature": {
+          "_class": "CarNetLib.VehicleStatusFeature",
+          "unavailable": false,
+          "doorLayout": 5,
+          "serviceDisableReason": 7,
+          "isOilServiceIntervalSupported": true,
+          "isNextServiceIntervalSupported": true,
+          "isWindowStateSupported": true,
+          "vehicleType": 0,
+          "serviceEnabled": true,
+          "serviceDisabledReasons": {
+            "count": 0,
+            "items": []
+          }
+        },
+        "lastParkingPositionFeature": null,
+        "parkingAssistantFeature": null,
+        "honkFlashFeature": {
+          "serviceDisableReason": 7,
+          "serviceDisabledReasons": {
+            "count": 0,
+            "items": []
+          },
+          "serviceEnabled": true,
+          "_class": "CarNetLib.HonkAndFlashFeature",
+          "unavailable": false
+        }
+      },
+      "controls": {
+        "lock": {
+          "sdkServiceEnabled": true,
+          "sdkFlag": true,
+          "backendPermission": true,
+          "physicalExecutionTested": false
+        },
+        "unlock": {
+          "sdkServiceEnabled": true,
+          "sdkFlag": true,
+          "backendPermission": true,
+          "physicalExecutionTested": false
+        },
+        "windowOpen": {
+          "sdkServiceEnabled": true,
+          "sdkFlag": true,
+          "backendPermission": true,
+          "physicalExecutionTested": false
+        },
+        "windowClose": {
+          "sdkServiceEnabled": true,
+          "sdkFlag": true,
+          "backendPermission": true,
+          "physicalExecutionTested": false
+        },
+        "windowVenting": {
+          "sdkServiceEnabled": true,
+          "sdkFlag": true,
+          "backendPermission": true,
+          "physicalExecutionTested": false
+        },
+        "engineStart": {
+          "sdkServiceEnabled": true,
+          "sdkFlag": true,
+          "backendPermission": true,
+          "physicalExecutionTested": false
+        },
+        "engineStop": {
+          "sdkServiceEnabled": true,
+          "sdkFlag": true,
+          "backendPermission": true,
+          "physicalExecutionTested": false
+        },
+        "honkFlash": {
+          "sdkServiceEnabled": true,
+          "sdkFlag": true,
+          "backendPermission": true,
+          "physicalExecutionTested": false
+        }
+      },
+      "queryCount": 31,
+      "queryStates": {
+        "success": 17,
+        "sdk-error": 13,
+        "http-error": 1
+      },
+      "queries": {
+        "vehicleStatus": {
+          "state": "success",
+          "runner": "loadWithErrorFunction:",
+          "emptyResult": false,
+          "resultClass": "CarNetLib.VehicleStatus",
+          "availableFields": [
+            "bodyStatus",
+            "bonnetStatus",
+            "doorPositions",
+            "frontLeftDoorStatus",
+            "frontLeftWindowStatus",
+            "frontRightDoorStatus",
+            "frontRightWindowStatus",
+            "fuelLevel",
+            "leftParkingLightStatus",
+            "mileage",
+            "nextOilServiceInDays",
+            "nextOilServiceInKm",
+            "nextServiceInDays",
+            "nextServiceInKm",
+            "parkingLightPositions",
+            "primaryEngineRange",
+            "primaryEngineType",
+            "rearLeftDoorStatus",
+            "rearLeftWindowStatus",
+            "rearRightDoorStatus",
+            "rearRightWindowStatus",
+            "rightParkingLightStatus",
+            "secondaryEngineType",
+            "sunroofStatus",
+            "timestamp",
+            "trunkStatus",
+            "windowPositions"
+          ]
+        },
+        "parkingPosition": {
+          "state": "sdk-error",
+          "runner": "loadWithErrorFunction:",
+          "error": "errorCode=(1:featureNotAvailable)"
+        },
+        "climateStatus": {
+          "state": "sdk-error",
+          "runner": "loadWithErrorFunction:",
+          "error": "errorCode=(1:featureNotAvailable)"
+        },
+        "pretripClimateStatus": {
+          "state": "sdk-error",
+          "runner": "loadWithErrorFunction:",
+          "error": "errorCode=(1:featureNotAvailable)"
+        },
+        "chargerStatus": {
+          "state": "sdk-error",
+          "runner": "loadWithErrorFunction:",
+          "error": "errorCode=(1:featureNotAvailable)"
+        },
+        "chargerStatusV2": {
+          "state": "sdk-error",
+          "runner": "loadWithErrorFunction:",
+          "error": "errorCode=(1:featureNotAvailable)"
+        },
+        "auxiliaryHeatingStatus": {
+          "state": "sdk-error",
+          "runner": "loadWithErrorFunction:",
+          "error": "errorCode=(1:featureNotAvailable)"
+        },
+        "pairingStatus": {
+          "state": "success",
+          "runner": "loadWithErrorFunction:",
+          "emptyResult": true
+        },
+        "honkFlashConfiguration": {
+          "state": "success",
+          "runner": "loadWithErrorFunction:",
+          "emptyResult": false,
+          "resultClass": "CarNetLib.InternalHonkAndFlashConfiguration",
+          "configuration": {
+            "maximumDistanceToVehicle": 0,
+            "maximumServiceDuration": 30,
+            "flashForbidden": false,
+            "defaultServiceDuration": 15,
+            "honkForbidden": false
+          }
+        },
+        "vehicleUsers": {
+          "state": "success",
+          "runner": "loadWithErrorFunction:",
+          "emptyResult": false,
+          "resultClass": null,
+          "returnedCount": 2,
+          "snapshotItemCount": 2,
+          "nonNullItemFields": [
+            "deletedInBackend",
+            "identityProviderID",
+            "isInVehicle",
+            "mbbUserId",
+            "pushToVehicle",
+            "securityLevel",
+            "spinLockedWaitingTime",
+            "spinStatus",
+            "ssoId",
+            "userRole",
+            "userStatus"
+          ]
+        },
+        "healthWarnings": {
+          "state": "success",
+          "runner": "loadWithErrorFunction:",
+          "emptyResult": false,
+          "resultClass": "CarNetLib.InternalWarningsReport",
+          "warningCount": 0,
+          "warnings": []
+        },
+        "engineHistory": {
+          "state": "success",
+          "runner": "executeWithErrorFunction:",
+          "emptyResult": false,
+          "resultClass": "CarNetLib.RemoteStartHistory",
+          "historyCount": 0
+        },
+        "enginePairStatus": {
+          "state": "success",
+          "runner": "executeWithErrorFunction:",
+          "emptyResult": false,
+          "resultClass": "CarNetLib.QueryRemoteLastStatus"
+        },
+        "departureConfiguration": {
+          "state": "sdk-error",
+          "runner": "loadWithErrorFunction:",
+          "error": "errorCode=(1:featureNotAvailable)"
+        },
+        "profileTimers": {
+          "state": "sdk-error",
+          "runner": "executeWithErrorFunction:",
+          "error": "errorCode=(1:featureNotAvailable)"
+        },
+        "remoteProfileTimer": {
+          "state": "sdk-error",
+          "runner": "loadWithErrorFunction:",
+          "error": "errorCode=(1:featureNotAvailable)"
+        },
+        "geofenceDefinitions": {
+          "state": "sdk-error",
+          "runner": "loadWithErrorFunction:",
+          "error": "errorCode=(1:featureNotAvailable)"
+        },
+        "geofenceNotifications": {
+          "state": "sdk-error",
+          "runner": "loadWithErrorFunction:",
+          "error": "errorCode=(1:featureNotAvailable)"
+        },
+        "speedDefinitions": {
+          "state": "sdk-error",
+          "runner": "loadWithErrorFunction:",
+          "error": "errorCode=(1:featureNotAvailable)"
+        },
+        "speedNotifications": {
+          "state": "sdk-error",
+          "runner": "loadWithErrorFunction:",
+          "error": "errorCode=(1:featureNotAvailable)"
+        },
+        "antiTheftNotifications": {
+          "state": "success",
+          "runner": "loadWithErrorFunction:",
+          "emptyResult": false,
+          "resultClass": null,
+          "returnedCount": 0,
+          "snapshotItemCount": 0,
+          "nonNullItemFields": []
+        },
+        "pairingLastStatus": {
+          "state": "success",
+          "runner": "executeWithErrorFunction:",
+          "emptyResult": false,
+          "resultClass": "CarNetLib.QueryRemoteLastStatus"
+        },
+        "tripsLongTerm": {
+          "state": "success",
+          "runner": "loadWithErrorFunction:",
+          "emptyResult": false,
+          "resultClass": null,
+          "returnedCount": 1,
+          "snapshotItemCount": 1,
+          "nonNullItemFields": [
+            "averageFuelConsumption",
+            "averageSpeed",
+            "id",
+            "mileage",
+            "overallMileage",
+            "reportReason",
+            "startMileage",
+            "travelTime",
+            "tripEnd",
+            "tripType"
+          ]
+        },
+        "tripsShortTerm": {
+          "state": "success",
+          "runner": "loadWithErrorFunction:",
+          "emptyResult": false,
+          "resultClass": null,
+          "returnedCount": 41,
+          "snapshotItemCount": 41,
+          "nonNullItemFields": [
+            "averageFuelConsumption",
+            "averageSpeed",
+            "id",
+            "mileage",
+            "overallMileage",
+            "reportReason",
+            "startMileage",
+            "travelTime",
+            "tripEnd",
+            "tripType"
+          ]
+        },
+        "tripsCyclic": {
+          "state": "success",
+          "runner": "loadWithErrorFunction:",
+          "emptyResult": false,
+          "resultClass": null,
+          "returnedCount": 5,
+          "snapshotItemCount": 5,
+          "nonNullItemFields": [
+            "averageFuelConsumption",
+            "averageSpeed",
+            "id",
+            "mileage",
+            "overallMileage",
+            "reportReason",
+            "startMileage",
+            "travelTime",
+            "tripEnd",
+            "tripType"
+          ]
+        },
+        "vehicleData": {
+          "state": "success",
+          "httpStatus": 200,
+          "bytes": 1274
+        },
+        "statusReport": {
+          "state": "success",
+          "httpStatus": 200,
+          "bytes": 15180
+        },
+        "operationList": {
+          "state": "success",
+          "httpStatus": 200,
+          "bytes": 44729
+        },
+        "operationListUnscoped": {
+          "state": "success",
+          "httpStatus": 200,
+          "bytes": 44729
+        },
+        "carFinder": {
+          "state": "http-error",
+          "httpStatus": 403,
+          "bytes": 210
+        },
+        "homeRegion": {
+          "state": "success",
+          "httpStatus": 200,
+          "bytes": 108
+        }
+      },
+      "rawSignalCount": 56,
+      "rawSignalsWithValues": 51
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "date": "2026-11-17",
+  "bundleId": "com.lukev.minimalclient",
+  "displayName": "车控",
+  "installedAsOverlay": true,
+  "ipaSha256": "c9403b5abadd927ad3dc242b94377e524cead2294bb05171c277f28078c15c23",
+  "uiReviewHarnessInDelivery": false,
+  "buildWarnings": 0,
+  "signatureVerified": true,
+  "physicalCommandsSentByReview": false,
+  "runtimeEvidence": {
+    "skeuomorphicHome": "captured from real app window; foreground Chinese labels and symbols visible after material-layer fix",
+    "informationRoot": "real-device category index captured",
+    "trips": "GTI real query succeeded; time/duration display and descending order observed",
+    "fullAutomaticReview": "incomplete; user navigated away / foreground unavailable; old images not counted as fresh results"
+  },
+  "checks": {
+    "safeGetterABI": "passed",
+    "rawXMLValuesAndNamespaces": "passed",
+    "diffWhitespace": "passed"
+  },
+  "pendingAcceptance": [
+    "haptic feel on device",
+    "SPIN input and physical car control",
+    "default-vehicle preference round trip",
+    "remaining detail pages manual review"
+  ],
+  "knownGaps": [
+    "fresh independent password/SMS login and token refresh",
+    "MOSC location authentication/signature integration"
+  ]
+}

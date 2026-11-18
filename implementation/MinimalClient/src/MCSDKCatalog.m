@@ -54,29 +54,29 @@ static NSDictionary *MCFeatureMap(void) {
                     info.rawVehicle = vehicle;
                     id vd = MCSafeGet(vehicle, @"vehicleData");
                     if (vd) {
-                        info.brand = [vd valueForKey:@"brand"];
-                        info.country = [vd valueForKey:@"country"];
+                        info.brand = MCSafeGet(vd, @"brand");
+                        info.country = MCSafeGet(vd, @"country");
                         id cp = MCSafeGet(vd, @"carportData");
                         if ([cp respondsToSelector:@selector(modelName)]) {
-                            info.modelCode = [cp valueForKey:@"modelCode"];
-                            info.modelName = [cp valueForKey:@"modelName"];
-                            info.modelYear = [[cp valueForKey:@"modelYear"] stringValue];
-                            info.countryCode = [cp valueForKey:@"countryCode"];
-                            info.color = [cp valueForKey:@"color"];
-                            info.engine = [cp valueForKey:@"engine"];
-                            info.transmission = [cp valueForKey:@"transmission"];
-                            info.mmi = [cp valueForKey:@"mmi"];
+                            info.modelCode = MCSafeGet(cp, @"modelCode");
+                            info.modelName = MCSafeGet(cp, @"modelName");
+                            info.modelYear = [MCSafeGet(cp, @"modelYear") description];
+                            info.countryCode = MCSafeGet(cp, @"countryCode");
+                            info.color = MCSafeGet(cp, @"color");
+                            info.engine = MCSafeGet(cp, @"engine");
+                            info.transmission = MCSafeGet(cp, @"transmission");
+                            info.mmi = MCSafeGet(cp, @"mmi");
                         }
                     }
                     info.displayName = info.modelName.length ? info.modelName
                                         : [vin substringFromIndex:MAX(0, vin.length - 6)];
-                    // 能力矩阵：feature 属性非 nil 即支持
+                    // A feature object exists even for disabled services; inspect the actual enabled flag.
                     NSMutableArray *feats = [NSMutableArray array];
                     NSDictionary *map = MCFeatureMap();
                     for (NSString *key in map) {
                         if (![vehicle respondsToSelector:NSSelectorFromString(key)]) continue;
                         id v = ((id(*)(id,SEL))objc_msgSend)(vehicle, NSSelectorFromString(key));
-                        if (v) [feats addObject:key];
+                        if (v && [MCSafeGet(v, @"serviceEnabled") boolValue]) [feats addObject:key];
                     }
                     info.features = feats;
                     [infos addObject:info];

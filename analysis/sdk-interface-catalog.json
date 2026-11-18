@@ -1,0 +1,427 @@
+{
+  "ChargerService": [
+    "CarNetLib.ChargerService.getChargerActionStatus(accountIdentifier: Swift.String, vin: Swift.String, actionId: Swift.String) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendChargerActionResponse>",
+    "CarNetLib.ChargerService.baseServicePath() -> Swift.String?",
+    "CarNetLib.ChargerService.loadChargerStatus(accountIdentifier: Swift.String, vin: Swift.String) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendChargerStatusResponse>",
+    "CarNetLib.ChargerService.executeChargerAction(actionType: CarNetLib.BackendChargerActionType, settings: CarNetLib.BackendChargerSettings?, accountIdentifier: Swift.String, vin: Swift.String) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendChargerActionResponse>",
+    "CarNetLib.ChargerService.poll(accountIdentifier: Swift.String, vin: Swift.String, pollId: Swift.String) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendChargerActionResponse>"
+  ],
+  "VehicleService": [
+    "CarNetLib.VehicleService.requestBackendToUpdateVehicleStatusFromVehicle(accountIdentifier: Swift.String, vin: Swift.String) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendJobTransactionResponse>",
+    "CarNetLib.VehicleService.getVehicleStatus(accountIdentifier: Swift.String, vin: Swift.String, requestId: Swift.String) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendStoredVehicleDataResponse>",
+    "CarNetLib.VehicleService.getVehicleStatus(accountIdentifier: Swift.String, vin: Swift.String) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendStoredVehicleDataResponse>",
+    "CarNetLib.VehicleService.baseServicePath() -> Swift.String?",
+    "CarNetLib.VehicleService.pollRequestStatus(accountIdentifier: Swift.String, vin: Swift.String, requestId: Swift.String) throws -> CarNetLib.RestApiClientResult<CarNetLib.RequestStatusResponse>",
+    "CarNetLib.VehicleService.poll(accountIdentifier: Swift.String, vin: Swift.String, pollId: Swift.String) throws -> CarNetLib.RestApiClientResult<CarNetLib.RequestStatusResponse>"
+  ],
+  "HonkFlashService": [
+    "CarNetLib.HonkFlashService.baseServicePath() -> Swift.String?",
+    "CarNetLib.HonkFlashService.startAction(accountIdentifier: Swift.String, vin: Swift.String, actionRequest: CarNetLib.BackendHonkFlashActionRequest) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendHonkFlashActionResponse>",
+    "CarNetLib.HonkFlashService.getConfiguration(accountIdentifier: Swift.String, vin: Swift.String) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendHonkFlashConfiguration>",
+    "CarNetLib.HonkFlashService.pollActionStatus(accountIdentifier: Swift.String, vin: Swift.String, requestId: Swift.String) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendHonkFlashStatus>",
+    "CarNetLib.HonkFlashService.poll(accountIdentifier: Swift.String, vin: Swift.String, pollId: Swift.String) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendHonkFlashStatus>"
+  ],
+  "StageActionsImpl": [
+    "CarNetLib.StageActionsImpl.authenticate(identityToken: Swift.String, accountFunction: (CarNetLib.Account) -> ()) -> CarNetLib.ExecutableAction",
+    "CarNetLib.StageActionsImpl.authenticate(clientID: Swift.String, identityToken: Swift.String, successFunction: (CarNetLib.Account) -> ()) -> CarNetLib.ExecutableAction",
+    "CarNetLib.StageActionsImpl.(errorFunction in _16C23D5F593130A9AB260FE4D1366EBC).modify : ((CarNetLib.CarNetLibError) -> ())?",
+    "CarNetLib.StageActionsImpl.(errorFunction in _16C23D5F593130A9AB260FE4D1366EBC).getter : ((CarNetLib.CarNetLibError) -> ())?",
+    "CarNetLib.StageActionsImpl.(errorFunction in _16C23D5F593130A9AB260FE4D1366EBC).setter : ((CarNetLib.CarNetLibError) -> ())?",
+    "CarNetLib.StageActionsImpl.registerClient(successFunction: (Swift.String) -> ()) -> CarNetLib.ExecutableAction",
+    "CarNetLib.StageActionsImpl.(accountFunction in _16C23D5F593130A9AB260FE4D1366EBC).modify : ((CarNetLib.Account) -> ())?",
+    "CarNetLib.StageActionsImpl.(accountFunction in _16C23D5F593130A9AB260FE4D1366EBC).getter : ((CarNetLib.Account) -> ())?",
+    "CarNetLib.StageActionsImpl.(accountFunction in _16C23D5F593130A9AB260FE4D1366EBC).setter : ((CarNetLib.Account) -> ())?"
+  ],
+  "ChargerRepository": [
+    "CarNetLib.ChargerRepository.loadChargerStatus() throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendChargerStatusResponse>",
+    "CarNetLib.ChargerRepository.executeChargerAction(actionType: CarNetLib.BackendChargerActionType, settings: CarNetLib.BackendChargerSettings?, flowStateListener: ((CarNetLib.FlowStateInfo) -> ())?) throws -> CarNetLib.RestApiClientResponse<CarNetLib.BackendChargerActionResponse>"
+  ],
+  "LockUnlockService": [
+    "CarNetLib.LockUnlockService.baseServicePath() -> Swift.String?",
+    "CarNetLib.LockUnlockService.startAction(accountIdentifier: Swift.String, vin: Swift.String, securityPin: Swift.String, operationType: CarNetLib.BackendLockUnlockOperationType) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendJobTransactionResponse>",
+    "CarNetLib.LockUnlockService.pollActionStatus(accountIdentifier: Swift.String, vin: Swift.String, requestId: Swift.String) throws -> CarNetLib.RestApiClientResult<CarNetLib.RequestStatusResponse>",
+    "CarNetLib.LockUnlockService.poll(accountIdentifier: Swift.String, vin: Swift.String, pollId: Swift.String) throws -> CarNetLib.RestApiClientResult<CarNetLib.RequestStatusResponse>",
+    "CarNetLib.LockUnlockService.getStatus(accountIdentifier: Swift.String, vin: Swift.String) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendLockUnlockActionStatus>"
+  ],
+  "SpeedAlertService": [
+    "CarNetLib.SpeedAlertService.getSpeedAlerts(accountIdentifier: Swift.String, vin: Swift.String) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendSpeedAlertNotifications>",
+    "CarNetLib.SpeedAlertService.getSpeedAlertDefinitionList(accountIdentifier: Swift.String, vin: Swift.String, statusType: CarNetLib.BackendAlertDefinitionListStatusType) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendSpeedAlertDefinitionList>",
+    "CarNetLib.SpeedAlertService.getSpeedAlertDefinitionListStatus(accountIdentifier: Swift.String, vin: Swift.String, listID: Swift.String) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendAlertDefinitionListStatus>",
+    "CarNetLib.SpeedAlertService.baseServicePath() -> Swift.String?",
+    "CarNetLib.SpeedAlertService.deleteSpeedAlerts(accountIdentifier: Swift.String, vin: Swift.String) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendEmptyModel>",
+    "CarNetLib.SpeedAlertService.updateSpeedAlertDefinitionList(accountIdentifier: Swift.String, vin: Swift.String, alerts: CarNetLib.BackendSpeedAlertDefinitionList) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendSpeedAlertDefinitionList>",
+    "CarNetLib.SpeedAlertService.getConfiguration(accountIdentifier: Swift.String, vin: Swift.String) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendAlertConfiguration>",
+    "CarNetLib.SpeedAlertService.poll(accountIdentifier: Swift.String, vin: Swift.String, pollId: Swift.String) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendAlertDefinitionListStatus>"
+  ],
+  "VehicleRepository": [
+    "CarNetLib.VehicleRepository.getVehicleStatus(statusCallback: ((CarNetLib.FlowStateInfo) -> ())?) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendStoredVehicleDataResponse>",
+    "CarNetLib.VehicleRepository.updateVehicleStatus(statusCallback: ((CarNetLib.FlowStateInfo) -> ())?) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendStoredVehicleDataResponse>"
+  ],
+  "AccountActionsImpl": [
+    "CarNetLib.AccountActionsImpl.vehicleVins(successFunction: ([Swift.String]) -> ()) -> CarNetLib.QueryAction",
+    "CarNetLib.AccountActionsImpl.revokeRefreshToken(successFunction: () -> ()) -> CarNetLib.ExecutableAction",
+    "CarNetLib.AccountActionsImpl.revokeAuthentication(successFunction: () -> ()) -> CarNetLib.ExecutableAction",
+    "CarNetLib.AccountActionsImpl.subscribeForTokenChanges(callbackFunction: (CarNetLib.Account, CarNetLib.MbbTokens) -> ()) -> ()",
+    "CarNetLib.AccountActionsImpl.unsubscribeForTokenChanges() -> ()",
+    "CarNetLib.AccountActionsImpl.remove(statusFunction: (Swift.Bool) -> ()) -> ()",
+    "CarNetLib.AccountActionsImpl.vehicle(vin: Swift.String, successFunction: (CarNetLib.Vehicle) -> ()) -> CarNetLib.QueryAction",
+    "CarNetLib.AccountActionsImpl.vehicles(vehicleFunction: ([CarNetLib.Vehicle]) -> ()) -> CarNetLib.QueryAction"
+  ],
+  "ChargerActionsImpl": [
+    "CarNetLib.ChargerActionsImpl.startWithoutSettingsv2(successFunction: () -> ()) -> CarNetLib.ListenableExecutableAction",
+    "CarNetLib.ChargerActionsImpl.stop(successFunction: () -> ()) -> CarNetLib.ListenableExecutableAction",
+    "CarNetLib.ChargerActionsImpl.start(_: CarNetLib.ChargerSettings, successFunction: () -> ()) -> CarNetLib.ListenableExecutableAction",
+    "CarNetLib.ChargerActionsImpl.stopV2(successFunction: () -> ()) -> CarNetLib.ListenableExecutableAction",
+    "CarNetLib.ChargerActionsImpl.update(_: CarNetLib.ChargerSettings, successFunction: () -> ()) -> CarNetLib.ListenableExecutableAction",
+    "CarNetLib.ChargerActionsImpl.resetV2(successFunction: () -> ()) -> CarNetLib.ListenableExecutableAction",
+    "CarNetLib.ChargerActionsImpl.startV2(_: CarNetLib.ChargerSettingsV2, successFunction: () -> ()) -> CarNetLib.ListenableExecutableAction",
+    "CarNetLib.ChargerActionsImpl.updateV2(_: CarNetLib.ChargerSettingsV2, successFunction: () -> ()) -> CarNetLib.ListenableExecutableAction",
+    "CarNetLib.ChargerActionsImpl.getStatus(successFunction: (CarNetLib.ChargerV2) -> ()) -> CarNetLib.ListenableExecutableAction"
+  ],
+  "RemoteStartService": [
+    "CarNetLib.RemoteStartService.baseServicePath() -> Swift.String?",
+    "CarNetLib.RemoteStartService.getActions(accountIdentifier: Swift.String, vin: Swift.String, mbbUserID: Swift.String) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendRemoteStartActionStatus>",
+    "CarNetLib.RemoteStartService.getHistory(accountIdentifier: Swift.String, vin: Swift.String) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendRemoteStartHistoryActionResponse>",
+    "CarNetLib.RemoteStartService.stopAction(accountIdentifier: Swift.String, vin: Swift.String, mbbUserID: Swift.String) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendJobTransactionResponse>",
+    "CarNetLib.RemoteStartService.startAction(accountIdentifier: Swift.String, vin: Swift.String, mbbUserID: Swift.String, securityToken: Swift.String, actionRequest: CarNetLib.BackendRemoteStartRequestModel) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendJobTransactionResponse>",
+    "CarNetLib.RemoteStartService.actionStatus(accountIdentifier: Swift.String, vin: Swift.String, requestId: Swift.String) throws -> CarNetLib.RestApiClientResult<CarNetLib.QueryRemoteLastStatusgQueryResponse>",
+    "CarNetLib.RemoteStartService.getActionStatus(accountIdentifier: Swift.String, vin: Swift.String, pollId: Swift.String) throws -> CarNetLib.RestApiClientResult<CarNetLib.QueryRemoteLastStatusgQueryResponse>",
+    "CarNetLib.RemoteStartService.pollActionStatus(accountIdentifier: Swift.String, vin: Swift.String, requestId: Swift.String) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendRemoteStartAction>",
+    "CarNetLib.RemoteStartService.poll(accountIdentifier: Swift.String, vin: Swift.String, pollId: Swift.String) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendRemoteStartAction>",
+    "CarNetLib.RemoteStartService.history(accountIdentifier: Swift.String, vin: Swift.String) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendRemoteStartHistoryActionResponse>"
+  ],
+  "SecurityPinService": [
+    "CarNetLib.SecurityPinService.baseServicePath() -> Swift.String?",
+    "CarNetLib.SecurityPinService.requestSecurityPinAuthentication(accountIdentifier: Swift.String, vin: Swift.String, service: Swift.String, operation: Swift.String) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendSecurityPinAuthenticationInfo>",
+    "CarNetLib.SecurityPinService.completeSecurityPinAuthentication(accountIdentifier: Swift.String, securityAuthentication: CarNetLib.BackendSecurityPinAuthentication) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendSecurityToken>"
+  ],
+  "VehicleActionsImpl": [
+    "CarNetLib.VehicleActionsImpl.honkAndFlash(parameter: CarNetLib.HonkAndFlashParameter, successFunction: () -> ()) -> CarNetLib.RemoteHonkFlashRateLimitRecievedActions",
+    "CarNetLib.VehicleActionsImpl.updateStatus(statusFunction: (CarNetLib.VehicleStatus) -> ()) -> CarNetLib.ListenableExecutableAction",
+    "CarNetLib.VehicleActionsImpl.vehicleUsers(successFunction: ([CarNetLib.VehicleUser]) -> ()) -> CarNetLib.QueryAction",
+    "CarNetLib.VehicleActionsImpl.chargerStatus(statusFunction: (CarNetLib.ChargerStatus) -> ()) -> CarNetLib.QueryAction",
+    "CarNetLib.VehicleActionsImpl.tripStatistics(tripType: CarNetLib.TripType, statusFunction: ([CarNetLib.TripData]) -> ()) -> CarNetLib.QueryAction",
+    "CarNetLib.VehicleActionsImpl.tripStatistics(type: CarNetLib.TripType) -> CarNetLib.TripStatisticsActions",
+    "CarNetLib.VehicleActionsImpl.chargerStatusV2(statusFunction: (CarNetLib.ChargerV2) -> ()) -> CarNetLib.QueryAction",
+    "CarNetLib.VehicleActionsImpl.removeFromAccount(successFunction: () -> ()) -> CarNetLib.ExecutableAction",
+    "CarNetLib.VehicleActionsImpl.RemoteProfileTimer(successFunction: (CarNetLib.RPTTimerAndProfileList) -> ()) -> CarNetLib.QueryAction",
+    "CarNetLib.VehicleActionsImpl.remoteProfileTimer(successFunction: (CarNetLib.RPTTimerAndProfileList) -> ()) -> CarNetLib.QueryAction",
+    "CarNetLib.VehicleActionsImpl.climatisationStatus(statusFunction: (CarNetLib.ClimatisationStatus) -> ()) -> CarNetLib.QueryAction",
+    "CarNetLib.VehicleActionsImpl.auxiliaryHeatingStatus(statusFunction: (CarNetLib.AuxiliaryHeatingStatus) -> ()) -> CarNetLib.QueryAction",
+    "CarNetLib.VehicleActionsImpl.honkAndFlashConfiguration(statusFunction: (CarNetLib.HonkAndFlashConfiguration) -> ()) -> CarNetLib.QueryAction",
+    "CarNetLib.VehicleActionsImpl.mobileDevicePairingStatus(statusFunction: (Swift.Bool) -> ()) -> CarNetLib.QueryAction",
+    "CarNetLib.VehicleActionsImpl.remotePretripClimatisationStatus(statusFunction: (CarNetLib.RemotePretripClimatisationStatus) -> ()) -> CarNetLib.QueryAction",
+    "CarNetLib.VehicleActionsImpl.honk(parameter: CarNetLib.HonkAndFlashParameter, successFunction: () -> ()) -> CarNetLib.RemoteHonkFlashRateLimitRecievedActions",
+    "CarNetLib.VehicleActionsImpl.flash(parameter: CarNetLib.HonkAndFlashParameter, successFunction: () -> ()) -> CarNetLib.RemoteHonkFlashRateLimitRecievedActions",
+    "CarNetLib.VehicleActionsImpl.status(statusFunction: (CarNetLib.VehicleStatus) -> ()) -> CarNetLib.QueryAction",
+    "CarNetLib.VehicleActionsImpl.location(vehicleLocationFunction: (CarNetLib.VehicleLocation) -> ()) -> CarNetLib.QueryAction"
+  ],
+  "HonkFlashRepository": [
+    "CarNetLib.HonkFlashRepository.executeAction(actionRequest: CarNetLib.BackendHonkFlashActionRequest, progressFunction: ((CarNetLib.FlowStateInfo) -> ())?, rateLimitRecievedFunction: ((Swift.Int) -> ())?) throws -> CarNetLib.BackendHonkFlashStatus",
+    "CarNetLib.HonkFlashRepository.getConfiguration() throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendHonkFlashConfiguration>"
+  ],
+  "ProfileTimerService": [
+    "CarNetLib.ProfileTimerService.getProfileList(vin: Swift.String, accountIdentifier: Swift.String) throws -> CarNetLib.RestApiClientResult<CarNetLib.ProfileListResponse>",
+    "CarNetLib.ProfileTimerService.getTimerList(vin: Swift.String, accountIdentifier: Swift.String) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackTimerList>",
+    "CarNetLib.ProfileTimerService.baseServicePath() -> Swift.String?",
+    "CarNetLib.ProfileTimerService.setProfiles(vin: Swift.String, accountIdentifier: Swift.String, profiles: CarNetLib.BackendChargerActionSetProfilesRequest) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendPRTActionResponse>",
+    "CarNetLib.ProfileTimerService.requestCurrent(vin: Swift.String, accountIdentifier: Swift.String, requestPayload: CarNetLib.BackendPRTActionRequest) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendPRTActionResponse>",
+    "CarNetLib.ProfileTimerService.getActionStatus(accountIdentifier: Swift.String, vin: Swift.String, actionId: Swift.String) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendPRTActionResponse>",
+    "CarNetLib.ProfileTimerService.getTimersAndProfiles(accountIdentifier: Swift.String, vin: Swift.String) throws -> CarNetLib.RestApiClientResult<CarNetLib.TimerAndProfileList>",
+    "CarNetLib.ProfileTimerService.setTimersAndProfiles(vin: Swift.String, accountIdentifier: Swift.String, timersAndProfiles: CarNetLib.BackendChargerActionSetTimersAndProfilesRequest1) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendPRTActionResponse>",
+    "CarNetLib.ProfileTimerService.poll(accountIdentifier: Swift.String, vin: Swift.String, pollId: Swift.String) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendPRTActionResponse>",
+    "CarNetLib.ProfileTimerService.setTimers(vin: Swift.String, accountIdentifier: Swift.String, timerSettings: CarNetLib.BackendChargerActionSetTimersRequest) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendPRTActionResponse>"
+  ],
+  "ClimatisationService": [
+    "CarNetLib.ClimatisationService.getClimatisationJobStatus(accountIdentifier: Swift.String, vin: Swift.String, actionId: Swift.String) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendClimatisationActionResponse>",
+    "CarNetLib.ClimatisationService.baseServicePath() -> Swift.String?",
+    "CarNetLib.ClimatisationService.loadClimatisationStatus(accountIdentifier: Swift.String, vin: Swift.String) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendClimatisationStatus>",
+    "CarNetLib.ClimatisationService.executeClimatisationAction(actionType: CarNetLib.BackendClimatisationActionType, settings: CarNetLib.BackendClimatisationSettings?, accountIdentifier: Swift.String, vin: Swift.String) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendClimatisationActionResponse>",
+    "CarNetLib.ClimatisationService.poll(accountIdentifier: Swift.String, vin: Swift.String, pollId: Swift.String) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendClimatisationActionResponse>"
+  ],
+  "GeofenceAlertService": [
+    "CarNetLib.GeofenceAlertService.getGeofenceDefinitionList(accountIdentifier: Swift.String, vin: Swift.String, statusType: CarNetLib.BackendAlertDefinitionListStatusType) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendGeofencingDefinitionList>",
+    "CarNetLib.GeofenceAlertService.getGeofenceDefinitionListStatus(accountIdentifier: Swift.String, vin: Swift.String, listID: Swift.String) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendAlertDefinitionListStatus>",
+    "CarNetLib.GeofenceAlertService.baseServicePath() -> Swift.String?",
+    "CarNetLib.GeofenceAlertService.updateGeofenceDefinitionList(accountIdentifier: Swift.String, vin: Swift.String, alerts: CarNetLib.BackendGeofencingDefinitionList) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendGeofencingDefinitionList>",
+    "CarNetLib.GeofenceAlertService.getGeofences(accountIdentifier: Swift.String, vin: Swift.String) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendGeofencingAlertNotifications>",
+    "CarNetLib.GeofenceAlertService.deleteGeofences(accountIdentifier: Swift.String, vin: Swift.String) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendEmptyModel>",
+    "CarNetLib.GeofenceAlertService.getConfiguration(accountIdentifier: Swift.String, vin: Swift.String) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendAlertConfiguration>",
+    "CarNetLib.GeofenceAlertService.poll(accountIdentifier: Swift.String, vin: Swift.String, pollId: Swift.String) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendAlertDefinitionListStatus>"
+  ],
+  "LockUnlockRepository": [
+    "CarNetLib.LockUnlockRepository.(executeAction in _F51DBD4905166525A440EDA0D44E8606)(action: CarNetLib.BackendServiceOperationType, vin: Swift.String, securityPin: Swift.String, statusCallback: ((CarNetLib.FlowStateInfo) -> ())?) throws -> CarNetLib.RestApiClientResponse<CarNetLib.BackendLockUnlockActionStatus>",
+    "CarNetLib.LockUnlockRepository.windowSunroofOpen(vin: Swift.String, securityPin: Swift.String, statusCallback: ((CarNetLib.FlowStateInfo) -> ())?) throws -> CarNetLib.RestApiClientResponse<CarNetLib.BackendLockUnlockActionStatus>",
+    "CarNetLib.LockUnlockRepository.windowSunroofClose(vin: Swift.String, securityPin: Swift.String, statusCallback: ((CarNetLib.FlowStateInfo) -> ())?) throws -> CarNetLib.RestApiClientResponse<CarNetLib.BackendLockUnlockActionStatus>",
+    "CarNetLib.LockUnlockRepository.windowSunroofVentingOpen(vin: Swift.String, securityPin: Swift.String, statusCallback: ((CarNetLib.FlowStateInfo) -> ())?) throws -> CarNetLib.RestApiClientResponse<CarNetLib.BackendLockUnlockActionStatus>",
+    "CarNetLib.LockUnlockRepository.lock(vin: Swift.String, securityPin: Swift.String, statusCallback: ((CarNetLib.FlowStateInfo) -> ())?) throws -> CarNetLib.RestApiClientResponse<CarNetLib.BackendLockUnlockActionStatus>",
+    "CarNetLib.LockUnlockRepository.unlock(vin: Swift.String, securityPin: Swift.String, statusCallback: ((CarNetLib.FlowStateInfo) -> ())?) throws -> CarNetLib.RestApiClientResponse<CarNetLib.BackendLockUnlockActionStatus>"
+  ],
+  "SpeedAlertRepository": [
+    "CarNetLib.SpeedAlertRepository.getSpeedAlertNotifications() throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendSpeedAlertNotifications>",
+    "CarNetLib.SpeedAlertRepository.getSpeedAlertDefinitionList() throws -> CarNetLib.SpeedAlertDefinitionList",
+    "CarNetLib.SpeedAlertRepository.deleteSpeedAlertNotifications() throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendEmptyModel>",
+    "CarNetLib.SpeedAlertRepository.updateSpeedAlertDefinitionList(alertDefinitions: [CarNetLib.SpeedAlertDefinition], flowStateInfoFunction: ((CarNetLib.FlowStateInfo) -> ())?) throws -> [CarNetLib.SpeedAlertDefinition]"
+  ],
+  "AntiTheftAlertService": [
+    "CarNetLib.AntiTheftAlertService.baseServicePath() -> Swift.String?",
+    "CarNetLib.AntiTheftAlertService.getHistory(accountIdentifier: Swift.String, vin: Swift.String) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendAntiTheftAlertNotifications>",
+    "CarNetLib.AntiTheftAlertService.deleteHistory(accountIdentifier: Swift.String, vin: Swift.String) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendEmptyModel>"
+  ],
+  "DepartureTimerService": [
+    "CarNetLib.DepartureTimerService.getTimerBackendSettings(accountIdentifier: Swift.String, vin: Swift.String) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendDepartureTimerSettings>",
+    "CarNetLib.DepartureTimerService.putTimerBackendSettings(accountIdentifier: Swift.String, vin: Swift.String, settings: CarNetLib.BackendDepartureTimerSettings) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendEmptyModel>",
+    "CarNetLib.DepartureTimerService.baseServicePath() -> Swift.String?",
+    "CarNetLib.DepartureTimerService.getActionStatus(accountIdentifier: Swift.String, vin: Swift.String, actionId: Swift.String) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendDepartureTimerActionResponse>",
+    "CarNetLib.DepartureTimerService.getTimersAndProfiles(accountIdentifier: Swift.String, vin: Swift.String) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendDepartureTimersAndProfiles>",
+    "CarNetLib.DepartureTimerService.postTimersAndProfiles(accountIdentifier: Swift.String, vin: Swift.String, securityToken: Swift.String?, action: CarNetLib.BackendDepartureTimerActionRequest) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendDepartureTimerActionResponse>",
+    "CarNetLib.DepartureTimerService.poll(accountIdentifier: Swift.String, vin: Swift.String, pollId: Swift.String) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendDepartureTimerActionResponse>"
+  ],
+  "LockUnlockActionsImpl": [
+    "CarNetLib.LockUnlockActionsImpl.windowSunroofOpen(statusFunction: (CarNetLib.WindowSunroofStatus) -> ()) -> CarNetLib.SecurityPinProtectedExecutableAction",
+    "CarNetLib.LockUnlockActionsImpl.windowSunroofClose(statusFunction: (CarNetLib.WindowSunroofStatus) -> ()) -> CarNetLib.SecurityPinProtectedExecutableAction",
+    "CarNetLib.LockUnlockActionsImpl.windowSunroofVentingOpen(statusFunction: (CarNetLib.WindowSunroofStatus) -> ()) -> CarNetLib.SecurityPinProtectedExecutableAction",
+    "CarNetLib.LockUnlockActionsImpl.lock(statusFunction: (CarNetLib.LockUnlockDoorStatus) -> ()) -> CarNetLib.SecurityPinProtectedExecutableAction",
+    "CarNetLib.LockUnlockActionsImpl.unlock(statusFunction: (CarNetLib.LockUnlockDoorStatus) -> ()) -> CarNetLib.SecurityPinProtectedExecutableAction"
+  ],
+  "RemoteStartRepository": [
+    "CarNetLib.RemoteStartRepository.stop(statusCallback: ((CarNetLib.FlowStateInfo) -> ())?) throws -> CarNetLib.RestApiClientResponse<CarNetLib.BackendRemoteStartHistoryActionResponse>",
+    "CarNetLib.RemoteStartRepository.start(securityPin: Swift.String, rstKey: Swift.String, timestampTrigger: Foundation.Date, timestampFirstDigitSpin: Foundation.Date, timestampLastDigitSpin: Foundation.Date, statusCallback: ((CarNetLib.FlowStateInfo) -> ())?) throws -> CarNetLib.RestApiClientResponse<CarNetLib.BackendRemoteStartHistoryActionResponse>",
+    "CarNetLib.RemoteStartRepository.status() throws -> CarNetLib.RestApiClientResult<CarNetLib.QueryRemoteLastStatusgQueryResponse>",
+    "CarNetLib.RemoteStartRepository.history() throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendRemoteStartHistoryActionResponse>",
+    "CarNetLib.RemoteStartRepository.byteToHex(Swift.UInt8) -> Swift.String"
+  ],
+  "SpeedAlertActionsImpl": [
+    "CarNetLib.SpeedAlertActionsImpl.definitions(statusFunction: (CarNetLib.SpeedAlertDefinitionList) -> ()) -> CarNetLib.QueryAction",
+    "CarNetLib.SpeedAlertActionsImpl.notifications(statusFunction: ([CarNetLib.SpeedAlert]) -> ()) -> CarNetLib.QueryAction"
+  ],
+  "TripStatisticsService": [
+    "CarNetLib.TripStatisticsService.getTripStatistics(accountIdentififer: Swift.String, vin: Swift.String, tripType: Swift.String) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendTripDataList>",
+    "CarNetLib.TripStatisticsService.baseServicePath() -> Swift.String?",
+    "CarNetLib.TripStatisticsService.deleteTrips(accountIdentififer: Swift.String, vin: Swift.String, tripType: Swift.String, deleteMode: CarNetLib.TripStatisticsService.DeleteMode) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendEmptyModel>"
+  ],
+  "ProfileTimerRepository": [
+    "CarNetLib.ProfileTimerRepository.setProfile(timerSettings: CarNetLib.BackendChargerActionSetProfilesRequest) throws -> CarNetLib.RestApiClientResponse<CarNetLib.BackendPRTActionResponse>",
+    "CarNetLib.ProfileTimerRepository.setTimer(timerSettings: CarNetLib.BackendChargerActionSetTimersRequest) throws -> CarNetLib.RestApiClientResponse<CarNetLib.BackendPRTActionResponse>",
+    "CarNetLib.ProfileTimerRepository.setProfileAndTimer(profileAndTimer: CarNetLib.BackendChargerActionSetTimersAndProfilesRequest1, flowStateListener: ((CarNetLib.FlowStateInfo) -> ())?) throws -> CarNetLib.RestApiClientResponse<CarNetLib.BackendPRTActionResponse>",
+    "CarNetLib.ProfileTimerRepository.timerAndProfile() throws -> CarNetLib.RestApiClientResult<CarNetLib.TimerAndProfileList>",
+    "CarNetLib.ProfileTimerRepository.requestCurrent(model: CarNetLib.BackendPRTActionRequest) throws -> CarNetLib.RestApiClientResponse<CarNetLib.BackendPRTActionResponse>"
+  ],
+  "RemoteStartActionsImpl": [
+    "CarNetLib.RemoteStartActionsImpl.getHistory(successFunction: (CarNetLib.RemoteStartHistory) -> ()) -> CarNetLib.ListenableExecutableAction",
+    "CarNetLib.RemoteStartActionsImpl.stopEngine(statusFunction: (CarNetLib.RemoteStartHistoryAction) -> ()) -> CarNetLib.ListenableExecutableAction",
+    "CarNetLib.RemoteStartActionsImpl.startEngine(timestampTrigger: Foundation.Date, timestampFirstDigitSpin: Foundation.Date, timestampLastDigitSpin: Foundation.Date, statusFunction: (CarNetLib.RemoteStartHistoryAction) -> ()) -> CarNetLib.SecurityPinProtectedExecutableAction",
+    "CarNetLib.RemoteStartActionsImpl.getLastPairStatus(successFunction: (CarNetLib.QueryRemoteLastStatus) -> ()) -> CarNetLib.ListenableExecutableAction"
+  ],
+  "VehicleLocationService": [
+    "CarNetLib.VehicleLocationService.getVehicleLocation(accountIdentifier: Swift.String, vin: Swift.String) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendLastParkingPosition>",
+    "CarNetLib.VehicleLocationService.baseServicePath() -> Swift.String?"
+  ],
+  "AuxiliaryHeatingService": [
+    "CarNetLib.AuxiliaryHeatingService.baseServicePath() -> Swift.String?",
+    "CarNetLib.AuxiliaryHeatingService.loadAuxiliaryHeatingStatus(accountIdentifier: Swift.String, vin: Swift.String) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendAuxiliaryHeatingStatus>",
+    "CarNetLib.AuxiliaryHeatingService.quickAction(accountIdentifier: Swift.String, vin: Swift.String, actionRequest: CarNetLib.BackendAuxiliaryHeatingRequestModel) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendJobTransactionResponse>",
+    "CarNetLib.AuxiliaryHeatingService.pollActionStatus(accountIdentifier: Swift.String, vin: Swift.String, requestId: Swift.String) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendAuxiliaryHeatingActionStatus>",
+    "CarNetLib.AuxiliaryHeatingService.updateDepartureTimer(accountIdentifier: Swift.String, vin: Swift.String, isActive: Swift.Bool, actionRequest: CarNetLib.BackendAuxiliaryHeatingDepartureTimerList) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendJobTransactionResponse>",
+    "CarNetLib.AuxiliaryHeatingService.poll(accountIdentifier: Swift.String, vin: Swift.String, pollId: Swift.String) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendAuxiliaryHeatingActionStatus>"
+  ],
+  "ClimatisationRepository": [
+    "CarNetLib.ClimatisationRepository.loadClimatisationStatus() throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendClimatisationStatus>",
+    "CarNetLib.ClimatisationRepository.executeClimatisationAction(actionType: CarNetLib.BackendClimatisationActionType, settings: CarNetLib.BackendClimatisationSettings?, flowStateListener: ((CarNetLib.FlowStateInfo) -> ())?) throws -> CarNetLib.RestApiClientResponse<CarNetLib.BackendClimatisationActionResponse>"
+  ],
+  "GeofenceAlertRepository": [
+    "CarNetLib.GeofenceAlertRepository.getGeofenceNotifications() throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendGeofencingAlertNotifications>",
+    "CarNetLib.GeofenceAlertRepository.getGeofenceAlertDefinitionList() throws -> CarNetLib.GeofenceAlertDefinitionList",
+    "CarNetLib.GeofenceAlertRepository.deleteGeofenceNotifications() throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendEmptyModel>",
+    "CarNetLib.GeofenceAlertRepository.updateGeofenceDefinitionList(alertDefinitions: [CarNetLib.GeofenceAlertDefinition], flowStateInfoFunction: ((CarNetLib.FlowStateInfo) -> ())?) throws -> [CarNetLib.GeofenceAlertDefinition]"
+  ],
+  "ProfileTimerActionsImpl": [
+    "CarNetLib.ProfileTimerActionsImpl.setProfiles(_: Swift.String, timer: CarNetLib.ProfileList, successFunction: () -> ()) -> CarNetLib.ListenableExecutableAction",
+    "CarNetLib.ProfileTimerActionsImpl.requestCurrent(_: Swift.String, successFunction: (CarNetLib.RPTActionModel) -> ()) -> CarNetLib.ListenableExecutableAction",
+    "CarNetLib.ProfileTimerActionsImpl.getTimersAndProfiles(successFunction: (CarNetLib.RPTTimerAndProfileList) -> ()) -> CarNetLib.ListenableExecutableAction",
+    "CarNetLib.ProfileTimerActionsImpl.setTimersAndProfiles(_: CarNetLib.RPTTimerAndProfileList, successFunction: () -> ()) -> CarNetLib.ListenableExecutableAction",
+    "CarNetLib.ProfileTimerActionsImpl.setTimers(_: Swift.String, timer: CarNetLib.ProfileTimer, successFunction: () -> ()) -> CarNetLib.ListenableExecutableAction"
+  ],
+  "VehicleDiscoveryService": [
+    "CarNetLib.VehicleDiscoveryService.getHomeRegion(accountIdentifier: Swift.String, vin: Swift.String) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendVehicleHomeRegion>"
+  ],
+  "AntiTheftAlertRepository": [
+    "CarNetLib.AntiTheftAlertRepository.getAntiTheftAlertNotifications() throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendAntiTheftAlertNotifications>",
+    "CarNetLib.AntiTheftAlertRepository.deleteAntiTheftAlarmNotifications() throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendEmptyModel>"
+  ],
+  "ClimatisationActionsImpl": [
+    "CarNetLib.ClimatisationActionsImpl.stop(_: CarNetLib.ClimatisationOperationType, successFunction: () -> ()) -> CarNetLib.ListenableExecutableAction",
+    "CarNetLib.ClimatisationActionsImpl.start(_: CarNetLib.ClimatisationOperationType, climatisationSettings: CarNetLib.ClimatisationSettings?, successFunction: () -> ()) -> CarNetLib.ListenableExecutableAction",
+    "CarNetLib.ClimatisationActionsImpl.update(_: CarNetLib.ClimatisationSettings, successFunction: () -> ()) -> CarNetLib.ListenableExecutableAction"
+  ],
+  "DepartureTimerRepository": [
+    "CarNetLib.DepartureTimerRepository.getTimerBackendSettings() throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendDepartureTimerSettings>",
+    "CarNetLib.DepartureTimerRepository.putTimerBackendSettings(settings: CarNetLib.BackendDepartureTimerSettings) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendEmptyModel>",
+    "CarNetLib.DepartureTimerRepository.getTimersAndProfiles() throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendDepartureTimersAndProfiles>",
+    "CarNetLib.DepartureTimerRepository.postTimersAndProfiles(timersAndProfiles: CarNetLib.BackendDepartureTimersAndProfiles, actionType: CarNetLib.BackendDepartureTimerActionType, securityPin: Swift.String?, flowStateListener: ((CarNetLib.FlowStateInfo) -> ())?) throws -> CarNetLib.BackendDepartureTimersAndProfiles"
+  ],
+  "GeofenceAlertActionsImpl": [
+    "CarNetLib.GeofenceAlertActionsImpl.definitions(statusFunction: (CarNetLib.GeofenceAlertDefinitionList) -> ()) -> CarNetLib.QueryAction",
+    "CarNetLib.GeofenceAlertActionsImpl.notifications(statusFunction: ([CarNetLib.GeofenceAlert]) -> ()) -> CarNetLib.QueryAction"
+  ],
+  "MBBAuthenticationService": [
+    "CarNetLib.MBBAuthenticationService.revokeToken(accountIdentifier: Swift.String, clientId: Swift.String, tokenTypeHint: Swift.String, refreshToken: Swift.String) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendEmptyModel>",
+    "CarNetLib.MBBAuthenticationService.refreshToken(accountIdentifier: Swift.String, cliendId: Swift.String, grantType: Swift.String, scope: Swift.String, refreshToken: Swift.String) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendTokenResponse>",
+    "CarNetLib.MBBAuthenticationService.requestToken(clientId: Swift.String, scope: Swift.String, identityToken: Swift.String, constantFields: [Swift.String : Swift.String]) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendTokenResponse>",
+    "CarNetLib.MBBAuthenticationService.registerClient(clientRegistrationRequest: CarNetLib.BackendClientRegistrationRequest) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendClientRegistrationResponse>"
+  ],
+  "TripStatisticsRepository": [
+    "CarNetLib.TripStatisticsRepository.getTripStatistics(tripType: Swift.String) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendTripDataList>",
+    "CarNetLib.TripStatisticsRepository.deleteTrips(tripType: Swift.String, deleteMode: CarNetLib.TripStatisticsService.DeleteMode) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendEmptyModel>"
+  ],
+  "VehicleManagementService": [
+    "CarNetLib.VehicleManagementService.getVehicleData(accountIdentifier: Swift.String, vin: Swift.String) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendVehicleData>",
+    "CarNetLib.VehicleManagementService.baseServicePath() -> Swift.String?"
+  ],
+  "AntiTheftAlertActionsImpl": [
+    "CarNetLib.AntiTheftAlertActionsImpl.notifications(statusFunction: ([CarNetLib.AntiTheftAlert]) -> ()) -> CarNetLib.QueryAction"
+  ],
+  "DepartureTimerActionsImpl": [
+    "CarNetLib.DepartureTimerActionsImpl.configuration(successFunction: (CarNetLib.DepartureTimerConfiguration) -> ()) -> CarNetLib.QueryAction"
+  ],
+  "TripStatisticsActionsImpl": [
+    "CarNetLib.TripStatisticsActionsImpl.deleteTrips(tripIds: [Swift.String], successFunction: () -> ()) -> CarNetLib.ExecutableAction",
+    "CarNetLib.TripStatisticsActionsImpl.deleteAllTrips(successFunction: () -> ()) -> CarNetLib.ExecutableAction",
+    "CarNetLib.TripStatisticsActionsImpl.trips(successFunction: ([CarNetLib.TripData]) -> ()) -> CarNetLib.QueryAction"
+  ],
+  "VWIdAuthenticationService": [
+    "CarNetLib.VWIdAuthenticationService.fetchInitialToken(authCode: Swift.String, idToken: Swift.String, pkceCodeVerifier: Swift.String) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendTokenResponse>"
+  ],
+  "VehicleLocationRepository": [
+    "CarNetLib.VehicleLocationRepository.getVehicleLocation() throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendLastParkingPosition>"
+  ],
+  "AuxiliaryHeatingRepository": [
+    "CarNetLib.AuxiliaryHeatingRepository.loadAuxiliaryHeatingStatus() throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendAuxiliaryHeatingStatus>",
+    "CarNetLib.AuxiliaryHeatingRepository.performQuickAction(requestModel: CarNetLib.BackendAuxiliaryHeatingRequestModel, statusCallback: ((CarNetLib.FlowStateInfo) -> ())?) throws -> CarNetLib.RestApiClientResponse<CarNetLib.BackendAuxiliaryHeatingActionStatus>",
+    "CarNetLib.AuxiliaryHeatingRepository.(startPollingActions in _9507EC29FB005F51A30A67689AC7E84D)(vin: Swift.String, requestId: Swift.String, statusCallback: ((CarNetLib.FlowStateInfo) -> ())?) throws -> CarNetLib.RestApiClientResponse<CarNetLib.BackendAuxiliaryHeatingActionStatus>",
+    "CarNetLib.AuxiliaryHeatingRepository.updateDepartureTimer(isActive: Swift.Bool, requestModel: CarNetLib.BackendAuxiliaryHeatingDepartureTimerList, statusCallback: ((CarNetLib.FlowStateInfo) -> ())?) throws -> CarNetLib.RestApiClientResponse<CarNetLib.BackendAuxiliaryHeatingActionStatus>"
+  ],
+  "MobileDevicePairingService": [
+    "CarNetLib.MobileDevicePairingService.baseServicePath() -> Swift.String?",
+    "CarNetLib.MobileDevicePairingService.actionStatus(accountIdentifier: Swift.String, vin: Swift.String, requestId: Swift.String) throws -> CarNetLib.RestApiClientResult<CarNetLib.QueryRemoteLastStatusgQueryResponse>",
+    "CarNetLib.MobileDevicePairingService.getActionStatus(accountIdentifier: Swift.String, vin: Swift.String, pollId: Swift.String) throws -> CarNetLib.RestApiClientResult<CarNetLib.QueryRemoteLastStatusgQueryResponse>",
+    "CarNetLib.MobileDevicePairingService.pollActionStatus(accountIdentifier: Swift.String, vin: Swift.String, requestId: Swift.String) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendMobileDevicePairingActionStatus>",
+    "CarNetLib.MobileDevicePairingService.poll(accountIdentifier: Swift.String, vin: Swift.String, pollId: Swift.String) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendMobileDevicePairingActionStatus>",
+    "CarNetLib.MobileDevicePairingService.query(accountIdentifier: Swift.String, vin: Swift.String) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendMobileDevicePairingQueryResponse>",
+    "CarNetLib.MobileDevicePairingService.initial(accountIdentifier: Swift.String, vin: Swift.String, mbbUserID: Swift.String, actionRequest: CarNetLib.BackendMobileDevicePairingInitialRequestModel) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendMobileDevicePairingInitialResponse>",
+    "CarNetLib.MobileDevicePairingService.pairing(accountIdentifier: Swift.String, vin: Swift.String, mbbUserID: Swift.String, actionRequest: CarNetLib.BackendMobileDevicePairingPairingRequestModel) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendJobTransactionResponse>",
+    "CarNetLib.MobileDevicePairingService.unpairing(accountIdentifier: Swift.String, vin: Swift.String, mbbUserID: Swift.String) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendJobTransactionResponse>"
+  ],
+  "SVWIdentityProviderService": [
+    "CarNetLib.SVWIdentityProviderService.sendSVWsmsCode(clientId: Swift.String, username: Swift.String) throws -> CarNetLib.RestApiClientResult<CarNetLib.SVWSMSCodeResponse>",
+    "CarNetLib.SVWIdentityProviderService.sendSVWImageCode(clientId: Swift.String) throws -> CarNetLib.RestApiClientResult<CarNetLib.SVWImageCodeResponse>",
+    "CarNetLib.SVWIdentityProviderService.fetchIdentityToken(clientId: Swift.String, username: Swift.String, password: Swift.String) throws -> CarNetLib.RestApiClientResult<CarNetLib.SVWIdentityResponse>",
+    "CarNetLib.SVWIdentityProviderService.loginSWWithsmsCode(clientId: Swift.String, username: Swift.String, smsCode: Swift.String, imageCode: Swift.String, picTicket: Swift.String) throws -> CarNetLib.RestApiClientResult<CarNetLib.SVWCodeIdentityResponse>",
+    "CarNetLib.SVWIdentityProviderService.fetchIdentityTokenNew(clientId: Swift.String, username: Swift.String, password: Swift.String, picContent: Swift.String, picTicket: Swift.String) throws -> CarNetLib.RestApiClientResult<CarNetLib.SVWIdentityResponse>"
+  ],
+  "UserConfidentialRepository": [
+    "CarNetLib.UserConfidentialRepository.removeUserInfo(forUserID: Swift.String, vin: Swift.String) -> ()",
+    "CarNetLib.UserConfidentialRepository.storeRStKey(forUserID: Swift.String, vin: Swift.String, value: Swift.String) -> ()",
+    "CarNetLib.UserConfidentialRepository.getRequestID(forVin: Swift.String, action: Swift.String) -> Swift.String?",
+    "CarNetLib.UserConfidentialRepository.saveRequestID(forRequestID: Swift.String, vin: Swift.String, action: Swift.String) -> ()",
+    "CarNetLib.UserConfidentialRepository.(readRequestIDValue in _A06FB536EA4AED8F619C786454481856)<A>(vin: Swift.String, action: Swift.String) -> A?",
+    "CarNetLib.UserConfidentialRepository.Key.make(for: Swift.String, vin: Swift.String) -> Swift.String",
+    "CarNetLib.UserConfidentialRepository.getRStKey(forUserID: Swift.String, vin: Swift.String) -> Swift.String?",
+    "CarNetLib.UserConfidentialRepository.(readValue in _A06FB536EA4AED8F619C786454481856)<A>(forKey: CarNetLib.UserConfidentialRepository.Key, userID: Swift.String, vin: Swift.String) -> A?",
+    "CarNetLib.UserConfidentialRepository.(saveValue in _A06FB536EA4AED8F619C786454481856)(forKey: CarNetLib.UserConfidentialRepository.Key, value: Any, userID: Swift.String, vin: Swift.String) -> ()"
+  ],
+  "VehicleHealthReportService": [
+    "CarNetLib.VehicleHealthReportService.baseServicePath() -> Swift.String?",
+    "CarNetLib.VehicleHealthReportService.getHistory(accountIdentifier: Swift.String, vin: Swift.String, mbbUserId: Swift.String) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendVhrVehicleData>"
+  ],
+  "AuxiliaryHeatingActionsImpl": [
+    "CarNetLib.AuxiliaryHeatingActionsImpl.updateDepartureTimer(departureTimerList: CarNetLib.AuxiliaryHeatingDepartureTimerList, statusFunction: () -> ()) -> CarNetLib.ListenableExecutableAction",
+    "CarNetLib.AuxiliaryHeatingActionsImpl.stop(statusFunction: () -> ()) -> CarNetLib.ListenableExecutableAction",
+    "CarNetLib.AuxiliaryHeatingActionsImpl.start(statusFunction: () -> ()) -> CarNetLib.ListenableExecutableAction"
+  ],
+  "MBBAuthenticationRepository": [
+    "CarNetLib.MBBAuthenticationRepository.revokeToken(accountIdentifier: Swift.String, clientId: Swift.String, refreshToken: Swift.String) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendEmptyModel>",
+    "CarNetLib.MBBAuthenticationRepository.(requestTokens in _657655CABA7CD517A758F0F11A9FA5DF)(refreshTokenCredentials: CarNetLib.RefreshToken) throws -> CarNetLib.InternalCredentials?",
+    "CarNetLib.MBBAuthenticationRepository.(requestTokens in _657655CABA7CD517A758F0F11A9FA5DF)(clientId: Swift.String, identityTokenCredentials: CarNetLib.IdentityToken) throws -> CarNetLib.InternalCredentials?",
+    "CarNetLib.MBBAuthenticationRepository.exchangeCredentials(clientId: Swift.String, authenticationCredentials: CarNetLib.InternalCredentials) throws -> CarNetLib.InternalCredentials?",
+    "CarNetLib.MBBAuthenticationRepository.registerClientAppAtMbb() throws -> (clientId: Swift.String?, response: CarNetLib.Response)",
+    "CarNetLib.MBBAuthenticationRepository.(getStaticBodyParamsForMbbAuthServer in _657655CABA7CD517A758F0F11A9FA5DF)(scope: Swift.String) -> [Swift.String : Swift.String]"
+  ],
+  "VehicleOperationListService": [
+    "CarNetLib.VehicleOperationListService.getVehicleOperationList(accountIdentifier: Swift.String, vin: Swift.String, scope: CarNetLib.VehicleOperationListService.Scope) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendOperationList>"
+  ],
+  "FAWVWIdentityProviderService": [
+    "CarNetLib.FAWVWIdentityProviderService.isApproval(Swift.String) -> Swift.Bool",
+    "CarNetLib.FAWVWIdentityProviderService.completeUrlParams(_: Swift.String, urlParams: [Swift.String : Any]?, secretKey: Swift.String) -> [Swift.String : Any]",
+    "CarNetLib.FAWVWIdentityProviderService.fetchIdentityToken(clientId: Swift.String, username: Swift.String, password: Swift.String) throws -> CarNetLib.RestApiClientResult<CarNetLib.FAWVWIdentityResponse>",
+    "CarNetLib.FAWVWIdentityProviderService.sign(_: Swift.String, urlParams: [Swift.String : Any], secretKey: Swift.String) -> Swift.String"
+  ],
+  "FetchIdentityTokenActionsImpl": [
+    "CarNetLib.FetchIdentityTokenActionsImpl.(handleRedirectUrl in _546BDA1765061D92CDBE884329B01184)(redirectUrl: Swift.String) -> ()",
+    "CarNetLib.FetchIdentityTokenActionsImpl.loginUrlForLanguage(isocode: Swift.String) -> Swift.String",
+    "CarNetLib.FetchIdentityTokenActionsImpl.process(redirectUrl: Swift.String) -> Swift.Bool"
+  ],
+  "MobileDevicePairingRepository": [
+    "CarNetLib.MobileDevicePairingRepository.executeAction(action: CarNetLib.BackendServiceOperationType, requestModel: CarNetLib.BackendMobileDevicePairingPairingRequestModel?, statusCallback: ((CarNetLib.FlowStateInfo) -> ())?) throws -> CarNetLib.RestApiClientResponse<CarNetLib.BackendMobileDevicePairingActionStatus>",
+    "CarNetLib.MobileDevicePairingRepository.(startPollingActions in _1275850903A7F9908C659454563EF1D5)(vin: Swift.String, requestId: Swift.String, statusCallback: ((CarNetLib.FlowStateInfo) -> ())?) throws -> CarNetLib.RestApiClientResponse<CarNetLib.BackendMobileDevicePairingActionStatus>",
+    "CarNetLib.MobileDevicePairingRepository.query() throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendMobileDevicePairingQueryResponse>",
+    "CarNetLib.MobileDevicePairingRepository.status() throws -> CarNetLib.RestApiClientResult<CarNetLib.QueryRemoteLastStatusgQueryResponse>",
+    "CarNetLib.MobileDevicePairingRepository.initial(requestModel: CarNetLib.BackendMobileDevicePairingInitialRequestModel) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendMobileDevicePairingInitialResponse>",
+    "CarNetLib.MobileDevicePairingRepository.pairing(requestModel: CarNetLib.BackendMobileDevicePairingPairingRequestModel, statusCallback: ((CarNetLib.FlowStateInfo) -> ())?) throws -> CarNetLib.RestApiClientResponse<CarNetLib.BackendMobileDevicePairingActionStatus>",
+    "CarNetLib.MobileDevicePairingRepository.unpairing(statusCallback: ((CarNetLib.FlowStateInfo) -> ())?) throws -> CarNetLib.RestApiClientResponse<CarNetLib.BackendMobileDevicePairingActionStatus>"
+  ],
+  "MobileDevicePairingActionsImpl": [
+    "CarNetLib.MobileDevicePairingActionsImpl.getLastPairStatus(successFunction: (CarNetLib.QueryRemoteLastStatus) -> ()) -> CarNetLib.ListenableExecutableAction",
+    "CarNetLib.MobileDevicePairingActionsImpl.pair(phoneID: Swift.String, successFunction: () -> ()) -> CarNetLib.ListenableExecutableAction",
+    "CarNetLib.MobileDevicePairingActionsImpl.unpair(successFunction: () -> ()) -> CarNetLib.ListenableExecutableAction"
+  ],
+  "SecurityPinProtectedRepository": [
+    "CarNetLib.SecurityPinProtectedRepository.requestSecurityToken(operationRequest: CarNetLib.SecuredOperationRequest, securityPin: Swift.String) throws -> CarNetLib.RestApiClientResponse<CarNetLib.BackendSecurityToken>",
+    "CarNetLib.SecurityPinProtectedRepository.requestRStOSecurityInfo(operationRequest: CarNetLib.SecuredOperationRequest, securityPin: Swift.String) throws -> CarNetLib.BackendRStOSecurityInfo",
+    "CarNetLib.SecurityPinProtectedRepository.(computeChallengeResponse in _6483DD8D00649994FFBEF34BF2904346)(authentificationInfo: CarNetLib.BackendSecurityPinAuthenticationInfo, securityPin: Swift.String) -> Swift.String?"
+  ],
+  "VWProfileAuthenticationService": [
+    "CarNetLib.VWProfileAuthenticationService.requestTokens(authorization: Swift.String, clientId: Swift.String, grantType: Swift.String, authorizationCode: Swift.String, redirectUri: Swift.String) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendTokenResponse>",
+    "CarNetLib.VWProfileAuthenticationService.requestMBBIdentityToken(authorization: Swift.String, accessToken: Swift.String, tokenManagerId: Swift.String, constantFields: [Swift.String : Swift.String]) throws -> CarNetLib.RestApiClientResult<CarNetLib.BackendTokenMapperResponse>"
+  ],
+  "VehicleHealthReportActionsImpl": [
+    "CarNetLib.VehicleHealthReportActionsImpl.warnings(successFunction: (CarNetLib.WarningsReport) -> ()) -> CarNetLib.QueryAction"
+  ],
+  "SpeedAlertDefinitionActionsImpl": [
+    "CarNetLib.SpeedAlertDefinitionActionsImpl.update(_: [CarNetLib.SpeedAlertDefinition], statusFunction: ([CarNetLib.SpeedAlertDefinition]) -> ()) -> CarNetLib.ListenableExecutableAction"
+  ],
+  "IdentityProviderStageActionsImpl": [
+    "CarNetLib.IdentityProviderStageActionsImpl.fetchIdentityToken(identityTokenFunction: (Swift.String) -> (), errorFunction: (CarNetLib.CarNetLibError) -> ()) -> CarNetLib.FetchIdentityTokenActions",
+    "CarNetLib.IdentityProviderStageActionsImpl.fetchIdentityToken(clientId: Swift.String, username: Swift.String, password: Swift.String, identityTokenFunction: (Swift.String) -> ()) -> CarNetLib.ExecutableAction",
+    "CarNetLib.IdentityProviderStageActionsImpl.fetchSMSCode(clientId: Swift.String, username: Swift.String, smsCodeFunction: (Swift.String) -> ()) -> CarNetLib.ExecutableAction",
+    "CarNetLib.IdentityProviderStageActionsImpl.fetchImageCode(clientId: Swift.String, ImageCodeFunction: (CarNetLib.ImageCodeResponse) -> ()) -> CarNetLib.ExecutableAction",
+    "CarNetLib.IdentityProviderStageActionsImpl.fetchLoginAndRegister(clientId: Swift.String, username: Swift.String, smsCode: Swift.String, picContent: Swift.String, picTicket: Swift.String, identityTokenFunction: (Swift.String) -> ()) -> CarNetLib.ExecutableAction"
+  ],
+  "SpeedAlertNotificationActionsImpl": [
+    "CarNetLib.SpeedAlertNotificationActionsImpl.delete(() -> ()) -> CarNetLib.ListenableExecutableAction"
+  ],
+  "VWProfileAuthenticationRepository": [
+    "CarNetLib.VWProfileAuthenticationRepository.(requestToken in _ABA4B0AFCB2F94DBCCE456AFFC72F58E)(CarNetLib.AuthCode) throws -> CarNetLib.InternalCredentials?",
+    "CarNetLib.VWProfileAuthenticationRepository.(exchangeCredentials in _ABA4B0AFCB2F94DBCCE456AFFC72F58E)(CarNetLib.InternalCredentials) throws -> CarNetLib.InternalCredentials",
+    "CarNetLib.VWProfileAuthenticationRepository.exchangeCredentials(authCode: CarNetLib.AuthCode) throws -> CarNetLib.InternalCredentials?",
+    "CarNetLib.VWProfileAuthenticationRepository.(requestMBBIdentityToken in _ABA4B0AFCB2F94DBCCE456AFFC72F58E)(CarNetLib.AccessToken, CarNetLib.VWProfileAuthenticationService) throws -> CarNetLib.IdentityToken?",
+    "CarNetLib.VWProfileAuthenticationRepository.(getBasicAuthorizationHeader in _ABA4B0AFCB2F94DBCCE456AFFC72F58E)(vwProfileStage: CarNetLib.VWProfileStage) -> Swift.String",
+    "CarNetLib.VWProfileAuthenticationRepository.(getStaticBodyParamsForTokenMapper in _ABA4B0AFCB2F94DBCCE456AFFC72F58E)() -> [Swift.String : Swift.String]"
+  ],
+  "GeofenceAlertDefinitionActionsImpl": [
+    "CarNetLib.GeofenceAlertDefinitionActionsImpl.update(_: [CarNetLib.GeofenceAlertDefinition], statusFunction: ([CarNetLib.GeofenceAlertDefinition]) -> ()) -> CarNetLib.ListenableExecutableAction"
+  ],
+  "GeofenceAlertNotificationActionsImpl": [
+    "CarNetLib.GeofenceAlertNotificationActionsImpl.delete(() -> ()) -> CarNetLib.ListenableExecutableAction"
+  ],
+  "AntiTheftAlertNotificationActionsImpl": [
+    "CarNetLib.AntiTheftAlertNotificationActionsImpl.delete(() -> ()) -> CarNetLib.ListenableExecutableAction"
+  ],
+  "DepartureTimerConfigurationActionsImpl": [
+    "CarNetLib.DepartureTimerConfigurationActionsImpl.updateChargeMinLimit(_: CarNetLib.DepartureTimerConfiguration, successFunction: (CarNetLib.DepartureTimerConfiguration) -> ()) -> CarNetLib.OptionalSecurityPinProtectedExecutableAction",
+    "CarNetLib.DepartureTimerConfigurationActionsImpl.update(_: CarNetLib.DepartureTimerConfiguration, successFunction: (CarNetLib.DepartureTimerConfiguration) -> ()) -> CarNetLib.OptionalSecurityPinProtectedExecutableAction"
+  ],
+  "RemoteHonkFlashRateLimitRecievedActionsImpl": [
+    "CarNetLib.RemoteHonkFlashRateLimitRecievedActionsImpl.rateLimitRecieved(statusFunction: (Swift.Int) -> ()) -> CarNetLib.ListenableExecutableAction"
+  ]
+}

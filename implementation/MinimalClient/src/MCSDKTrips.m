@@ -10,9 +10,9 @@
                     userInfo:@{NSLocalizedDescriptionKey: @"尚未选择车辆"}]);
         return;
     }
-    // tripStatistics(tripType:statusFunction:)；TripType 为 Int 枚举，0=单次行程（默认）
+    // tripStatistics(tripType:statusFunction:)；TripType 为 Int 枚举，1=短期行程（0=长期、2=周期，依据 SDK TripType.description 反汇编）
     id action = ((id(*)(id,SEL,long,id))objc_msgSend)(self.vehicleActions,
-        @selector(tripStatisticsWithTripType:statusFunction:), (long)0,
+        @selector(tripStatisticsWithTripType:statusFunction:), (long)1,
         ^(id trips) {
             // [TripData] → 摘要字典数组（不打印 VIN）
             NSMutableArray *out = [NSMutableArray array];
@@ -22,8 +22,7 @@
                                       @"mileage",@"overallMileage",@"averageSpeed",
                                       @"averageFuelConsumption",@"averageElectricEngineConsumption",
                                       @"averageRecuperation",@"zeroEmissionDistance",@"reportReason"]) {
-                    id v = nil;
-                    @try { v = [t valueForKey:k]; } @catch (id e) {}
+                    id v = MCSafeGet(t, k);
                     if (v) d[k] = [v description];
                 }
                 [out addObject:d];

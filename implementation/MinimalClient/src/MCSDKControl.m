@@ -1,5 +1,5 @@
-// MCSDKControl.m — 物理控制全量接口（用户已明确授权执行）
-// SPIN 保护动作：securityPinWithSecurityPin: → loadWithErrorFunction:
+// MCSDKControl.m — Control adapters. UI confirmation remains required; capability evidence is not execution proof.
+// Protected action: securityPinWithSecurityPin: -> ExecutableAction.executeWithErrorFunction:
 // SPIN 仅存内存（MCSDK.spinCode），不落盘、不打印。
 #import "MCSDK_Internal.h"
 #import <objc/message.h>
@@ -11,12 +11,14 @@ static void Execute(id action, NSString *_Nullable spin,
                     void (^onError)(NSString *)) {
     if (!action) { onError(@"指令构造失败"); return; }
     id runnable = action;
-    if (spin.length > 0 && [action respondsToSelector:@selector(securityPinWithSecurityPin:)]) {
+    if ([action respondsToSelector:@selector(securityPinWithSecurityPin:)]) {
+        if (!spin.length) { onError(@"此操作需要 SPIN 安全码"); return; }
         runnable = ((id(*)(id,SEL,id))objc_msgSend)(action,
                       @selector(securityPinWithSecurityPin:), spin);
         if (!runnable) { onError(@"SPIN 被拒绝（码错误或被锁）"); return; }
     }
-    ((void(*)(id,SEL,id))objc_msgSend)(runnable, @selector(loadWithErrorFunction:),
+    if (![runnable respondsToSelector:@selector(executeWithErrorFunction:)]) { onError(@"SDK 未提供该控制动作的执行入口"); return; }
+    ((void(*)(id,SEL,id))objc_msgSend)(runnable, @selector(executeWithErrorFunction:),
         ^(id sdkError) { onError(MCNullStr([sdkError description])); });
 }
 
@@ -25,9 +27,9 @@ static void RunStatusCommand(id vehicleActions, NSString *facadeProp, SEL comman
                              NSString *spin, void (^onStatus)(NSString *),
                              void (^onError)(NSString *)) {
     if (!vehicleActions) { onError(@"未选车"); return; }
-    id sub = nil;
-    @try { sub = [vehicleActions valueForKey:facadeProp]; } @catch (id e) {}
+    id sub = MCSafeGet(vehicleActions, facadeProp);
     if (!sub) { onError([NSString stringWithFormat:@"车辆不支持 %@", facadeProp]); return; }
+    if (![sub respondsToSelector:command]) { onError(@"SDK 未暴露此控制接口"); return; }
     id action = ((id(*)(id,SEL,id))objc_msgSend)(sub, command,
         ^(id status) { onStatus(MCNullStr([status description])); });
     Execute(action, spin, onError);
@@ -37,12 +39,12 @@ static void RunStatusCommand(id vehicleActions, NSString *facadeProp, SEL comman
 static void RunHonkFlash(id vehicleActions, SEL command, NSUInteger duration,
                          void (^onStatus)(NSString *), void (^onError)(NSString *)) {
     if (!vehicleActions) { onError(@"未选车"); return; }
-    id sub = nil;
-    @try { sub = [vehicleActions valueForKey:@"honkAndFlash"]; } @catch (id e) {}
-    if (!sub) { onError(@"车辆不支持寻车"); return; }
+    // Honk/flash methods live directly on VehicleActionsImpl, not a honkAndFlash property.
+    id sub = vehicleActions;
+    if (![sub respondsToSelector:command]) { onError(@"SDK 未提供此寻车接口"); return; }
     Class paramCls = NSClassFromString(@"_TtC9CarNetLib21HonkAndFlashParameter");
     if (!paramCls) { onError(@"HonkAndFlashParameter 类缺失"); return; }
-    id param = ((id(*)(id,SEL,NSUInteger))objc_msgSend)([paramCls new],
+    id param = ((id(*)(id,SEL,NSUInteger))objc_msgSend)([paramCls alloc],
                  @selector(initWithDuration:), duration);
     id action = ((id(*)(id,SEL,id,id))objc_msgSend)(sub, command, param,
         ^(id status) { onStatus(MCNullStr([status description])); });
@@ -83,26 +85,28 @@ static void RunHonkFlash(id vehicleActions, SEL command, NSUInteger duration,
            onStatus:(void (^)(NSString *))onStatus
               error:(void (^)(NSString *))onError {
     if (!self.vehicleActions) { onError(@"未选车"); return; }
-    id sub = nil;
-    @try { sub = [self.vehicleActions valueForKey:@"climatisation"]; } @catch (id e) {}
+    id sub = MCSafeGet(self.vehicleActions, @"climatisation");
     if (!sub) { onError(@"车辆不支持空调"); return; }
     Class tempCls = NSClassFromString(@"_TtC9CarNetLib16TemperatureValue");
     Class setCls  = NSClassFromString(@"_TtC9CarNetLib21ClimatisationSettings");
     if (!tempCls || !setCls) { onError(@"空调参数类缺失"); return; }
-    id temp = ((id(*)(id,SEL,double,long))objc_msgSend)([tempCls new],
+    id temp = ((id(*)(id,SEL,double,long))objc_msgSend)([tempCls alloc],
                 @selector(initWithTemperature:unit:), tempC, 0 /* celsius */);
-    id settings = ((id(*)(id,SEL,long,id,BOOL))objc_msgSend)([setCls new],
+    id settings = ((id(*)(id,SEL,long,id,BOOL))objc_msgSend)([setCls alloc],
                 @selector(initWithHeaterSource:targetTemperature:useWithoutExternalPower:),
                 0 /* automatic */, temp, YES);
-    id action = ((id(*)(id,SEL,id,id,id))objc_msgSend)(sub,
+    id action = ((id(*)(id,SEL,NSInteger,id,id))objc_msgSend)(sub,
                 @selector(start:climatisationSettings:successFunction:),
-                nil /* 无 timerId */, settings,
+                (NSInteger)0 /* enum argument; vehicle-specific validity must be verified */, settings,
                 ^(id status) { onStatus(MCNullStr([status description])); });
     Execute(action, nil, onError);
 }
 - (void)climateStop:(void (^)(NSString *))onStatus error:(void (^)(NSString *))onError {
-    RunStatusCommand(self.vehicleActions, @"climatisation",
-                     @selector(stopWithSuccessFunction:), nil, onStatus, onError);
+    id sub=MCSafeGet(self.vehicleActions,@"climatisation");
+    SEL selector=@selector(stop:successFunction:);
+    if (![sub respondsToSelector:selector]) { onError(@"SDK 未提供空调停止接口"); return; }
+    id action=((id(*)(id,SEL,NSInteger,id))objc_msgSend)(sub,selector,(NSInteger)0,^(id status){onStatus(MCNullStr([status description]));});
+    Execute(action,nil,onError);
 }
 
 // 辅助加热（门面 remoteAuxiliaryHeating）
@@ -121,8 +125,7 @@ static void RunHonkFlash(id vehicleActions, SEL command, NSUInteger duration,
                      error:(void (^)(NSString *))onError {
     if (!self.vehicleActions) { onError(@"未选车"); return; }
     if (spin.length == 0) { onError(@"需要 SPIN"); return; }
-    id sub = nil;
-    @try { sub = [self.vehicleActions valueForKey:@"remoteStart"]; } @catch (id e) {}
+    id sub = MCSafeGet(self.vehicleActions, @"remoteStart");
     if (!sub) { onError(@"车辆不支持远程启动"); return; }
     NSDate *now = [NSDate date];
     // SPIN 输入起止时间戳防重放：这里以当下为界（首末位输入时刻）

@@ -1,0 +1,21 @@
+{
+  "date": "2026-11-17",
+  "officialApp": {
+    "bundleID": "com.fawvw.aftermarket",
+    "version": "444.28.0",
+    "processIDAtObservation": 15007,
+    "locatorPageObserved": true,
+    "vehicleMarkerObserved": true,
+    "vehicleAgeAndDistanceCardObserved": true,
+    "requestPlaintextObserved": false
+  },
+  "evidence": [
+    "native UI screenshot retained privately",
+    "official process unified logs include MoscCarnetCarFinderViewController resources"
+  ],
+  "limitations": [
+    "CoreLocation callbacks can refer to the phone and are not proof of vehicle coordinates",
+    "No official app injection or resigning performed",
+    "Request signature or device-binding cause not yet proven"
+  ]
+}

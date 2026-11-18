@@ -1,341 +1,262 @@
-// MainViewController.m — 车辆信息 + 能力 + 控制面板
-// 左上角：按 VIN 单选下拉（UIMenu，交接文档 P1 要求）
-// 控制按钮：用户已授权执行；每个指令带确认弹窗。
 #import "MainViewController.h"
 #import "MCSDK.h"
-#import "MCHostAuth.h"
-#import "MCConfiguration.h"
+#import "MCCapabilitySurvey.h"
+#import "MCInformationViewController.h"
+#import "MCUI.h"
+#import "MCRemoteHardware.h"
 
+static UIColor *RemoteColor(CGFloat v) {return [UIColor colorWithWhite:v alpha:1];}
+static UILabel *Label(NSString *text,CGFloat size,UIFontWeight weight,UIColor *color) {
+    UILabel *l=[UILabel new];l.text=text;l.font=MCFont(size,weight);l.textColor=color;l.numberOfLines=0;l.adjustsFontForContentSizeCategory=YES;return l;
+}
+static UIStackView *Stack(NSArray *views,BOOL horizontal,CGFloat spacing) {
+    UIStackView *s=[[UIStackView alloc] initWithArrangedSubviews:views];s.axis=horizontal?UILayoutConstraintAxisHorizontal:UILayoutConstraintAxisVertical;s.spacing=spacing;return s;
+}
 @interface MainViewController ()
-@property (nonatomic, strong) NSArray<MCVehicleInfo *> *vehicles;
-@property (nonatomic, copy) NSString *currentVIN;
-@property (nonatomic, strong) UILabel *infoLabel;    // 车辆静态信息
-@property (nonatomic, strong) UILabel *statusLabel;  // 只读状态
-@property (nonatomic, strong) UITextView *logView;
+@property(nonatomic,strong) NSArray<MCVehicleInfo *> *vehicles;
+@property(nonatomic,copy) NSString *currentVIN;
+@property(nonatomic,strong) UILabel *rangeLabel,*fuelLabel,*mileageLabel,*snapshotLabel,*bodyLabel,*messageLabel,*vehicleLabel;
+@property(nonatomic,strong) UIButton *refreshButton;
+@property(nonatomic,strong) UIStackView *controlGrid;
+@property(nonatomic,strong) NSMutableArray<UIButton *> *controlButtons;
+@property(nonatomic,strong) MCRemoteKey *lockButton,*unlockButton;
+@property(nonatomic,strong) UIRefreshControl *refreshControl;
+@property(nonatomic,strong) UIActivityIndicatorView *activity;
+@property(nonatomic) BOOL vehicleReady,selecting,commandRunning,refreshing,sessionLoading;
+@property(nonatomic) NSUInteger generation,refreshGeneration,commandGeneration;
 @end
-
 @implementation MainViewController
-
 - (void)viewDidLoad {
     [super viewDidLoad];
-    self.view.backgroundColor = UIColor.systemBackgroundColor;
-    self.title = @"一汽大众·车控";
-    self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc]
-        initWithTitle:@"车辆…" style:UIBarButtonItemStylePlain target:nil action:nil];
-
-    CGFloat W = self.view.bounds.size.width;
-    self.infoLabel = [[UILabel alloc] init];
-    self.infoLabel.font = [UIFont systemFontOfSize:13];
-    self.infoLabel.numberOfLines = 0;
-    self.infoLabel.text = @"等待自动登录…";
-
-    self.statusLabel = [[UILabel alloc] init];
-    self.statusLabel.font = [UIFont fontWithName:@"Menlo" size:11];
-    self.statusLabel.numberOfLines = 0;
-
-    self.logView = [[UITextView alloc] init];
-    self.logView.font = [UIFont fontWithName:@"Menlo" size:10];
-    self.logView.editable = NO;
-    self.logView.layer.borderWidth = 1;
-    self.logView.layer.borderColor = [UIColor systemGray4Color].CGColor;
-    [self.logView.heightAnchor constraintEqualToConstant:150].active = YES;
-
-    // 控制按钮：2 列 × 4 行
-    NSArray *titles = @[
-        @"闪灯", @"鸣笛+闪灯", @"锁车", @"解锁",
-        @"车窗通风", @"车窗全开", @"车窗全关", @"空调开22℃",
-        @"空调关", @"辅热开", @"辅热关", @"发动机启",
-        @"发动机停", @"刷新状态", @"停车位置", @"行程记录",
-        @"空调状态", @"健康告警", @"门窗细态", @"能力清单", @"原始数据", @"状态详情", @"权限地图", @"深度探测"];
-    NSUInteger gridRows = (titles.count + 3) / 4;
-    NSMutableArray *allRows = [NSMutableArray array];
-    for (NSUInteger r = 0; r < gridRows; r++) {
-        NSMutableArray *row = [NSMutableArray array];
-        for (NSUInteger c = 0; c < 4; c++) {
-            NSUInteger idx = r * 4 + c;
-            if (idx >= titles.count) break;
-            NSString *t = titles[idx];
-            UIButton *b = [UIButton buttonWithType:UIButtonTypeSystem];
-            [b setTitle:t forState:UIControlStateNormal];
-            [b.layer setBorderWidth:1];
-            b.layer.borderColor = [UIColor systemBlueColor].CGColor;
-            b.layer.cornerRadius = 6;
-            [b addTarget:self action:@selector(onAction:) forControlEvents:UIControlEventTouchUpInside];
-            b.accessibilityLabel = t;
-            [b.heightAnchor constraintEqualToConstant:40].active = YES;
-            [row addObject:b];
-        }
-        UIStackView *sv = [[UIStackView alloc] initWithArrangedSubviews:row];
-        sv.axis = UILayoutConstraintAxisHorizontal;
-        sv.distribution = UIStackViewDistributionFillEqually;
-        sv.spacing = 8;
-        [allRows addObject:sv];
-    }
-    UIStackView *grid = [[UIStackView alloc] initWithArrangedSubviews:allRows];
-    grid.axis = UILayoutConstraintAxisVertical;
-    grid.spacing = 8;
-
-    UIStackView *stack = [[UIStackView alloc] initWithArrangedSubviews:
-        @[self.infoLabel, self.statusLabel, grid, self.logView]];
-    stack.axis = UILayoutConstraintAxisVertical;
-    stack.spacing = 12;
-
-    UIScrollView *scroll = [[UIScrollView alloc] init];
-    scroll.translatesAutoresizingMaskIntoConstraints = NO;
-    stack.translatesAutoresizingMaskIntoConstraints = NO;
-    [scroll addSubview:stack];
-    [self.view addSubview:scroll];
-    [NSLayoutConstraint activateConstraints:@[
-        [scroll.topAnchor constraintEqualToAnchor:self.view.topAnchor],
-        [scroll.bottomAnchor constraintEqualToAnchor:self.view.bottomAnchor],
-        [scroll.leadingAnchor constraintEqualToAnchor:self.view.leadingAnchor],
-        [scroll.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor],
-        [stack.topAnchor constraintEqualToAnchor:scroll.contentLayoutGuide.topAnchor constant:12],
-        [stack.bottomAnchor constraintEqualToAnchor:scroll.contentLayoutGuide.bottomAnchor constant:-12],
-        [stack.leadingAnchor constraintEqualToAnchor:scroll.contentLayoutGuide.leadingAnchor constant:16],
-        [stack.trailingAnchor constraintEqualToAnchor:scroll.contentLayoutGuide.trailingAnchor constant:-16],
-        [stack.widthAnchor constraintEqualToAnchor:scroll.frameLayoutGuide.widthAnchor constant:-32],
-    ]];
-
-    // 自动登录（持久会话）
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2 * NSEC_PER_SEC)),
-                   dispatch_get_main_queue(), ^{
-        NSString *imported = [[NSUserDefaults standardUserDefaults] stringForKey:@"imported.idToken"];
-        if (imported.length == 0) { [self log:@"无持久会话"]; return; }
-        [self log:@"自动登录…"];
-        [[MCSDK shared] initializeSDK:^(NSError *err) {
-            if (err) { [self log:@"初始化失败: %@", err.localizedDescription]; return; }
-            [[MCSDK shared] loginMBBWithIdentityToken:imported completion:^(NSError *merr) {
-                if (merr) { [self log:@"自动登录失败: %@", merr.localizedDescription]; return; }
-                [self log:@"已登录，加载车辆…"];
-                [self loadCatalog];
-            }];
-        }];
-    });
+    self.view.backgroundColor=MCPaper();self.title=@"车控";self.controlButtons=[NSMutableArray array];
+    UINavigationBarAppearance *appearance=[UINavigationBarAppearance new];[appearance configureWithOpaqueBackground];appearance.backgroundColor=MCPaper();appearance.shadowColor=UIColor.clearColor;
+    self.navigationController.navigationBar.standardAppearance=appearance;self.navigationController.navigationBar.scrollEdgeAppearance=appearance;self.navigationController.navigationBar.tintColor=UIColor.labelColor;
+    self.navigationItem.leftBarButtonItem=[[UIBarButtonItem alloc] initWithTitle:@"选择车辆 ⌄" style:UIBarButtonItemStylePlain target:nil action:nil];
+    self.navigationItem.rightBarButtonItem=[[UIBarButtonItem alloc] initWithImage:[UIImage systemImageNamed:@"info.circle"] style:UIBarButtonItemStylePlain target:self action:@selector(openInformation)];
+    self.navigationItem.rightBarButtonItem.accessibilityLabel=@"查看车辆信息";self.navigationItem.rightBarButtonItem.enabled=NO;
+    [self buildRemote];[self startSession];
 }
-
-- (void)log:(NSString *)fmt, ... {
-    va_list ap; va_start(ap, fmt);
-    NSString *line = [[NSString alloc] initWithFormat:fmt arguments:ap];
-    va_end(ap);
-    dispatch_async(dispatch_get_main_queue(), ^{
-        self.logView.text = [NSString stringWithFormat:@"%@%@\n", self.logView.text, line];
-        NSLog(@"[MC] %@", line);
-    });
+- (MCRemoteKey *)key:(NSString *)title icon:(NSString *)icon large:(BOOL)large {
+    MCRemoteKey *button=[MCRemoteKey buttonWithType:UIButtonTypeCustom];
+    [button configureTitle:title icon:icon large:large];
+    button.backgroundColor=UIColor.clearColor;button.layer.cornerRadius=large?24:20;button.layer.borderWidth=0;
+    button.accessibilityLabel=title;[button.heightAnchor constraintGreaterThanOrEqualToConstant:44].active=YES;
+    [button addTarget:self action:@selector(keyDown:) forControlEvents:UIControlEventTouchDown];
+    [self.controlButtons addObject:button];return button;
 }
-
-#pragma mark 车辆目录与左上角单选下拉
-
-- (void)loadCatalog {
-    [[MCSDK shared] catalogWithCompletion:^(NSArray<MCVehicleInfo *> *infos, NSError *err) {
-        if (!infos) { [self log:@"车辆目录失败: %@", err.localizedDescription]; return; }
-        self.vehicles = infos;
-        [self log:@"%lu 辆车已加载", (unsigned long)infos.count];
-        NSString *pick = self.currentVIN ?: infos.firstObject.vin;
-        [self rebuildMenu:pick];
-        [self selectVIN:pick];
-    }];
+- (void)keyDown:(UIButton *)button {if(button.enabled) MCHapticPress();}
+- (void)buildRemote {
+    UIScrollView *scroll=[UIScrollView new];scroll.translatesAutoresizingMaskIntoConstraints=NO;scroll.alwaysBounceVertical=YES;[self.view addSubview:scroll];
+    self.refreshControl=[UIRefreshControl new];[self.refreshControl addTarget:self action:@selector(refreshPressed) forControlEvents:UIControlEventValueChanged];scroll.refreshControl=self.refreshControl;
+    UIView *remote=[MCRemoteHousing new];remote.translatesAutoresizingMaskIntoConstraints=NO;[scroll addSubview:remote];
+    self.vehicleLabel=Label(@"车辆遥控器",13,UIFontWeightSemibold,RemoteColor(.64));
+    UILabel *brand=Label(@"CAR CONTROL",10,UIFontWeightBold,RemoteColor(.47));
+    UIStackView *brandRow=Stack(@[self.vehicleLabel,[UIView new],brand],YES,12);brandRow.alignment=UIStackViewAlignmentCenter;
+    UIView *led=[MCLCDPanel new];
+    UIColor *lcd=[UIColor colorWithRed:.15 green:.21 blue:.15 alpha:1];
+    UILabel *caption=Label(@"车辆状态",13,UIFontWeightSemibold,lcd);
+    self.refreshButton=[UIButton buttonWithType:UIButtonTypeSystem];[self.refreshButton setImage:[UIImage systemImageNamed:@"arrow.clockwise"] forState:UIControlStateNormal];self.refreshButton.tintColor=lcd;self.refreshButton.accessibilityLabel=@"刷新车辆状态";[self.refreshButton.widthAnchor constraintEqualToConstant:44].active=YES;[self.refreshButton.heightAnchor constraintEqualToConstant:44].active=YES;[self.refreshButton addTarget:self action:@selector(refreshPressed) forControlEvents:UIControlEventTouchUpInside];
+    UIStackView *ledTop=Stack(@[caption,[UIView new],self.refreshButton],YES,4);ledTop.alignment=UIStackViewAlignmentCenter;
+    self.rangeLabel=[MCSevenSegmentLabel new];self.rangeLabel.text=@"—";self.rangeLabel.textColor=lcd;self.rangeLabel.font=[UIFont monospacedDigitSystemFontOfSize:56 weight:UIFontWeightLight];self.rangeLabel.adjustsFontSizeToFitWidth=YES;self.rangeLabel.minimumScaleFactor=.5;self.rangeLabel.numberOfLines=1;
+    UILabel *rangeCaption=Label(@"预计续航 · km",12,UIFontWeightMedium,lcd);
+    self.fuelLabel=Label(@"— %",28,UIFontWeightMedium,lcd);self.fuelLabel.font=[UIFont monospacedDigitSystemFontOfSize:28 weight:UIFontWeightMedium];
+    UILabel *fuelCaption=Label(@"燃油余量",12,UIFontWeightMedium,lcd);
+    UIStackView *range=Stack(@[self.rangeLabel,rangeCaption],NO,0),*fuel=Stack(@[self.fuelLabel,fuelCaption],NO,5);
+    UIStackView *numbers=Stack(@[range,fuel],YES,16);numbers.distribution=UIStackViewDistributionFillProportionally;numbers.alignment=UIStackViewAlignmentBottom;
+    self.bodyLabel=Label(@"等待车辆状态",13,UIFontWeightMedium,lcd);
+    self.mileageLabel=Label(@"总里程 — km",12,UIFontWeightRegular,lcd);
+    self.snapshotLabel=Label(@"尚未读取车况",11,UIFontWeightRegular,[lcd colorWithAlphaComponent:.75]);
+    UIStackView *ledStack=Stack(@[ledTop,numbers,self.bodyLabel,self.mileageLabel,self.snapshotLabel],NO,6);ledStack.translatesAutoresizingMaskIntoConstraints=NO;[led addSubview:ledStack];
+    [NSLayoutConstraint activateConstraints:@[[ledStack.topAnchor constraintEqualToAnchor:led.topAnchor constant:10],[ledStack.bottomAnchor constraintEqualToAnchor:led.bottomAnchor constant:-18],[ledStack.leadingAnchor constraintEqualToAnchor:led.leadingAnchor constant:20],[ledStack.trailingAnchor constraintEqualToAnchor:led.trailingAnchor constant:-20]]];
+    self.lockButton=[self key:@"锁车" icon:@"lock.fill" large:YES];self.lockButton.silver=YES;self.lockButton.backgroundColor=UIColor.clearColor;self.lockButton.layer.borderColor=UIColor.clearColor.CGColor;
+    [self.lockButton addTarget:self action:@selector(lockPressed) forControlEvents:UIControlEventTouchUpInside];
+    self.unlockButton=[self key:@"解锁" icon:@"lock.open" large:NO];[self.unlockButton addTarget:self action:@selector(unlockPressed) forControlEvents:UIControlEventTouchUpInside];
+    self.controlGrid=Stack(@[],NO,12);
+    self.messageLabel=Label(@"正在恢复登录…",13,UIFontWeightRegular,RemoteColor(.70));self.messageLabel.textAlignment=NSTextAlignmentCenter;
+    self.activity=[[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleMedium];self.activity.color=RemoteColor(.75);self.activity.hidesWhenStopped=YES;
+    UIStackView *feedback=Stack(@[self.activity,self.messageLabel],YES,8);feedback.alignment=UIStackViewAlignmentCenter;feedback.distribution=UIStackViewDistributionFill;
+    UIStackView *stack=Stack(@[brandRow,led,self.controlGrid,feedback],NO,18);stack.translatesAutoresizingMaskIntoConstraints=NO;[remote addSubview:stack];
+    NSLayoutConstraint *width=[remote.widthAnchor constraintEqualToAnchor:scroll.frameLayoutGuide.widthAnchor constant:-32];width.priority=999;
+    [NSLayoutConstraint activateConstraints:@[[scroll.topAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.topAnchor],[scroll.bottomAnchor constraintEqualToAnchor:self.view.bottomAnchor],[scroll.leadingAnchor constraintEqualToAnchor:self.view.leadingAnchor],[scroll.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor],[scroll.contentLayoutGuide.widthAnchor constraintEqualToAnchor:scroll.frameLayoutGuide.widthAnchor],[remote.topAnchor constraintEqualToAnchor:scroll.contentLayoutGuide.topAnchor constant:14],[remote.bottomAnchor constraintEqualToAnchor:scroll.contentLayoutGuide.bottomAnchor constant:-30],[remote.centerXAnchor constraintEqualToAnchor:scroll.frameLayoutGuide.centerXAnchor],width,[remote.widthAnchor constraintLessThanOrEqualToConstant:440],[remote.leadingAnchor constraintGreaterThanOrEqualToAnchor:scroll.contentLayoutGuide.leadingAnchor constant:16],[remote.trailingAnchor constraintLessThanOrEqualToAnchor:scroll.contentLayoutGuide.trailingAnchor constant:-16],[stack.topAnchor constraintEqualToAnchor:remote.topAnchor constant:24],[stack.bottomAnchor constraintEqualToAnchor:remote.bottomAnchor constant:-62],[stack.leadingAnchor constraintEqualToAnchor:remote.leadingAnchor constant:22],[stack.trailingAnchor constraintEqualToAnchor:remote.trailingAnchor constant:-22]]];
+    [self setControlsEnabled];
 }
-
-- (void)rebuildMenu:(NSString *)pick {
-    NSMutableArray<UIAction *> *actions = [NSMutableArray array];
-    for (MCVehicleInfo *v in self.vehicles) {
-        NSString *sub = [NSString stringWithFormat:@"%@ · %@…%@",
-            v.displayName.length ? v.displayName : @"?", [v.vin substringToIndex:8],
-            [v.vin substringFromIndex:11]];
-        NSString *title = [v.vin isEqualToString:pick]
-            ? [@"✓ " stringByAppendingString:sub] : sub;
-        [actions addObject:[UIAction actionWithTitle:title image:nil identifier:v.vin
-            handler:^(__kindof UIAction *a) { [self selectVIN:v.vin]; }]];
-    }
-    self.navigationItem.leftBarButtonItem.menu = [UIMenu menuWithTitle:@"切换车辆" children:actions];
+- (void)setMessage:(NSString *)text busy:(BOOL)busy {
+    self.messageLabel.text=text;if(busy) [self.activity startAnimating];else [self.activity stopAnimating];
 }
-
+- (void)startSession {
+    if(self.sessionLoading) return;
+    if([NSProcessInfo.processInfo.environment[@"MC_CAPABILITY_SURVEY"] isEqual:@"1"]) {[MCCapabilitySurvey runWithProgress:^(NSString *message){[self setMessage:message busy:YES];}];return;}
+    NSString *token=[NSUserDefaults.standardUserDefaults stringForKey:@"imported.idToken"];
+    if(!token.length) {[self setMessage:@"尚无登录会话，请先完成登录接入" busy:NO];return;}
+    self.sessionLoading=YES;[self setMessage:@"正在连接车辆服务…" busy:YES];
+    [[MCSDK shared] initializeSDK:^(NSError *error){dispatch_async(dispatch_get_main_queue(),^{
+        if(error) {self.sessionLoading=NO;[self setMessage:@"连接失败，下拉重试" busy:NO];return;}
+        [[MCSDK shared] loginMBBWithIdentityToken:token completion:^(NSError *loginError){dispatch_async(dispatch_get_main_queue(),^{
+            self.sessionLoading=NO;
+            if(loginError) {[self setMessage:@"登录会话已失效，请重新登录" busy:NO];return;}[self loadCatalog];
+        });}];
+    });}];
+}
 - (MCVehicleInfo *)currentInfo {
-    return [self.vehicles filteredArrayUsingPredicate:
-        [NSPredicate predicateWithFormat:@"vin == %@", self.currentVIN]].firstObject;
+    for(MCVehicleInfo *v in self.vehicles) if([v.vin isEqual:self.currentVIN]) return v;return nil;
 }
-
-- (void)selectVIN:(NSString *)vin {
-    self.currentVIN = vin;
-    [self rebuildMenu:vin];
-    MCVehicleInfo *v = [self currentInfo];
-    if (!v) return;
-    self.navigationItem.leftBarButtonItem.title = v.displayName.length ? v.displayName : vin;
-    self.infoLabel.text = [NSString stringWithFormat:
-        @"%@\n%@ 年款 · 产地 %@ · 变速箱 %@\n发动机 %@ · 颜色色号 %@ · MMI %@\nVIN %@",
-        v.displayName, v.modelYear.length ? v.modelYear : @"?", v.countryCode, v.transmission,
-        v.engine, v.color, v.mmi, v.vin];
-    self.statusLabel.text = @"加载状态…";
-    [[MCSDK shared] selectVehicleWithVIN:vin completion:^(NSError *err) {
-        if (err) { [self log:@"选车失败: %@", err.localizedDescription]; return; }
-        [self refreshStatus];
-    }];
+- (void)loadCatalog {
+    [[MCSDK shared] catalogWithCompletion:^(NSArray<MCVehicleInfo *> *vehicles,NSError *error){dispatch_async(dispatch_get_main_queue(),^{
+        if(!vehicles.count) {[self setMessage:@"未能加载车辆，下拉重试" busy:NO];return;}
+        self.vehicles=vehicles;NSString *saved=[NSUserDefaults.standardUserDefaults stringForKey:@"vehicle.defaultVIN"];
+        MCVehicleInfo *pick=nil;for(MCVehicleInfo *v in vehicles) if([v.vin isEqual:saved]) pick=v;
+        if(!pick) {for(MCVehicleInfo *v in vehicles) if([v.displayName.uppercaseString containsString:@"GTI"]) {pick=v;break;}pick=pick?:vehicles.firstObject;[NSUserDefaults.standardUserDefaults setObject:pick.vin forKey:@"vehicle.defaultVIN"];}
+        [self selectVIN:pick.vin];
+    });}];
 }
-
-- (void)refreshStatus {
-    [[MCSDK shared] statusOfCurrentVehicleWithCompletion:^(NSString *summary, NSError *err) {
-        if (err) { self.statusLabel.text = [@"状态失败: " stringByAppendingString:err.localizedDescription]; return; }
-        self.statusLabel.text = [self prettyStatus:summary];
-    }];
-}
-
-- (NSString *)prettyStatus:(NSString *)raw {
-    NSData *d = [raw dataUsingEncoding:NSUTF8StringEncoding];
-    id j = d ? [NSJSONSerialization JSONObjectWithData:d options:0 error:nil] : nil;
-    if (![j isKindOfClass:NSDictionary.class]) return raw;
-    NSDictionary *x = j;
-    NSDateFormatter *df = [NSDateFormatter new]; df.dateFormat = @"MM-dd HH:mm";
-    NSMutableString *s = [NSMutableString string];
-    if (x[@"timestamp"]) [s appendFormat:@"状态时间 %@\n",
-        [df stringFromDate:[NSDate dateWithTimeIntervalSince1970:[x[@"timestamp"] doubleValue]]]];
-    NSDictionary *m = x[@"mileage"]; if (m[@"mileage"]) [s appendFormat:@"总里程 %@ km\n", m[@"mileage"]];
-    NSDictionary *f = x[@"fuelLevel"]; if (f[@"level"]) [s appendFormat:@"油量 %@%%\n", f[@"level"]];
-    NSDictionary *r = x[@"primaryEngineRange"]; if (r[@"range"]) [s appendFormat:@"续航 %@ km\n", r[@"range"]];
-    if (x[@"nextServiceInKm"]) [s appendFormat:@"下次保养 %@km / %@天\n", x[@"nextServiceInKm"], x[@"nextServiceInDays"] ?: @"-"];
-    if (x[@"nextOilServiceInKm"]) [s appendFormat:@"下次换油 %@km / %@天\n", x[@"nextOilServiceInKm"], x[@"nextOilServiceInDays"] ?: @"-"];
-    if ([x[@"bodyStatus"] isKindOfClass:NSDictionary.class]) {
-        NSDictionary *b = x[@"bodyStatus"];
-        if (b[@"centralLockStatus"]) [s appendFormat:@"中央门锁 %@\n", [b[@"centralLockStatus"] description]];
-        id comps = b[@"vehicleComponents"];
-        if ([comps isKindOfClass:NSArray.class] && [(NSArray *)comps count]) {
-            [s appendFormat:@"部件 %lu 项（门窗/机盖/天窗）\n", (unsigned long)[(NSArray *)comps count]];
-        }
+- (void)rebuildMenu {
+    NSString *defaultVIN=[NSUserDefaults.standardUserDefaults stringForKey:@"vehicle.defaultVIN"];
+    NSMutableArray *choices=[NSMutableArray array];
+    for(MCVehicleInfo *v in self.vehicles) {
+        UIAction *a=[UIAction actionWithTitle:MCVehicleName(v.displayName) image:[UIImage systemImageNamed:@"car.side"] identifier:v.vin handler:^(__kindof UIAction *action){MCHapticSelect();[self selectVIN:v.vin];}];
+        NSString *suffix=[v.vin substringFromIndex:MAX(0,(NSInteger)v.vin.length-6)];
+        a.subtitle=[NSString stringWithFormat:@"%@年款 · 尾号 %@%@",v.modelYear?:@"—",suffix,[v.vin isEqual:defaultVIN]?@" · 默认启动":@""];
+        a.state=[v.vin isEqual:self.currentVIN]?UIMenuElementStateOn:UIMenuElementStateOff;[choices addObject:a];
     }
-    return s.length ? s : raw;
+    UIMenu *cars=[UIMenu menuWithTitle:@"" image:nil identifier:nil options:UIMenuOptionsDisplayInline|UIMenuOptionsSingleSelection children:choices];
+    BOOL isDefault=[defaultVIN isEqual:self.currentVIN];
+    UIAction *setDefault=[UIAction actionWithTitle:isDefault?@"当前为默认车辆":@"将当前车辆设为默认" image:[UIImage systemImageNamed:isDefault?@"star.fill":@"star"] identifier:nil handler:^(__kindof UIAction *action){
+        if(self.selecting || self.commandRunning || !self.currentVIN.length) return;MCHapticSelect();[NSUserDefaults.standardUserDefaults setObject:self.currentVIN forKey:@"vehicle.defaultVIN"];[self rebuildMenu];[self setMessage:@"默认车辆已保存，下次启动自动选择" busy:NO];
+    }];if(isDefault) setDefault.attributes=UIMenuElementAttributesDisabled;
+    self.navigationItem.leftBarButtonItem.menu=[UIMenu menuWithTitle:@"切换车辆" children:@[cars,[UIMenu menuWithTitle:@"" image:nil identifier:nil options:UIMenuOptionsDisplayInline children:@[setDefault]]]];
+    self.navigationItem.leftBarButtonItem.title=[NSString stringWithFormat:@"%@ ⌄",MCVehicleName([self currentInfo].displayName)];
 }
-
-#pragma mark 控制与查询按钮
-
-- (void)onAction:(UIButton *)sender {
-    NSString *what = sender.accessibilityLabel;
-    NSDictionary<NSString *, void (^)(void)> *handlers = @{
-        @"闪灯": ^{ [[MCSDK shared] flashLights:^(NSString *st){[self log:@"闪灯结果: %@",st];} error:^(NSString *e){[self log:@"闪灯失败: %@",e];}]; },
-        @"鸣笛+闪灯": ^{ [[MCSDK shared] honkAndFlash:^(NSString *st){[self log:@"鸣笛闪灯结果: %@",st];} error:^(NSString *e){[self log:@"鸣笛闪灯失败: %@",e];}]; },
-        @"锁车": ^{ [[MCSDK shared] lockVehicle:^(NSString *st){[self log:@"锁车结果: %@",st];} error:^(NSString *e){[self log:@"锁车失败: %@",e];}]; },
-        @"解锁": ^{ [[MCSDK shared] unlockVehicle:^(NSString *st){[self log:@"解锁结果: %@",st];} error:^(NSString *e){[self log:@"解锁失败: %@",e];}]; },
-        @"车窗通风": ^{ [[MCSDK shared] windowVenting:^(NSString *st){[self log:@"通风结果: %@",st];} error:^(NSString *e){[self log:@"通风失败: %@",e];}]; },
-        @"刷新状态": ^{ [self refreshStatus]; },
-        @"停车位置": ^{ [[MCSDK shared] locationOfCurrentVehicleWithCompletion:^(NSString *sum, NSError *err) {
-            [self log:@"%@", err ? [NSString stringWithFormat:@"位置失败: %@", err.localizedDescription]
-                                 : [NSString stringWithFormat:@"位置: %@", sum]]; }]; },
-        @"能力清单": ^{ [self showFeatures]; },
-        @"车窗全开": ^{ [[MCSDK shared] windowOpen:^(NSString *st){[self log:@"车窗全开结果: %@",st];} error:^(NSString *e){[self log:@"车窗全开失败: %@",e];}]; },
-        @"车窗全关": ^{ [[MCSDK shared] windowClose:^(NSString *st){[self log:@"车窗全关结果: %@",st];} error:^(NSString *e){[self log:@"车窗全关失败: %@",e];}]; },
-        @"空调开22℃": ^{ [[MCSDK shared] climateStart:22.0 onStatus:^(NSString *st){[self log:@"空调开启结果: %@",st];} error:^(NSString *e){[self log:@"空调开启失败: %@",e];}]; },
-        @"空调关": ^{ [[MCSDK shared] climateStop:^(NSString *st){[self log:@"空调关闭结果: %@",st];} error:^(NSString *e){[self log:@"空调关闭失败: %@",e];}]; },
-        @"辅热开": ^{ [[MCSDK shared] auxHeatStart:^(NSString *st){[self log:@"辅热开启结果: %@",st];} error:^(NSString *e){[self log:@"辅热开启失败: %@",e];}]; },
-        @"辅热关": ^{ [[MCSDK shared] auxHeatStop:^(NSString *st){[self log:@"辅热关闭结果: %@",st];} error:^(NSString *e){[self log:@"辅热关闭失败: %@",e];}]; },
-        @"发动机启": ^{ [self promptSpinThenStartEngine]; },
-        @"发动机停": ^{ [[MCSDK shared] engineStop:^(NSString *st){[self log:@"发动机停止结果: %@",st];} error:^(NSString *e){[self log:@"发动机停止失败: %@",e];}]; },
-        @"空调状态": ^{ [[MCSDK shared] climateStatusWithCompletion:^(NSString *sum, NSError *err) {
-            dispatch_async(dispatch_get_main_queue(), ^{ self.statusLabel.text = err ? [NSString stringWithFormat:@"空调状态失败: %@", err.localizedDescription] : [NSString stringWithFormat:@"空调状态: %@", sum]; }); }]; },
-        @"健康告警": ^{ [[MCSDK shared] healthWarningsWithCompletion:^(NSString *sum, NSError *err) {
-            dispatch_async(dispatch_get_main_queue(), ^{ self.statusLabel.text = err ? [NSString stringWithFormat:@"健康告警失败: %@", err.localizedDescription] : [NSString stringWithFormat:@"健康告警: %@", sum]; }); }]; },
-        @"门窗细态": ^{ [self refreshStatus]; },
-        @"权限地图": ^{ [[MCSDK shared] rawOperationListForVIN:self.currentVIN completion:^(NSString *xml, NSError *err) {
-            if (err) { [self log:@"权限地图失败: %@", err.localizedDescription]; return; }
-            NSLog(@"[MC] OPS XML 前 2500 字符:\n%@", [xml substringToIndex:MIN(2500, xml.length)]);
-            NSArray *fields = [[MCSDK shared] parseRawXML:xml];
-            NSMutableString *s = [NSMutableString stringWithFormat:@"%@ 个操作权限:\n", @(fields.count)];
-            for (NSDictionary *f in fields) {
-                NSString *op = f[@"operationId"] ?: f[@"id"] ?: f[@"name"];
-                NSString *role = f[@"requiredUserRole"] ?: @"";
-                if (op) [s appendFormat:@"• %@ %@\n", op, role];
-            }
-            if (s.length < 30) s.string = [xml substringToIndex:MIN(1200, xml.length)];
-            dispatch_async(dispatch_get_main_queue(), ^{ self.statusLabel.text = s; });
-        }]; },
-        @"深度探测": ^{ [[MCSDK shared] deepProbeAll:^(NSString *line) {
-            [self log:@"%@", line];
-        }]; },
-        @"状态详情": ^{ [[MCSDK shared] rawStatusReportForVIN:self.currentVIN completion:^(NSString *xml, NSError *err) {
-            if (err) { [self log:@"原始数据失败: %@", err.localizedDescription]; return; }
-            [self log:@"原始数据 %lu 字符", (unsigned long)xml.length];
-            NSLog(@"[MC] XML 前 2500 字符:\n%@", [xml substringToIndex:MIN(2500, xml.length)]);
-            // 解析为字段表 + 中文标注
-            NSArray *fields = [[MCSDK shared] parseRawXML:xml];
-            NSDictionary *zh = @{
-                @"mileage": @"总里程", @"fuel": @"燃油", @"volume": @"容积/体积", @"level": @"液位/等级",
-                @"range": @"续航", @"oil": @"机油", @"temperature": @"温度", @"speed": @"速度",
-                @"door": @"车门", @"window": @"车窗", @"lock": @"锁", @"sunroof": @"天窗",
-                @"battery": @"电池", @"clima": @"空调", @"heater": @"加热", @"engine": @"发动机",
-                @"service": @"保养", @"pressure": @"胎压", @"position": @"位置", @"time": @"时间",
-                @"ignition": @"点火", @"outer": @"车外", @"tank": @"油箱",
-            };
-            NSMutableString *s = [NSMutableString string];
-            [s appendFormat:@"%lu 个信号字段：\n\n", (unsigned long)fields.count];
-            for (NSDictionary *f in fields) {
-                NSMutableArray *parts = [NSMutableArray array];
-                for (NSString *k in f) {
-                    if ([k hasPrefix:@"_"]) continue;
-                    [parts addObject:[NSString stringWithFormat:@"%@=%@", k, f[k]]];
-                }
-                if (!parts.count) continue;
-                NSString *line = [parts componentsJoinedByString:@"  "];
-                // 中文标注命中
-                NSString *low = line.lowercaseString;
-                NSMutableArray *tags = [NSMutableArray array];
-                for (NSString *key in zh) if ([low containsString:key]) [tags addObject:zh[key]];
-                if (tags.count) [s appendFormat:@"【%@】%@\n", [tags componentsJoinedByString:@"/"], line];
-            }
-            if (s.length < 40) s.string = [xml substringToIndex:MIN(1500, xml.length)];
-            dispatch_async(dispatch_get_main_queue(), ^{ self.statusLabel.text = s; });
-        }]; },
-        @"行程记录": ^{ [[MCSDK shared] tripsOfCurrentVehicleWithCompletion:^(NSArray<NSDictionary *> *trips, NSError *err) {
-            if (err) { [self log:@"行程失败: %@", err.localizedDescription]; return; }
-            [self log:@"%lu 条行程", (unsigned long)trips.count];
-            NSMutableString *s = [NSMutableString string];
-            for (NSDictionary *t in trips) {
-                [s appendFormat:@"• %@ 行程 %@km 用时 %@s 均速 %@ 油耗 %@L/100km\n",
-                    t[@"tripEnd"], t[@"mileage"] ?: @"?", t[@"travelTime"] ?: @"?",
-                    t[@"averageSpeed"] ?: @"?", t[@"averageFuelConsumption"] ?: @"?"];
-            }
-            dispatch_async(dispatch_get_main_queue(), ^{ self.statusLabel.text = s.length ? s : @"无行程记录"; });
-        }]; },
+- (void)selectVIN:(NSString *)vin {
+    if(self.commandRunning || self.selecting) return;
+    if([vin isEqual:self.currentVIN] && self.vehicleReady) return;
+    self.selecting=YES;self.vehicleReady=NO;self.refreshing=NO;self.currentVIN=vin;NSUInteger generation=++self.generation;
+    [self clearStatus];[self rebuildMenu];[self rebuildControls];[self setControlsEnabled];
+    self.vehicleLabel.text=MCVehicleName([self currentInfo].displayName);[self setMessage:@"正在切换车辆…" busy:YES];
+    [[MCSDK shared] selectVehicleWithVIN:vin completion:^(NSError *error){dispatch_async(dispatch_get_main_queue(),^{
+        if(generation!=self.generation) return;
+        self.selecting=NO;self.vehicleReady=!error;[self setControlsEnabled];
+        if(error) {[self setMessage:@"切换失败，请重新选择车辆" busy:NO];MCHapticResult(NO);return;}[self refreshStatus];
+    });}];
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW,30*NSEC_PER_SEC),dispatch_get_main_queue(),^{
+        if(self.selecting && generation==self.generation) {self.generation++;self.selecting=NO;self.vehicleReady=NO;[self setControlsEnabled];[self setMessage:@"切换超时，请重试" busy:NO];MCHapticResult(NO);}
+    });
+}
+- (void)clearStatus {self.rangeLabel.text=@"—";self.fuelLabel.text=@"— %";self.mileageLabel.text=@"总里程 — km";self.snapshotLabel.text=@"正在读取车况…";self.bodyLabel.text=@"门窗状态待更新";}
+- (void)setControlsEnabled {
+    BOOL enabled=self.vehicleReady && !self.selecting && !self.commandRunning;
+    for(UIButton *b in self.controlButtons) {b.enabled=enabled;b.alpha=enabled?1:.35;}
+    BOOL supportsLocks=[[self currentInfo].features containsObject:@"lockUnlockFeature"];
+    self.lockButton.enabled=enabled && supportsLocks;self.unlockButton.enabled=enabled && supportsLocks;self.lockButton.alpha=self.lockButton.enabled?1:.35;self.unlockButton.alpha=self.unlockButton.enabled?1:.35;
+    self.navigationItem.leftBarButtonItem.enabled=!self.selecting && !self.commandRunning;
+    self.navigationItem.rightBarButtonItem.enabled=self.vehicleReady;
+    self.refreshButton.enabled=self.vehicleReady && !self.refreshing && !self.commandRunning;
+}
+- (void)rebuildControls {
+    for(UIView *v in self.controlGrid.arrangedSubviews) {[self.controlGrid removeArrangedSubview:v];[v removeFromSuperview];}
+    self.controlButtons=[NSMutableArray arrayWithObjects:self.lockButton,self.unlockButton,nil];
+    NSArray *features=[self currentInfo].features;NSMutableArray *keys=[NSMutableArray array];
+    NSArray *specs=@[@[@"车窗",@"car.side.air.fresh",@"lockUnlockFeature",@[@"车窗通风",@"车窗全开",@"车窗全关"]],@[@"闪灯",@"light.beacon.max",@"honkFlashFeature",@[@"闪灯"]],@[@"鸣笛",@"speaker.wave.2",@"honkFlashFeature",@[@"鸣笛并闪灯"]],@[@"发动机",@"engine.combustion",@"remoteStartFeature",@[@"启动发动机",@"停止发动机"]],@[@"空调",@"fan",@"climaterFeature",@[@"开启空调 · 22℃",@"关闭空调"]],@[@"辅助加热",@"heat.waves",@"auxiliaryHeatingFeature",@[@"开启辅助加热",@"关闭辅助加热"]]];
+    for(NSArray *spec in specs) {
+        if(![features containsObject:spec[2]]) continue;
+        MCRemoteKey *b=[self key:spec[0] icon:spec[1] large:NO];NSMutableArray *actions=[NSMutableArray array];
+        for(NSString *title in spec[3]) [actions addObject:[UIAction actionWithTitle:title image:nil identifier:nil handler:^(__kindof UIAction *action){MCHapticSelect();[self confirmCommand:title];}]];
+        if(actions.count>1) {b.menu=[UIMenu menuWithTitle:spec[0] children:actions];b.showsMenuAsPrimaryAction=YES;b.showsDisclosure=YES;}
+        else [b addTarget:self action:@selector(singleKeyPressed:) forControlEvents:UIControlEventTouchUpInside];
+        [keys addObject:b];
+    }
+    UIView *pad=[UIView new];[pad.heightAnchor constraintEqualToConstant:262].active=YES;
+    [self.controlGrid addArrangedSubview:pad];
+    void (^place)(UIButton *,CGFloat,CGFloat,CGFloat,CGFloat)=^(UIButton *button,CGFloat x,CGFloat y,CGFloat w,CGFloat h){
+        button.translatesAutoresizingMaskIntoConstraints=NO;[pad addSubview:button];button.layer.cornerRadius=MIN(w,h)/2;
+        [NSLayoutConstraint activateConstraints:@[[button.centerXAnchor constraintEqualToAnchor:pad.centerXAnchor constant:x],[button.topAnchor constraintEqualToAnchor:pad.topAnchor constant:y],[button.widthAnchor constraintEqualToConstant:w],[button.heightAnchor constraintEqualToConstant:h]]];
     };
-    void (^run)(void) = handlers[what];
-    if (!run) return;
-    NSArray *needConfirm = @[@"闪灯", @"鸣笛+闪灯", @"锁车", @"解锁", @"车窗通风", @"车窗全开", @"车窗全关", @"空调开22℃", @"空调关", @"辅热开", @"辅热关", @"发动机启", @"发动机停"];
-    if (![needConfirm containsObject:what]) { run(); return; }
-    UIAlertController *ac = [UIAlertController alertControllerWithTitle:what
-        message:[NSString stringWithFormat:@"对 %@（%@）执行「%@」？",
-            self.navigationItem.leftBarButtonItem.title, self.currentVIN, what]
-        preferredStyle:UIAlertControllerStyleAlert];
-    [ac addAction:[UIAlertAction actionWithTitle:@"执行" style:UIAlertActionStyleDestructive handler:^(UIAlertAction *a) { run(); }]];
-    [ac addAction:[UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel handler:nil]];
-    [self presentViewController:ac animated:YES completion:nil];
-}
+    place(self.unlockButton,0,0,88,68);place(self.lockButton,0,80,104,104);
+    NSArray *positions=@[@[@(-110),@94,@78,@78],@[@110,@94,@78,@78],@[@(-71),@190,@82,@72],@[@71,@190,@82,@72]];
+    for(NSUInteger i=0;i<MIN(keys.count,4);i++) {NSArray *p=positions[i];place(keys[i],[p[0] doubleValue],[p[1] doubleValue],[p[2] doubleValue],[p[3] doubleValue]);}
+    for(NSUInteger i=4;i<keys.count;i++) [self.controlGrid addArrangedSubview:keys[i]];
 
-- (void)showFeatures {
-    MCVehicleInfo *v = [self currentInfo];
-    if (!v) return;
-    NSDictionary *desc = [MCSDK featureDescriptions];
-    NSMutableString *s = [NSMutableString stringWithFormat:@"%@ 支持的能力：\n", v.displayName];
-    for (NSString *key in v.features) [s appendFormat:@"• %@\n", desc[key] ?: key];
-    [s appendString:@"\nSDK 控制接口（部分需 SPIN/能力开通）："];
-    [[MCSDK controlCatalog] enumerateKeysAndObjectsUsingBlock:^(NSString *k, NSString *sdk, BOOL *stop) {
-        [s appendFormat:@"\n• %@：%@", k, sdk];
+}
+- (void)refreshPressed {
+    MCHapticPress();if(self.selecting || self.commandRunning) {[self.refreshControl endRefreshing];return;}
+    if(!self.vehicles.count) {[self.refreshControl endRefreshing];[self startSession];return;}
+    if(!self.vehicleReady) {[self.refreshControl endRefreshing];[self selectVIN:self.currentVIN];return;}
+    [self refreshStatus];
+}
+- (void)refreshStatus {
+    if(self.refreshing || !self.vehicleReady) {[self.refreshControl endRefreshing];return;}
+    self.refreshing=YES;NSUInteger generation=self.generation,request=++self.refreshGeneration;NSString *vin=[self.currentVIN copy];[self setControlsEnabled];[self setMessage:@"正在读取最新车况记录…" busy:YES];
+    [[MCSDK shared] informationForKey:@"vehicleStatus" completion:^(id value,NSError *error){
+        if(generation!=self.generation || request!=self.refreshGeneration || ![vin isEqual:self.currentVIN]) return;
+        self.refreshing=NO;[self.refreshControl endRefreshing];[self setControlsEnabled];
+        if(error || ![value isKindOfClass:NSDictionary.class]) {[self setMessage:@"车况读取失败，可下拉重试" busy:NO];MCHapticResult(NO);return;}
+        NSDictionary *s=value;
+        NSDictionary *rangeValue=[s[@"primaryEngineRange"] isKindOfClass:NSDictionary.class]?s[@"primaryEngineRange"]:@{};
+        NSDictionary *fuelValue=[s[@"fuelLevel"] isKindOfClass:NSDictionary.class]?s[@"fuelLevel"]:@{};
+        NSDictionary *mileageValue=[s[@"mileage"] isKindOfClass:NSDictionary.class]?s[@"mileage"]:@{};
+        id range=rangeValue[@"range"],fuel=fuelValue[@"level"],mileage=mileageValue[@"mileage"];
+        NSNumberFormatter *nf=[NSNumberFormatter new];nf.numberStyle=NSNumberFormatterDecimalStyle;
+        self.rangeLabel.text=range && range!=NSNull.null?[range description]:@"—";
+        self.fuelLabel.text=fuel && fuel!=NSNull.null?[NSString stringWithFormat:@"%@ %%",fuel]:@"— %";
+        self.mileageLabel.text=[NSString stringWithFormat:@"总里程 %@ km",[mileage isKindOfClass:NSNumber.class]?[nf stringFromNumber:mileage]:@"—"];
+        self.snapshotLabel.text=s[@"timestamp"] && s[@"timestamp"]!=NSNull.null?[NSString stringWithFormat:@"车况采集于 %@",MCFriendlyValue(s[@"timestamp"],@"timestamp")]:@"车辆未提供采集时间";
+        [self setMessage:@"车况已读取" busy:NO];
+        [[MCSDK shared] rawStatusReportForVIN:vin completion:^(NSString *xml,NSError *rawError){
+            if(generation!=self.generation || request!=self.refreshGeneration || ![vin isEqual:self.currentVIN] || rawError) return;
+            NSArray *fields=[[MCSDK shared] parseRawXML:xml];NSMutableDictionary *byID=[NSMutableDictionary dictionary];for(NSDictionary *f in fields) if(f[@"id"]) byID[f[@"id"]]=f;
+            BOOL allLocked=YES,known=YES;for(NSString *i in @[@"0x0301040001",@"0x0301040004",@"0x0301040007",@"0x030104000A"]) {NSString *text=byID[i][@"textId"];if(![text isEqual:@"door_locked"]) allLocked=NO;if(![text isEqual:@"door_locked"] && ![text isEqual:@"door_unlocked"]) known=NO;}
+            BOOL windowsClosed=YES,windowsKnown=YES;for(NSString *i in @[@"0x0301050002",@"0x0301050004",@"0x0301050006",@"0x0301050008"]) {NSString *v=byID[i][@"value"];if(!v.length) windowsKnown=NO;else if(v.doubleValue!=0) windowsClosed=NO;}
+            self.bodyLabel.text=[NSString stringWithFormat:@"%@  ·  %@",known?(allLocked?@"四门已锁":@"车门未全锁"):@"门锁状态未知",windowsKnown?(windowsClosed?@"四窗已关":@"车窗未全关"):@"车窗状态未知"];
+        }];
     }];
-    self.statusLabel.text = s;
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW,30*NSEC_PER_SEC),dispatch_get_main_queue(),^{
+        if(self.refreshing && generation==self.generation && request==self.refreshGeneration) {self.refreshGeneration++;self.refreshing=NO;[self.refreshControl endRefreshing];[self setControlsEnabled];[self setMessage:@"读取超时，请下拉重试" busy:NO];MCHapticResult(NO);}
+    });
 }
-
-- (void)promptSpinThenStartEngine {
-    UIAlertController *ac = [UIAlertController alertControllerWithTitle:@"远程启动发动机"
-        message:@"输入车机 SPIN 安全码（仅本次使用，不保存）" preferredStyle:UIAlertControllerStyleAlert];
-    [ac addTextFieldWithConfigurationHandler:^(UITextField *tf) {
-        tf.secureTextEntry = YES; tf.keyboardType = UIKeyboardTypeNumberPad;
-    }];
-    [ac addAction:[UIAlertAction actionWithTitle:@"启动" style:UIAlertActionStyleDestructive handler:^(UIAlertAction *a) {
-        NSString *spin = ac.textFields.firstObject.text;
-        if (spin.length == 0) { [self log:@"未输入 SPIN，已取消"]; return; }
-        [[MCSDK shared] engineStartWithSpin:spin onStatus:^(NSString *st) {
-            [self log:@"远程启动结果: %@", st];
-            dispatch_async(dispatch_get_main_queue(), ^{ self.statusLabel.text = [@"远程启动: " stringByAppendingString:st]; });
-        } error:^(NSString *e) { [self log:@"远程启动失败: %@", e]; }];
-    }]];
-    [ac addAction:[UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel handler:nil]];
-    [self presentViewController:ac animated:YES completion:nil];
+- (void)openInformation {
+    if(!self.vehicleReady) return;MCHapticSelect();__weak typeof(self) weakSelf=self;
+    MCInformationViewController *vc=[[MCInformationViewController alloc] initWithVehicle:[self currentInfo] currentVIN:^NSString *{return weakSelf.currentVIN;}];[self.navigationController pushViewController:vc animated:YES];
 }
-
+- (void)singleKeyPressed:(UIButton *)button {[self confirmCommand:[button.accessibilityLabel isEqual:@"鸣笛"]?@"鸣笛并闪灯":button.accessibilityLabel];}
+- (void)lockPressed {[self confirmCommand:@"锁车"];}
+- (void)unlockPressed {[self confirmCommand:@"解锁"];}
+- (void)confirmCommand:(NSString *)command {
+    if(!self.vehicleReady || self.commandRunning || self.selecting) return;
+    NSString *vin=[self.currentVIN copy];NSUInteger generation=self.generation;
+    UIAlertController *alert=[UIAlertController alertControllerWithTitle:command message:[NSString stringWithFormat:@"对 %@（尾号 %@）执行此操作？",MCVehicleName([self currentInfo].displayName),[vin substringFromIndex:MAX(0,(NSInteger)vin.length-6)]] preferredStyle:UIAlertControllerStyleAlert];
+    BOOL engine=[command isEqual:@"启动发动机"];
+    BOOL protected=engine || [@[@"锁车",@"解锁",@"车窗通风",@"车窗全开",@"车窗全关"] containsObject:command];
+    if(protected) {
+        alert.message=[alert.message stringByAppendingString:engine?@"\n请输入车机安全码，仅本次使用。\n请确认车辆停放安全、周围通风良好。":@"\n如车辆要求安全码，请在此输入；仅本次使用。"];
+        [alert addTextFieldWithConfigurationHandler:^(UITextField *tf){tf.secureTextEntry=YES;tf.keyboardType=UIKeyboardTypeNumberPad;tf.placeholder=engine?@"SPIN 安全码":@"SPIN 安全码（如需）";}];
+    }
+    [alert addAction:[UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel handler:^(UIAlertAction *a){MCHapticSelect();}]];
+    [alert addAction:[UIAlertAction actionWithTitle:command style:UIAlertActionStyleDefault handler:^(UIAlertAction *a){
+        MCHapticPress();if(generation!=self.generation || ![vin isEqual:self.currentVIN] || self.commandRunning) return;
+        NSString *spin=[alert.textFields.firstObject.text copy];alert.textFields.firstObject.text=@"";if([command isEqual:@"启动发动机"] && !spin.length) {[self setMessage:@"未输入安全码，操作已取消" busy:NO];MCHapticResult(NO);return;}
+        [self runCommand:command spin:spin];
+    }]];[self presentViewController:alert animated:YES completion:nil];
+}
+- (void)runCommand:(NSString *)command spin:(NSString *)spin {
+    self.commandRunning=YES;NSUInteger generation=self.generation,operation=++self.commandGeneration;NSString *vin=[self.currentVIN copy];[self setControlsEnabled];[self setMessage:[NSString stringWithFormat:@"正在%@…",command] busy:YES];
+    __block BOOL finished=NO;
+    void (^finish)(NSInteger,NSString *)=^(NSInteger result,NSString *status){dispatch_async(dispatch_get_main_queue(),^{
+        if(finished || generation!=self.generation || operation!=self.commandGeneration || ![vin isEqual:self.currentVIN]) return;
+        finished=YES;self.commandRunning=NO;[self setControlsEnabled];[self setMessage:[NSString stringWithFormat:@"%@：%@",command,status] busy:NO];if(result>=0) MCHapticResult(result==1);else MCHapticSelect();
+    });};
+    void (^ok)(NSString *)=^(NSString *status){
+        NSString *s=status.lowercaseString;
+        if([s containsString:@"inprogress"] || [s containsString:@"in_progress"] || [s containsString:@"pending"] || [s containsString:@"queued"]) {dispatch_async(dispatch_get_main_queue(),^{if(!finished) [self setMessage:[NSString stringWithFormat:@"%@请求处理中…",command] busy:YES];});return;}
+        if([s containsString:@"fail"] || [s containsString:@"error"] || [s containsString:@"reject"]) finish(0,@"车辆服务返回未完成，请刷新状态后确认");
+        else if([s containsString:@"success"] || [s containsString:@"succeed"]) finish(1,@"车辆服务已确认完成");
+        else finish(-1,@"已收到回执，请刷新车况确认结果");
+    };
+    void (^fail)(NSString *)=^(NSString *s){finish(0,s);};MCSDK *sdk=MCSDK.shared;
+    NSDictionary<NSString *,void (^)(void)> *commands=@{
+        @"锁车":^{[sdk lockVehicle:ok error:fail];},@"解锁":^{[sdk unlockVehicle:ok error:fail];},@"闪灯":^{[sdk flashLights:ok error:fail];},@"鸣笛并闪灯":^{[sdk honkAndFlash:ok error:fail];},@"车窗通风":^{[sdk windowVenting:ok error:fail];},@"车窗全开":^{[sdk windowOpen:ok error:fail];},@"车窗全关":^{[sdk windowClose:ok error:fail];},@"开启空调 · 22℃":^{[sdk climateStart:22 onStatus:ok error:fail];},@"关闭空调":^{[sdk climateStop:ok error:fail];},@"开启辅助加热":^{[sdk auxHeatStart:ok error:fail];},@"关闭辅助加热":^{[sdk auxHeatStop:ok error:fail];},@"启动发动机":^{[sdk engineStartWithSpin:spin onStatus:ok error:fail];},@"停止发动机":^{[sdk engineStop:ok error:fail];}
+    };
+    sdk.spinCode=spin;
+    void (^run)(void)=commands[command];if(run) run();else finish(NO,@"当前操作不可用");
+    sdk.spinCode=nil;
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW,135*NSEC_PER_SEC),dispatch_get_main_queue(),^{if(!finished) finish(NO,@"未取得最终结果，请先查看车辆状态再重试");});
+}
 @end

@@ -235,13 +235,13 @@ static inline Class MCClass(NSString *runtimeName) {
             NSMutableDictionary *details = [NSMutableDictionary dictionaryWithObject:NSStringFromClass([status class]) forKey:@"statusClass"];
             for (NSString *key in @[@"timestamp",@"mileage",@"fuelLevel",@"electricLevel",@"primaryEngineRange",@"combinedRange"]) {
                 @try {
-                    id value = [status valueForKey:key];
+                    id value = MCSafeGet(status, key);
                     if ([value isKindOfClass:NSDate.class]) details[key] = @([value timeIntervalSince1970]);
                     else if ([value isKindOfClass:NSNumber.class] || [value isKindOfClass:NSString.class]) details[key] = value;
                     else if (value) {
                         NSMutableDictionary *parts = [NSMutableDictionary dictionary];
                         for (NSString *part in @[@"mileage",@"range",@"level",@"unit"]) {
-                            @try { id v=[value valueForKey:part]; if ([v isKindOfClass:NSNumber.class] || [v isKindOfClass:NSString.class]) parts[part]=v; } @catch (NSException *e) {}
+                            @try { id v=MCSafeGet(value, part); if ([v isKindOfClass:NSNumber.class] || [v isKindOfClass:NSString.class]) parts[part]=v; } @catch (NSException *e) {}
                         }
                         if (parts.count) details[key]=parts;
                     }

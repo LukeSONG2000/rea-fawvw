@@ -22,12 +22,15 @@ PROFILE = Path('/Users/lukesong/Library/Developer/Xcode/UserData/Provisioning Pr
 
 # P0 依赖白名单（analysis/rea-carnet-sdk-evidence.json + EVReflectionCore→XMLDictionary 递归闭包）
 FRAMEWORKS = ['CarNetLib', 'AEXML', 'AnyDate', 'EVReflectionCore', 'XMLDictionary', 'TrustKit']
+sys.path.insert(0, str(HERE.parent))
+from prepare_inputs import ensure_inputs
 
 def run(cmd, **kw):
     print('$', ' '.join(str(c) for c in cmd))
     subprocess.run([str(c) for c in cmd], check=True, **kw)
 
 def main():
+    ensure_inputs()
     make_ipa = '--ipa' in sys.argv
     if OUT.exists():
         shutil.rmtree(OUT)  # 构建目录可安全重建；recovered/ 输入不动
@@ -35,6 +38,8 @@ def main():
 
     # 1. 编译（arm64 真机；SDK framework 为真机构建，模拟器 slice 不存在）
     sources = sorted(str(p) for p in SRC.glob('*.m'))
+    if '--ui-review' in sys.argv:
+        sources.append(str(HERE / 'tests/UIReadOnlyReview.m'))
     exe = APPDIR / 'MinimalClient'
     run(['xcrun', '--sdk', 'iphoneos', 'clang', '-arch', 'arm64',
          '-miphoneos-version-min=15.0', '-fobjc-arc', '-fmodules',
@@ -78,6 +83,7 @@ def main():
 
     report = {
         'bundle_id': bid,
+        'ui_review_enabled': '--ui-review' in sys.argv,
         'app': str(APPDIR),
         'frameworks': FRAMEWORKS,
         'app_size_bytes': sum(p.stat().st_size for p in APPDIR.rglob('*') if p.is_file()),

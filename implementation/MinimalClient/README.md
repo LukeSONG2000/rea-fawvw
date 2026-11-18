@@ -1,4 +1,6 @@
-# MinimalClient — CarNetLib 独立最小宿主（P0）
+# MinimalClient — 独立车控客户端
+
+> 2026-11-17：已开发拟物遥控器首页、默认车辆和分级信息页。当前产品规格、验收和未接入项见 [CONTROL-APP-UI.md](../../docs/CONTROL-APP-UI.md)。下方 P0 记录为历史状态，以最新文档及真机验收为准。
 
 目标：验证 CarNetLib.framework 脱离原 OneApp 主程序独立完成「网关密码登录 → MBB 令牌交换 → 车辆列表 → 只读状态」。全部调用序列与参数依据 [docs/P0-EVIDENCE.md](../../docs/P0-EVIDENCE.md) 的反汇编证据，未验证项显式标注 `TODO-RUNTIME`。
 
@@ -11,7 +13,7 @@ python3 build.py --ipa
 ```
 
 - 仅依赖 Xcode 命令行工具（clang + codesign），无 .xcodeproj，可重现。
-- 输入只读：`recovered/ios-444.28.0` 的 6 个 framework + 本目录 src/。
+- 输入只读：原始 IPA + 本目录 src/；构建按需解出 `recovered/ios-444.28.0` 中的 6 个 framework，完整包可通过 `python3 implementation/prepare_inputs.py --full` 恢复。
 - Bundle ID `com.lukev.minimalclient`，wildcard 开发证书签名；与设备上唯一可用安装 `com.lukev.aftermarket` 并存。
 
 ## 结构

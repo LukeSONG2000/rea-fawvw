@@ -1,0 +1,33 @@
+{
+  "sdk_sha256": "c9594a2256eea8438fa0bdfe6891c59bb648bbcac06180328660696e46f25798",
+  "source": "shipped arm64 CarNetLib; nm/swift-demangle + bounded llvm-objdump + literal file bytes",
+  "operation_list_scope": {
+    "getter": "0x4d9d4c",
+    "literal_offset": "0x555361",
+    "value": "All",
+    "note": "Different enum from authentication scope t2_fawvw:fal"
+  },
+  "trip_types": {
+    "raw_value_initializer": "0x4afb48",
+    "description_getter": "0x4af9ac",
+    "values": {
+      "0": "longTerm",
+      "1": "shortTerm",
+      "2": "cyclic",
+      "3": "unknown"
+    }
+  },
+  "readonly_executable_selectors": {
+    "RemoteStartActionsImpl": [
+      "getHistoryWithSuccessFunction:",
+      "getLastPairStatusWithSuccessFunction:"
+    ],
+    "ProfileTimerActionsImpl": [
+      "getTimersAndProfilesWithSuccessFunction:"
+    ],
+    "MobileDevicePairingActionsImpl": [
+      "getLastPairStatusWithSuccessFunction:"
+    ]
+  },
+  "execution_limit": "Only these statically identified read methods may use execute during survey; all control and settings mutations excluded"
+}

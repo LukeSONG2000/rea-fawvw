@@ -100,6 +100,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 NS_ASSUME_NONNULL_END
 
+NS_ASSUME_NONNULL_BEGIN
 @interface MCSDK (Trips)
 /// 当前车历史行程列表（单次车程：时长/里程/均速/平均油耗等）。
 - (void)tripsOfCurrentVehicleWithCompletion:(void (^)(NSArray<NSDictionary *> *_Nullable trips,
@@ -114,6 +115,9 @@ NS_ASSUME_NONNULL_END
 @interface MCSDK (RawData)
 /// 当前 MBB 访问令牌（内存，来自 SDK 会话）。
 - (NSString *_Nullable)mbbAccessToken;
+/// Resolve each vehicle's HomeRegion before querying a regional GET endpoint.
+- (void)rawRegionalGETForVIN:(NSString *)vin path:(NSString *)path accept:(NSString *)accept
+                completion:(void (^)(NSString *_Nullable body, NSError *_Nullable error))completion;
 /// 直连 MAL vehicledata v2 原始信号（XML）。completion 返回全文。
 - (void)rawGet:(NSString *)urlString accept:(NSString *)accept
     completion:(void (^)(NSString *_Nullable body, NSError *_Nullable error))completion;
@@ -133,3 +137,10 @@ NS_ASSUME_NONNULL_END
 - (void)rawOperationListForVIN:(NSString *)vin completion:(void (^)(NSString *_Nullable xml, NSError *_Nullable error))completion;
 - (void)rawHomeRegionForVIN:(NSString *)vin completion:(void (^)(NSString *_Nullable json, NSError *_Nullable error))completion;
 @end
+
+@interface MCSDK (Information)
+/// 按明确只读白名单查询当前车辆，返回结构化数据供分级信息页使用。
+- (void)informationForKey:(NSString *)key completion:(void (^)(id _Nullable value, NSError *_Nullable error))completion;
+@end
+
+NS_ASSUME_NONNULL_END

@@ -30,3 +30,16 @@ output/minimalclient/
 # Local runtime credential capture and diagnostic overlays
 output/private-p0*/
 output/runtime-probe/
+
+output/private-capability*/
+
+output/safe-getter-tests
+
+output/raw-xml-parser-tests
+
+output/private-gti-location/
+
+output/gti-location-host/
+
+# 构建、设备数据与截图统一留在本机，不再跟踪 output/ 中的现场文件
+output/

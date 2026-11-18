@@ -1,7 +1,10 @@
 from pathlib import Path
-import hashlib,json,struct,subprocess,zipfile
+import hashlib,json,struct,subprocess,zipfile,sys
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT / 'implementation'))
+from prepare_inputs import ensure_inputs
+ensure_inputs(full=True)
 APP = ROOT / 'recovered/ios-444.28.0/Payload/OneApp.app'
 OUT = ROOT / 'output'
 LIB = OUT / 'CarControlOnly.dylib'
