@@ -1,0 +1,484 @@
+{
+  "date": "2026-11-18",
+  "workspace": "/Users/lukesong/Work/Workspace/LukeSONG/fawvw",
+  "status": "complete",
+  "diskBytesBefore": 6273617920,
+  "deletionPlan": [
+    {
+      "path": "output/gti-official-app-check.log",
+      "bytes": 195,
+      "kind": "file"
+    },
+    {
+      "path": "output/vehicle-only-console.log",
+      "bytes": 143,
+      "kind": "file"
+    },
+    {
+      "path": "output/multicar-verify.log",
+      "bytes": 160234,
+      "kind": "file"
+    },
+    {
+      "path": "output/FAWVW-444.28.0-CarControlOnly-dev-unsigned.ipa",
+      "bytes": 440449174,
+      "kind": "file"
+    },
+    {
+      "path": "output/fresh-minimal-check.log",
+      "bytes": 957832,
+      "kind": "file"
+    },
+    {
+      "path": "output/GTILocationProbe.dylib",
+      "bytes": 93520,
+      "kind": "file"
+    },
+    {
+      "path": "output/gti-location-cache-check-v4.log",
+      "bytes": 1217136,
+      "kind": "file"
+    },
+    {
+      "path": "output/multicar-proxy-check.log",
+      "bytes": 172965,
+      "kind": "file"
+    },
+    {
+      "path": "output/proxy-runtime-verify.log",
+      "bytes": 658477,
+      "kind": "file"
+    },
+    {
+      "path": "output/dropdown-preferences.plist",
+      "bytes": 20695,
+      "kind": "file"
+    },
+    {
+      "path": "output/P0RuntimeProbe.dylib",
+      "bytes": 72056,
+      "kind": "file"
+    },
+    {
+      "path": "output/p0-fresh-client-verify.log",
+      "bytes": 172635,
+      "kind": "file"
+    },
+    {
+      "path": "output/private-capability-survey-20261117",
+      "bytes": 60395,
+      "kind": "directory"
+    },
+    {
+      "path": "output/p0-query-verify.log",
+      "bytes": 114447,
+      "kind": "file"
+    },
+    {
+      "path": "output/proxy-bypass-verify.log",
+      "bytes": 1046,
+      "kind": "file"
+    },
+    {
+      "path": "output/gti-location-cache-check-v2.log",
+      "bytes": 940135,
+      "kind": "file"
+    },
+    {
+      "path": "output/gti-location-cache-check-v3.log",
+      "bytes": 1125745,
+      "kind": "file"
+    },
+    {
+      "path": "output/capability-normal-startup.log",
+      "bytes": 189507,
+      "kind": "file"
+    },
+    {
+      "path": "output/runtime-inspection.log",
+      "bytes": 337051,
+      "kind": "file"
+    },
+    {
+      "path": "output/gti-location-response2.log",
+      "bytes": 1527034,
+      "kind": "file"
+    },
+    {
+      "path": "output/FAWVW-444.28.0-CarControlOnly-dev-signed.ipa",
+      "bytes": 399209413,
+      "kind": "file"
+    },
+    {
+      "path": "output/gti-location-response-capture.log",
+      "bytes": 59441,
+      "kind": "file"
+    },
+    {
+      "path": "output/core-flow-console.log",
+      "bytes": 813130,
+      "kind": "file"
+    },
+    {
+      "path": "output/sign-development.log",
+      "bytes": 15073,
+      "kind": "file"
+    },
+    {
+      "path": "output/private-capability-survey-verified",
+      "bytes": 149328,
+      "kind": "directory"
+    },
+    {
+      "path": "output/gti-location-cache-check.log",
+      "bytes": 927865,
+      "kind": "file"
+    },
+    {
+      "path": "output/startup-debug.log",
+      "bytes": 319,
+      "kind": "file"
+    },
+    {
+      "path": "output/gti-location-screen.log",
+      "bytes": 564,
+      "kind": "file"
+    },
+    {
+      "path": "output/minimalclient",
+      "bytes": 21983718,
+      "kind": "directory"
+    },
+    {
+      "path": "output/p0-corrected-runtime.log",
+      "bytes": 2868,
+      "kind": "file"
+    },
+    {
+      "path": "output/minimalclient-remote-ui-review.log",
+      "bytes": 166458,
+      "kind": "file"
+    },
+    {
+      "path": "output/location-device-apps.log",
+      "bytes": 1183,
+      "kind": "file"
+    },
+    {
+      "path": "output/gti-official-screenshot.log",
+      "bytes": 564,
+      "kind": "file"
+    },
+    {
+      "path": "output/raw-xml-parser-tests",
+      "bytes": 78696,
+      "kind": "file"
+    },
+    {
+      "path": "output/overlay-install.log",
+      "bytes": 1170,
+      "kind": "file"
+    },
+    {
+      "path": "output/multicar-inspection.log",
+      "bytes": 138874,
+      "kind": "file"
+    },
+    {
+      "path": "output/minimalclient-remote-ui-review-v2.log",
+      "bytes": 165998,
+      "kind": "file"
+    },
+    {
+      "path": "output/p0-corrected-build.log",
+      "bytes": 6991,
+      "kind": "file"
+    },
+    {
+      "path": "output/gti-location-host",
+      "bytes": 762664004,
+      "kind": "directory"
+    },
+    {
+      "path": "output/startup-watchdog.ips",
+      "bytes": 64161,
+      "kind": "file"
+    },
+    {
+      "path": "output/p0-runtime-probe.log",
+      "bytes": 984028,
+      "kind": "file"
+    },
+    {
+      "path": "output/signed",
+      "bytes": 762504984,
+      "kind": "directory"
+    },
+    {
+      "path": "output/gti-location-native.log",
+      "bytes": 1496219,
+      "kind": "file"
+    },
+    {
+      "path": "output/vehicle-core-cold-start.log",
+      "bytes": 820993,
+      "kind": "file"
+    },
+    {
+      "path": "output/vehicle-core-final-console.log",
+      "bytes": 527816,
+      "kind": "file"
+    },
+    {
+      "path": "output/minimalclient-remote-review-build.log",
+      "bytes": 34839,
+      "kind": "file"
+    },
+    {
+      "path": "output/final-startup-check.log",
+      "bytes": 826524,
+      "kind": "file"
+    },
+    {
+      "path": "output/screenshot.log",
+      "bytes": 564,
+      "kind": "file"
+    },
+    {
+      "path": "output/decode-vehicles",
+      "bytes": 54400,
+      "kind": "file"
+    },
+    {
+      "path": "output/dropdown-verify.log",
+      "bytes": 1852391,
+      "kind": "file"
+    },
+    {
+      "path": "output/minimalclient-remote-build.log",
+      "bytes": 34769,
+      "kind": "file"
+    },
+    {
+      "path": "output/CarControlOnly.dylib",
+      "bytes": 139976,
+      "kind": "file"
+    },
+    {
+      "path": "output/fixed-launch-console.log",
+      "bytes": 437988,
+      "kind": "file"
+    },
+    {
+      "path": "output/safe-getter-tests",
+      "bytes": 54304,
+      "kind": "file"
+    },
+    {
+      "path": "output/native-picker-check.log",
+      "bytes": 524600,
+      "kind": "file"
+    },
+    {
+      "path": "output/vehicle-only-console-retry.log",
+      "bytes": 32922,
+      "kind": "file"
+    },
+    {
+      "path": "output/multicar-test.log",
+      "bytes": 467391,
+      "kind": "file"
+    },
+    {
+      "path": "output/capability-survey-final.log",
+      "bytes": 668958,
+      "kind": "file"
+    },
+    {
+      "path": "output/dropdown-verify-2.log",
+      "bytes": 8509920,
+      "kind": "file"
+    },
+    {
+      "path": "output/capability-screenshot.log",
+      "bytes": 564,
+      "kind": "file"
+    },
+    {
+      "path": "output/no-ad-console.log",
+      "bytes": 143,
+      "kind": "file"
+    },
+    {
+      "path": "output/capability-survey-runtime.log",
+      "bytes": 157145,
+      "kind": "file"
+    },
+    {
+      "path": "output/runtime-probe",
+      "bytes": 762642384,
+      "kind": "directory"
+    },
+    {
+      "path": "output/capability-survey-verify2.log",
+      "bytes": 157329,
+      "kind": "file"
+    },
+    {
+      "path": "output/capability-survey-build.log",
+      "bytes": 250639,
+      "kind": "file"
+    },
+    {
+      "path": "output/fresh-install-check.log",
+      "bytes": 497717,
+      "kind": "file"
+    },
+    {
+      "path": "output/OneApp.patched",
+      "bytes": 196188288,
+      "kind": "file"
+    },
+    {
+      "path": "output/private-gti-location/official-system.log",
+      "bytes": 15362117,
+      "kind": "file"
+    },
+    {
+      "path": "output/private-gti-location/capture",
+      "bytes": 7275,
+      "kind": "directory"
+    },
+    {
+      "path": "output/private-gti-location/cache-check",
+      "bytes": 640156,
+      "kind": "directory"
+    },
+    {
+      "path": "output/private-gti-location/remote-current-preview.png",
+      "bytes": 142512,
+      "kind": "file"
+    },
+    {
+      "path": "output/private-gti-location/response-capture",
+      "bytes": 52,
+      "kind": "directory"
+    },
+    {
+      "path": "output/private-gti-location/official-location-preview.png",
+      "bytes": 187101,
+      "kind": "file"
+    },
+    {
+      "path": "output/private-gti-location/remote-ui-review",
+      "bytes": 7922789,
+      "kind": "directory"
+    },
+    {
+      "path": "output/private-gti-location/cache-check-v2",
+      "bytes": 1082915,
+      "kind": "directory"
+    },
+    {
+      "path": "output/private-gti-location/remote-ui-before.png",
+      "bytes": 446615,
+      "kind": "file"
+    },
+    {
+      "path": "output/private-gti-location/cache-check-v3",
+      "bytes": 1738739,
+      "kind": "directory"
+    },
+    {
+      "path": "output/private-gti-location/remote-current-screen.png",
+      "bytes": 953519,
+      "kind": "file"
+    },
+    {
+      "path": "output/private-gti-location/original-findings.plist",
+      "bytes": 11043,
+      "kind": "file"
+    },
+    {
+      "path": "output/private-gti-location/response2",
+      "bytes": 10052,
+      "kind": "directory"
+    },
+    {
+      "path": "output/private-gti-location/remote-ui-review-v2",
+      "bytes": 7796867,
+      "kind": "directory"
+    },
+    {
+      "path": "output/private-gti-location/native-screen.png",
+      "bytes": 1536282,
+      "kind": "file"
+    },
+    {
+      "path": "output/private-gti-location/remote-ui-review-v2-final/05-maintenance.png",
+      "bytes": 2269916,
+      "kind": "file"
+    },
+    {
+      "path": "output/private-gti-location/remote-ui-review-v2-final/04-maintenance-groups.png",
+      "bytes": 2269916,
+      "kind": "file"
+    },
+    {
+      "path": "output/private-gti-location/remote-ui-review-v2-final/03-trips.png",
+      "bytes": 420216,
+      "kind": "file"
+    },
+    {
+      "path": "recovered/ios-444.28.0",
+      "bytes": 837309222,
+      "kind": "directory"
+    },
+    {
+      "path": "analysis/objc-runtime-metadata.txt",
+      "bytes": 133159400,
+      "kind": "file"
+    },
+    {
+      "path": "analysis/objc-runtime-metadata.txt.gz",
+      "bytes": 18568300,
+      "kind": "file"
+    }
+  ],
+  "plannedDeletionBytes": 4406423039,
+  "preserve": [
+    "source/docs/analysis/Git",
+    "original IPA",
+    "latest MinimalClient IPA",
+    "device backups and current session preferences",
+    "device tooling environment",
+    "final private evidence"
+  ],
+  "releaseDigestsVerified": true,
+  "sharedXcodeAndOtherWorkspacesTouched": false,
+  "deletedBytes": 4406423039,
+  "diskBytesAfter": 1851056128,
+  "diskBytesFreed": 4422561792,
+  "sourcePushedCommit": "52e6102",
+  "recoveredSDKCount": 6,
+  "recoveredBytes": 21810502,
+  "latestIPA": "output/FAWVW-MinimalClient-PoC-dev.ipa",
+  "latestIPASHA256": "941817b1d91853f2500a74843cc70af8e274f82097e3d25ff2de27b46d203570",
+  "validation": {
+    "rebuild": "passed, 0 warnings / 0 errors",
+    "codesignDeepStrict": "passed",
+    "SDKHashesVsOriginalIPA": "6 matched",
+    "archiveCRC": "passed",
+    "frameworkWhitelist": "passed",
+    "autoUIReviewHarness": "not included",
+    "safeGetterABI": "passed",
+    "XMLSignalsAndNamespaces": "passed",
+    "gitHistory": "retained; normal git gc only"
+  },
+  "postBuildCleanup": [
+    "output/minimalclient/",
+    "temporary test executables",
+    "obsolete build log",
+    "analysis/implementation __pycache__"
+  ]
+}
